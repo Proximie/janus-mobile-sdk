@@ -4,3 +4,9 @@ members = ["rslib", "uniffi-bindgen"]
 
 [workspace.dependencies]
 uniffi = "0.28.3"
+
+[profile.release]
+opt-level = "z"
+lto = "thin"
+panic = "abort"
+strip = "symbols"
