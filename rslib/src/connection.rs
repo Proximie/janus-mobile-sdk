@@ -1,11 +1,11 @@
 use crate::config::Config;
 use crate::error::JanusGatewayError;
 use crate::session::Session;
-use jarust::jaconfig::JaConfig;
-use jarust::jaconfig::TransportType;
-use jarust::jaconnection::CreateConnectionParams;
-use jarust::jaconnection::JaConnection;
-use jarust::TransactionGenerationStrategy;
+use jarust::core::connect;
+use jarust::core::jaconfig::JaConfig;
+use jarust::core::jaconfig::JanusAPI;
+use jarust::core::jaconnection::JaConnection;
+use jarust::interface::tgenerator::RandomTransactionGenerator;
 use std::time::Duration;
 
 #[derive(uniffi::Object)]
@@ -15,27 +15,14 @@ pub struct Connection {
 
 #[uniffi::export(async_runtime = "tokio")]
 pub async fn raw_janus_connect(config: Config) -> crate::JanusGatewayResult<Connection> {
-    let mut builder = JaConfig::builder()
-        .url(&config.url)
-        .capacity(config.capacity.into());
+    let config = JaConfig {
+        url: config.url,
+        capacity: config.capacity.into(),
+        apisecret: config.apisecret,
+        server_root: config.server_root.unwrap_or("janus".to_string()),
+    };
 
-    if let Some(apisecret) = config.apisecret {
-        builder = builder.apisecret(&apisecret);
-    }
-
-    if let Some(namespace) = config.namespace {
-        builder = builder.namespace(&namespace);
-    }
-
-    let config = builder.build();
-
-    let connection = match jarust::connect(
-        config,
-        TransportType::Ws,
-        TransactionGenerationStrategy::Random,
-    )
-    .await
-    {
+    let connection = match connect(config, JanusAPI::WebSocket, RandomTransactionGenerator).await {
         Ok(connection) => connection,
         Err(why) => {
             return Err(JanusGatewayError::ConnectionFailure {
@@ -55,13 +42,7 @@ impl Connection {
         timeout: Duration,
     ) -> crate::JanusGatewayResult<Session> {
         let mut connection = self.inner.clone();
-        let session = match connection
-            .create(CreateConnectionParams {
-                ka_interval,
-                timeout,
-            })
-            .await
-        {
+        let session = match connection.create_session(ka_interval, timeout).await {
             Ok(session) => session,
             Err(why) => {
                 return Err(JanusGatewayError::SessionCreationFailure {

@@ -10,17 +10,14 @@ name = "janus_gateway"
 crate-type = ["cdylib", "staticlib", "lib"]
 
 [dependencies]
-jarust = "0.5.0"
-jarust_plugins = "0.5.0"
-jarust_transport = "0.5.0"
 log = "0.4.22"
 log-panics = "2.1.0"
-serde = "1.0.210"
-serde_json = "1.0.128"
-thiserror = "1.0.63"
-tokio = "1.40.0"
-tracing = "0.1.40"
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+serde = "1.0.217"
+serde_json = "1.0.135"
+thiserror = "2.0.10"
+tokio = "1.43.0"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 uniffi = { workspace = true, features = ["tokio"] }
 
 [target.'cfg(target_os = "ios")'.dependencies]
@@ -30,6 +27,10 @@ oslog = "0.2.0"
 android_logger = "0.14.1"
 # Newer versions of openssl-sys have a bug that causes the build to fail
 openssl-sys = { version = "=0.9.87", features = ["vendored"] }
+
+[dependencies.jarust]
+version = "1.1.0"
+features = ["echo-test-plugin"]
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }

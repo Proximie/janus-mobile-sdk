@@ -1,10 +1,9 @@
 use crate::error::JanusGatewayError;
 use crate::japrotocol::Jsep;
-use jarust_plugins::echo_test::events::EchoTestEvent;
-use jarust_plugins::echo_test::events::PluginEvent;
-use jarust_plugins::echo_test::handle::EchoTestHandle as JaEchoTestHandle;
-use jarust_plugins::echo_test::msg_options::StartOptions;
-use jarust_transport::japrotocol::EstablishmentProtocol;
+use jarust::plugins::echo_test::events::EchoTestEvent;
+use jarust::plugins::echo_test::events::PluginEvent;
+use jarust::plugins::echo_test::handle::EchoTestHandle as JaEchoTestHandle;
+use jarust::plugins::echo_test::params::EchoTestStartParams;
 use std::fmt::Debug;
 use std::sync::Mutex;
 use std::time::Duration;
@@ -38,10 +37,11 @@ impl EchotestHandle {
     ) -> crate::JanusGatewayResult<()> {
         if let Err(why) = self
             .inner
-            .start(StartOptions {
-                audio: audio.unwrap_or_default(),
-                video: video.unwrap_or_default(),
+            .start(EchoTestStartParams {
+                audio,
+                video,
                 bitrate,
+                ..Default::default()
             })
             .await
         {
@@ -62,13 +62,14 @@ impl EchotestHandle {
     ) -> crate::JanusGatewayResult<()> {
         if let Err(why) = self
             .inner
-            .start_with_establishment(
-                StartOptions {
-                    audio: audio.unwrap_or_default(),
-                    video: video.unwrap_or_default(),
+            .start_with_jsep(
+                EchoTestStartParams {
+                    audio,
+                    video,
                     bitrate,
+                    ..Default::default()
                 },
-                EstablishmentProtocol::JSEP(jsep.into()),
+                jsep.into(),
                 timeout,
             )
             .await
@@ -91,17 +92,16 @@ impl EchotestHandle {
                     PluginEvent::EchoTestEvent(EchoTestEvent::Result { echotest, result }) => {
                         cb.on_result(echotest, result);
                     }
-                    PluginEvent::EchoTestEvent(EchoTestEvent::ResultWithEstablishment {
+                    PluginEvent::EchoTestEvent(EchoTestEvent::ResultWithJsep {
                         echotest,
                         result,
-                        establishment_protocol,
-                    }) => match establishment_protocol {
-                        EstablishmentProtocol::JSEP(jsep) => {
-                            cb.on_result_with_jsep(echotest, result, jsep.into());
-                        }
-                        EstablishmentProtocol::RTP(_) => {}
-                    },
-                    PluginEvent::GenericEvent(_) => {}
+                        jsep,
+                    }) => cb.on_result_with_jsep(echotest, result, jsep.into()),
+                    PluginEvent::EchoTestEvent(EchoTestEvent::Error { error_code, error }) => {
+                        cb.on_echo_test_error(error_code, error)
+                    }
+                    PluginEvent::EchoTestEvent(EchoTestEvent::Other(_))
+                    | PluginEvent::GenericEvent(_) => {}
                 }
             }
         });
@@ -124,4 +124,5 @@ impl Drop for EchotestHandle {
 pub trait EchotestHandleCallback: Send + Sync + Debug {
     fn on_result(&self, echotest: String, result: String);
     fn on_result_with_jsep(&self, echotest: String, result: String, jsep: Jsep);
+    fn on_echo_test_error(&self, error_code: u16, error: String);
 }

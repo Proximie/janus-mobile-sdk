@@ -1,13 +1,10 @@
-use std::time::Duration;
-
 use crate::error::JanusGatewayError;
 use crate::handle::Handle;
 use crate::plugins::echotest::EchotestHandle;
-use jarust::japlugin::AttachHandleParams;
-use jarust::jasession::JaSession;
-use jarust::prelude::Attach;
-use jarust_plugins::echo_test::jahandle_ext::EchoTest;
-use jarust_plugins::AttachPluginParams;
+use jarust::core::japlugin::Attach;
+use jarust::core::jasession::JaSession;
+use jarust::plugins::echo_test::jahandle_ext::EchoTest;
+use std::time::Duration;
 
 #[derive(uniffi::Object)]
 pub struct Session {
@@ -27,14 +24,7 @@ impl Session {
         plugin_id: &str,
         timeout: Duration,
     ) -> crate::JanusGatewayResult<Handle> {
-        let (handle, receiver) = match self
-            .inner
-            .attach(AttachHandleParams {
-                plugin_id: plugin_id.to_string(),
-                timeout,
-            })
-            .await
-        {
+        let (handle, receiver) = match self.inner.attach(plugin_id.to_string(), timeout).await {
             Ok(handle) => handle,
             Err(why) => {
                 return Err(JanusGatewayError::HandleCreationFailure {
@@ -50,11 +40,7 @@ impl Session {
         &self,
         timeout: Duration,
     ) -> crate::JanusGatewayResult<EchotestHandle> {
-        let (handle, receiver) = match self
-            .inner
-            .attach_echo_test(AttachPluginParams { timeout })
-            .await
-        {
+        let (handle, receiver) = match self.inner.attach_echo_test(timeout).await {
             Ok(handle) => handle,
             Err(why) => {
                 return Err(JanusGatewayError::HandleCreationFailure {

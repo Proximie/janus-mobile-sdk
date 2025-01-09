@@ -1,8 +1,7 @@
 use crate::error::JanusGatewayError;
 use crate::japrotocol::Jsep;
-use jarust::prelude::JaHandle;
-use jarust::prelude::JaResponse;
-use jarust_transport::japrotocol::EstablishmentProtocol;
+use jarust::core::jahandle::JaHandle;
+use jarust::interface::japrotocol::JaResponse;
 use serde_json::Value;
 use std::fmt::Debug;
 use std::sync::Mutex;
@@ -55,7 +54,7 @@ impl Handle {
         };
         if let Err(why) = self
             .inner
-            .fire_and_forget_with_establishment(body, EstablishmentProtocol::JSEP(jsep.into()))
+            .fire_and_forget_with_jsep(body, jsep.into())
             .await
         {
             return Err(JanusGatewayError::SendFailure {

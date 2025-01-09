@@ -1,5 +1,5 @@
-use jarust_transport::japrotocol::Jsep as ExternalJsep;
-use jarust_transport::japrotocol::JsepType as ExternalJsepType;
+use jarust::interface::japrotocol::Jsep as ExternalJsep;
+use jarust::interface::japrotocol::JsepType as ExternalJsepType;
 
 #[derive(uniffi::Record)]
 pub struct Jsep {
@@ -20,6 +20,7 @@ impl From<Jsep> for ExternalJsep {
                 JsepType::Offer => ExternalJsepType::Offer,
                 JsepType::Answer => ExternalJsepType::Answer,
             },
+            trickle: None,
             sdp: val.sdp,
         }
     }
