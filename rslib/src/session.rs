@@ -1,4 +1,4 @@
-use crate::error::JanusGatewayError;
+use crate::error::JanusGatewayHandleError;
 use crate::handle::Handle;
 use crate::plugins::echotest::EchotestHandle;
 use jarust::core::japlugin::Attach;
@@ -23,11 +23,11 @@ impl Session {
         &self,
         plugin_id: &str,
         timeout: Duration,
-    ) -> crate::JanusGatewayResult<Handle> {
+    ) -> Result<Handle, JanusGatewayHandleError> {
         let (handle, receiver) = match self.inner.attach(plugin_id.to_string(), timeout).await {
             Ok(handle) => handle,
             Err(why) => {
-                return Err(JanusGatewayError::HandleCreationFailure {
+                return Err(JanusGatewayHandleError::HandleCreationFailure {
                     plugin: plugin_id.to_string(),
                     reason: why.to_string(),
                 })
@@ -39,11 +39,11 @@ impl Session {
     pub async fn attach_echo_test(
         &self,
         timeout: Duration,
-    ) -> crate::JanusGatewayResult<EchotestHandle> {
+    ) -> Result<EchotestHandle, JanusGatewayHandleError> {
         let (handle, receiver) = match self.inner.attach_echo_test(timeout).await {
             Ok(handle) => handle,
             Err(why) => {
-                return Err(JanusGatewayError::HandleCreationFailure {
+                return Err(JanusGatewayHandleError::HandleCreationFailure {
                     plugin: "echotest".to_string(),
                     reason: why.to_string(),
                 })

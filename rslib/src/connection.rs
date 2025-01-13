@@ -1,5 +1,6 @@
 use crate::config::Config;
-use crate::error::JanusGatewayError;
+use crate::error::JanusGatewayConnectionError;
+use crate::error::JanusGatewaySessionError;
 use crate::session::Session;
 use jarust::core::connect;
 use jarust::core::jaconfig::JaConfig;
@@ -14,7 +15,7 @@ pub struct Connection {
 }
 
 #[uniffi::export(async_runtime = "tokio")]
-pub async fn raw_janus_connect(config: Config) -> crate::JanusGatewayResult<Connection> {
+pub async fn raw_janus_connect(config: Config) -> Result<Connection, JanusGatewayConnectionError> {
     let config = JaConfig {
         url: config.url,
         capacity: config.capacity.into(),
@@ -25,7 +26,7 @@ pub async fn raw_janus_connect(config: Config) -> crate::JanusGatewayResult<Conn
     let connection = match connect(config, JanusAPI::WebSocket, RandomTransactionGenerator).await {
         Ok(connection) => connection,
         Err(why) => {
-            return Err(JanusGatewayError::ConnectionFailure {
+            return Err(JanusGatewayConnectionError::ConnectionFailure {
                 reason: why.to_string(),
             })
         }
@@ -40,12 +41,12 @@ impl Connection {
         &self,
         ka_interval: u32,
         timeout: Duration,
-    ) -> crate::JanusGatewayResult<Session> {
+    ) -> Result<Session, JanusGatewaySessionError> {
         let mut connection = self.inner.clone();
         let session = match connection.create_session(ka_interval, timeout).await {
             Ok(session) => session,
             Err(why) => {
-                return Err(JanusGatewayError::SessionCreationFailure {
+                return Err(JanusGatewaySessionError::SessionCreationFailure {
                     reason: why.to_string(),
                 })
             }

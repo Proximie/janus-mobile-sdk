@@ -1,4 +1,4 @@
-use crate::error::JanusGatewayError;
+use crate::error::JanusGatewayCommunicationError;
 use crate::japrotocol::Jsep;
 use jarust::plugins::echo_test::events::EchoTestEvent;
 use jarust::plugins::echo_test::events::PluginEvent;
@@ -34,7 +34,7 @@ impl EchotestHandle {
         audio: Option<bool>,
         video: Option<bool>,
         bitrate: Option<u32>,
-    ) -> crate::JanusGatewayResult<()> {
+    ) -> Result<(), JanusGatewayCommunicationError> {
         if let Err(why) = self
             .inner
             .start(EchoTestStartParams {
@@ -45,7 +45,7 @@ impl EchotestHandle {
             })
             .await
         {
-            return Err(JanusGatewayError::SendFailure {
+            return Err(JanusGatewayCommunicationError::SendFailure {
                 reason: why.to_string(),
             });
         };
@@ -59,7 +59,7 @@ impl EchotestHandle {
         bitrate: Option<u32>,
         jsep: Jsep,
         timeout: Duration,
-    ) -> crate::JanusGatewayResult<()> {
+    ) -> Result<(), JanusGatewayCommunicationError> {
         if let Err(why) = self
             .inner
             .start_with_jsep(
@@ -74,7 +74,7 @@ impl EchotestHandle {
             )
             .await
         {
-            return Err(JanusGatewayError::SendFailure {
+            return Err(JanusGatewayCommunicationError::SendFailure {
                 reason: why.to_string(),
             });
         };

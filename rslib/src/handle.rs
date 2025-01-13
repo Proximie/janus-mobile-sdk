@@ -1,4 +1,4 @@
-use crate::error::JanusGatewayError;
+use crate::error::JanusGatewayCommunicationError;
 use crate::japrotocol::Jsep;
 use jarust::core::jahandle::JaHandle;
 use jarust::interface::japrotocol::JaResponse;
@@ -28,14 +28,17 @@ impl Handle {
 
 #[uniffi::export(async_runtime = "tokio")]
 impl Handle {
-    pub async fn fire_and_forget(&self, msg: &str) -> crate::JanusGatewayResult<()> {
-        let Ok(body) = serde_json::from_str(msg) else {
-            return Err(JanusGatewayError::Serialize {
-                body: msg.to_string(),
+    pub async fn fire_and_forget(
+        &self,
+        data: Vec<u8>,
+    ) -> Result<(), JanusGatewayCommunicationError> {
+        let Ok(body) = serde_json::from_slice(&data) else {
+            return Err(JanusGatewayCommunicationError::Serialize {
+                body: String::from_utf8_lossy(&data).to_string(),
             });
         };
         if let Err(why) = self.inner.fire_and_forget(body).await {
-            return Err(JanusGatewayError::SendFailure {
+            return Err(JanusGatewayCommunicationError::SendFailure {
                 reason: why.to_string(),
             });
         };
@@ -44,12 +47,12 @@ impl Handle {
 
     pub async fn fire_and_forget_with_jsep(
         &self,
-        msg: &str,
+        data: Vec<u8>,
         jsep: Jsep,
-    ) -> crate::JanusGatewayResult<()> {
-        let Ok(body) = serde_json::from_str(msg) else {
-            return Err(JanusGatewayError::Serialize {
-                body: msg.to_string(),
+    ) -> Result<(), JanusGatewayCommunicationError> {
+        let Ok(body) = serde_json::from_slice(&data) else {
+            return Err(JanusGatewayCommunicationError::Serialize {
+                body: String::from_utf8_lossy(&data).to_string(),
             });
         };
         if let Err(why) = self
@@ -57,7 +60,7 @@ impl Handle {
             .fire_and_forget_with_jsep(body, jsep.into())
             .await
         {
-            return Err(JanusGatewayError::SendFailure {
+            return Err(JanusGatewayCommunicationError::SendFailure {
                 reason: why.to_string(),
             });
         };
@@ -66,16 +69,16 @@ impl Handle {
 
     pub async fn send_waiton_ack(
         &self,
-        msg: &str,
+        data: Vec<u8>,
         timeout: Duration,
-    ) -> crate::JanusGatewayResult<()> {
-        let Ok(body) = serde_json::from_str(msg) else {
-            return Err(JanusGatewayError::Serialize {
-                body: msg.to_string(),
+    ) -> Result<(), JanusGatewayCommunicationError> {
+        let Ok(body) = serde_json::from_slice(&data) else {
+            return Err(JanusGatewayCommunicationError::Serialize {
+                body: String::from_utf8_lossy(&data).to_string(),
             });
         };
         if let Err(why) = self.inner.send_waiton_ack(body, timeout).await {
-            return Err(JanusGatewayError::SendFailure {
+            return Err(JanusGatewayCommunicationError::SendFailure {
                 reason: why.to_string(),
             });
         };
@@ -84,25 +87,25 @@ impl Handle {
 
     pub async fn send_waiton_result(
         &self,
-        msg: &str,
+        data: Vec<u8>,
         timeout: Duration,
-    ) -> crate::JanusGatewayResult<String> {
-        let Ok(body) = serde_json::from_str(msg) else {
-            return Err(JanusGatewayError::Serialize {
-                body: msg.to_string(),
+    ) -> Result<Vec<u8>, JanusGatewayCommunicationError> {
+        let Ok(body) = serde_json::from_slice(&data) else {
+            return Err(JanusGatewayCommunicationError::Serialize {
+                body: String::from_utf8_lossy(&data).to_string(),
             });
         };
         let result = match self.inner.send_waiton_rsp::<Value>(body, timeout).await {
             Ok(result) => result,
             Err(why) => {
-                return Err(JanusGatewayError::SendFailure {
+                return Err(JanusGatewayCommunicationError::SendFailure {
                     reason: why.to_string(),
                 })
             }
         };
         let Ok(result) = serde_json::from_value(result) else {
-            return Err(JanusGatewayError::Serialize {
-                body: msg.to_string(),
+            return Err(JanusGatewayCommunicationError::Serialize {
+                body: String::from_utf8_lossy(&data).to_string(),
             });
         };
         Ok(result)
