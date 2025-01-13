@@ -1,3 +1,4 @@
+use crate::error::JanusGatewayCommunicationError;
 use crate::error::JanusGatewayHandleError;
 use crate::handle::Handle;
 use crate::plugins::echotest::EchotestHandle;
@@ -50,5 +51,14 @@ impl Session {
             }
         };
         Ok(EchotestHandle::new(handle, receiver))
+    }
+
+    pub async fn destory(&self, timeout: Duration) -> Result<(), JanusGatewayCommunicationError> {
+        if let Err(why) = self.inner.destroy(timeout).await {
+            return Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            });
+        };
+        Ok(())
     }
 }

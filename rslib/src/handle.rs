@@ -1,5 +1,5 @@
 use crate::error::JanusGatewayCommunicationError;
-use crate::japrotocol::Jsep;
+use crate::protocol::{Candidate, Jsep};
 use jarust::core::jahandle::JaHandle;
 use jarust::interface::japrotocol::JaResponse;
 use serde_json::Value;
@@ -127,6 +127,59 @@ impl Handle {
         if let Ok(mut abort_handle) = self.abort_handle.lock() {
             *abort_handle = Some(join_handle.abort_handle());
         }
+    }
+
+    pub async fn hangup(&self, timeout: Duration) -> Result<(), JanusGatewayCommunicationError> {
+        self.inner.hangup(timeout).await.map_err(|err| {
+            JanusGatewayCommunicationError::SendFailure {
+                reason: err.to_string(),
+            }
+        })
+    }
+
+    pub async fn detach(&self, timeout: Duration) -> Result<(), JanusGatewayCommunicationError> {
+        self.inner.detach(timeout).await.map_err(|err| {
+            JanusGatewayCommunicationError::SendFailure {
+                reason: err.to_string(),
+            }
+        })
+    }
+
+    pub async fn trickle_single_candidate(
+        &self,
+        candidate: Candidate,
+        timeout: Duration,
+    ) -> Result<(), JanusGatewayCommunicationError> {
+        self.inner
+            .trickle_single_candidate(candidate.into(), timeout)
+            .await
+            .map_err(|err| JanusGatewayCommunicationError::SendFailure {
+                reason: err.to_string(),
+            })
+    }
+
+    pub async fn trickle_candidates(
+        &self,
+        candidates: Vec<Candidate>,
+        timeout: Duration,
+    ) -> Result<(), JanusGatewayCommunicationError> {
+        self.inner
+            .trickle_candidates(candidates.into_iter().map(Into::into).collect(), timeout)
+            .await
+            .map_err(|err| JanusGatewayCommunicationError::SendFailure {
+                reason: err.to_string(),
+            })
+    }
+
+    pub async fn complete_trickle(
+        &self,
+        timeout: Duration,
+    ) -> Result<(), JanusGatewayCommunicationError> {
+        self.inner.complete_trickle(timeout).await.map_err(|err| {
+            JanusGatewayCommunicationError::SendFailure {
+                reason: err.to_string(),
+            }
+        })
     }
 }
 

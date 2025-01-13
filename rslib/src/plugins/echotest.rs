@@ -1,5 +1,5 @@
 use crate::error::JanusGatewayCommunicationError;
-use crate::japrotocol::Jsep;
+use crate::protocol::Jsep;
 use jarust::plugins::echo_test::events::EchoTestEvent;
 use jarust::plugins::echo_test::events::PluginEvent;
 use jarust::plugins::echo_test::handle::EchoTestHandle as JaEchoTestHandle;
