@@ -496,6 +496,24 @@ fileprivate struct FfiConverterString: FfiConverter {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterData: FfiConverterRustBuffer {
+    typealias SwiftType = Data
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Data {
+        let len: Int32 = try readInt(&buf)
+        return Data(try readBytes(&buf, count: Int(len)))
+    }
+
+    public static func write(_ value: Data, into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        writeBytes(&buf, value)
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterDuration: FfiConverterRustBuffer {
     typealias SwiftType = TimeInterval
 
@@ -593,7 +611,7 @@ open func createSession(kaInterval: UInt32, timeout: TimeInterval)async throws  
             completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
             freeFunc: ffi_janus_gateway_rust_future_free_pointer,
             liftFunc: FfiConverterTypeSession.lift,
-            errorHandler: FfiConverterTypeJanusGatewayError.lift
+            errorHandler: FfiConverterTypeJanusGatewaySessionError.lift
         )
 }
     
@@ -727,7 +745,7 @@ open func start(audio: Bool?, video: Bool?, bitrate: UInt32?)async throws  {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
         )
 }
     
@@ -762,7 +780,7 @@ open func startWithJsep(audio: Bool?, video: Bool?, bitrate: UInt32?, jsep: Jsep
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
         )
 }
     
@@ -825,13 +843,13 @@ public func FfiConverterTypeEchotestHandle_lower(_ value: EchotestHandle) -> Uns
 
 public protocol HandleProtocol : AnyObject {
     
-    func fireAndForget(msg: String) async throws 
+    func fireAndForget(data: Data) async throws 
     
-    func fireAndForgetWithJsep(msg: String, jsep: Jsep) async throws 
+    func fireAndForgetWithJsep(data: Data, jsep: Jsep) async throws 
     
-    func sendWaitonAck(msg: String, timeout: TimeInterval) async throws 
+    func sendWaitonAck(data: Data, timeout: TimeInterval) async throws 
     
-    func sendWaitonResult(msg: String, timeout: TimeInterval) async throws  -> String
+    func sendWaitonResult(data: Data, timeout: TimeInterval) async throws  -> Data
     
     func startEventLoop(cb: HandleCallback) async 
     
@@ -887,71 +905,71 @@ open class Handle:
     
 
     
-open func fireAndForget(msg: String)async throws  {
+open func fireAndForget(data: Data)async throws  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_fire_and_forget(
                     self.uniffiClonePointer(),
-                    FfiConverterString.lower(msg)
+                    FfiConverterData.lower(data)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_void,
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
         )
 }
     
-open func fireAndForgetWithJsep(msg: String, jsep: Jsep)async throws  {
+open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_fire_and_forget_with_jsep(
                     self.uniffiClonePointer(),
-                    FfiConverterString.lower(msg),FfiConverterTypeJsep.lower(jsep)
+                    FfiConverterData.lower(data),FfiConverterTypeJsep.lower(jsep)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_void,
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
         )
 }
     
-open func sendWaitonAck(msg: String, timeout: TimeInterval)async throws  {
+open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_send_waiton_ack(
                     self.uniffiClonePointer(),
-                    FfiConverterString.lower(msg),FfiConverterDuration.lower(timeout)
+                    FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_void,
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
         )
 }
     
-open func sendWaitonResult(msg: String, timeout: TimeInterval)async throws  -> String {
+open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Data {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_send_waiton_result(
                     self.uniffiClonePointer(),
-                    FfiConverterString.lower(msg),FfiConverterDuration.lower(timeout)
+                    FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
-            liftFunc: FfiConverterString.lift,
-            errorHandler: FfiConverterTypeJanusGatewayError.lift
+            liftFunc: FfiConverterData.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
         )
 }
     
@@ -1101,7 +1119,7 @@ open func attach(pluginId: String, timeout: TimeInterval)async throws  -> Handle
             completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
             freeFunc: ffi_janus_gateway_rust_future_free_pointer,
             liftFunc: FfiConverterTypeHandle.lift,
-            errorHandler: FfiConverterTypeJanusGatewayError.lift
+            errorHandler: FfiConverterTypeJanusGatewayHandleError.lift
         )
 }
     
@@ -1118,7 +1136,7 @@ open func attachEchoTest(timeout: TimeInterval)async throws  -> EchotestHandle {
             completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
             freeFunc: ffi_janus_gateway_rust_future_free_pointer,
             liftFunc: FfiConverterTypeEchotestHandle.lift,
-            errorHandler: FfiConverterTypeJanusGatewayError.lift
+            errorHandler: FfiConverterTypeJanusGatewayHandleError.lift
         )
 }
     
@@ -1325,16 +1343,10 @@ public func FfiConverterTypeJsep_lower(_ value: Jsep) -> RustBuffer {
 }
 
 
-public enum JanusGatewayError {
+public enum JanusGatewayCommunicationError {
 
     
     
-    case ConnectionFailure(reason: String
-    )
-    case SessionCreationFailure(reason: String
-    )
-    case HandleCreationFailure(plugin: String, reason: String
-    )
     case Serialize(body: String
     )
     case SendFailure(reason: String
@@ -1345,10 +1357,73 @@ public enum JanusGatewayError {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public struct FfiConverterTypeJanusGatewayError: FfiConverterRustBuffer {
-    typealias SwiftType = JanusGatewayError
+public struct FfiConverterTypeJanusGatewayCommunicationError: FfiConverterRustBuffer {
+    typealias SwiftType = JanusGatewayCommunicationError
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> JanusGatewayError {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> JanusGatewayCommunicationError {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+
+        
+
+        
+        case 1: return .Serialize(
+            body: try FfiConverterString.read(from: &buf)
+            )
+        case 2: return .SendFailure(
+            reason: try FfiConverterString.read(from: &buf)
+            )
+
+         default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: JanusGatewayCommunicationError, into buf: inout [UInt8]) {
+        switch value {
+
+        
+
+        
+        
+        case let .Serialize(body):
+            writeInt(&buf, Int32(1))
+            FfiConverterString.write(body, into: &buf)
+            
+        
+        case let .SendFailure(reason):
+            writeInt(&buf, Int32(2))
+            FfiConverterString.write(reason, into: &buf)
+            
+        }
+    }
+}
+
+
+extension JanusGatewayCommunicationError: Equatable, Hashable {}
+
+extension JanusGatewayCommunicationError: Foundation.LocalizedError {
+    public var errorDescription: String? {
+        String(reflecting: self)
+    }
+}
+
+
+public enum JanusGatewayConnectionError {
+
+    
+    
+    case ConnectionFailure(reason: String
+    )
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeJanusGatewayConnectionError: FfiConverterRustBuffer {
+    typealias SwiftType = JanusGatewayConnectionError
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> JanusGatewayConnectionError {
         let variant: Int32 = try readInt(&buf)
         switch variant {
 
@@ -1358,25 +1433,12 @@ public struct FfiConverterTypeJanusGatewayError: FfiConverterRustBuffer {
         case 1: return .ConnectionFailure(
             reason: try FfiConverterString.read(from: &buf)
             )
-        case 2: return .SessionCreationFailure(
-            reason: try FfiConverterString.read(from: &buf)
-            )
-        case 3: return .HandleCreationFailure(
-            plugin: try FfiConverterString.read(from: &buf), 
-            reason: try FfiConverterString.read(from: &buf)
-            )
-        case 4: return .Serialize(
-            body: try FfiConverterString.read(from: &buf)
-            )
-        case 5: return .SendFailure(
-            reason: try FfiConverterString.read(from: &buf)
-            )
 
          default: throw UniffiInternalError.unexpectedEnumCase
         }
     }
 
-    public static func write(_ value: JanusGatewayError, into buf: inout [UInt8]) {
+    public static func write(_ value: JanusGatewayConnectionError, into buf: inout [UInt8]) {
         switch value {
 
         
@@ -1387,25 +1449,61 @@ public struct FfiConverterTypeJanusGatewayError: FfiConverterRustBuffer {
             writeInt(&buf, Int32(1))
             FfiConverterString.write(reason, into: &buf)
             
+        }
+    }
+}
+
+
+extension JanusGatewayConnectionError: Equatable, Hashable {}
+
+extension JanusGatewayConnectionError: Foundation.LocalizedError {
+    public var errorDescription: String? {
+        String(reflecting: self)
+    }
+}
+
+
+public enum JanusGatewayHandleError {
+
+    
+    
+    case HandleCreationFailure(plugin: String, reason: String
+    )
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeJanusGatewayHandleError: FfiConverterRustBuffer {
+    typealias SwiftType = JanusGatewayHandleError
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> JanusGatewayHandleError {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+
         
-        case let .SessionCreationFailure(reason):
-            writeInt(&buf, Int32(2))
-            FfiConverterString.write(reason, into: &buf)
-            
+
+        
+        case 1: return .HandleCreationFailure(
+            plugin: try FfiConverterString.read(from: &buf), 
+            reason: try FfiConverterString.read(from: &buf)
+            )
+
+         default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: JanusGatewayHandleError, into buf: inout [UInt8]) {
+        switch value {
+
+        
+
+        
         
         case let .HandleCreationFailure(plugin,reason):
-            writeInt(&buf, Int32(3))
+            writeInt(&buf, Int32(1))
             FfiConverterString.write(plugin, into: &buf)
-            FfiConverterString.write(reason, into: &buf)
-            
-        
-        case let .Serialize(body):
-            writeInt(&buf, Int32(4))
-            FfiConverterString.write(body, into: &buf)
-            
-        
-        case let .SendFailure(reason):
-            writeInt(&buf, Int32(5))
             FfiConverterString.write(reason, into: &buf)
             
         }
@@ -1413,9 +1511,64 @@ public struct FfiConverterTypeJanusGatewayError: FfiConverterRustBuffer {
 }
 
 
-extension JanusGatewayError: Equatable, Hashable {}
+extension JanusGatewayHandleError: Equatable, Hashable {}
 
-extension JanusGatewayError: Foundation.LocalizedError {
+extension JanusGatewayHandleError: Foundation.LocalizedError {
+    public var errorDescription: String? {
+        String(reflecting: self)
+    }
+}
+
+
+public enum JanusGatewaySessionError {
+
+    
+    
+    case SessionCreationFailure(reason: String
+    )
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeJanusGatewaySessionError: FfiConverterRustBuffer {
+    typealias SwiftType = JanusGatewaySessionError
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> JanusGatewaySessionError {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+
+        
+
+        
+        case 1: return .SessionCreationFailure(
+            reason: try FfiConverterString.read(from: &buf)
+            )
+
+         default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: JanusGatewaySessionError, into buf: inout [UInt8]) {
+        switch value {
+
+        
+
+        
+        
+        case let .SessionCreationFailure(reason):
+            writeInt(&buf, Int32(1))
+            FfiConverterString.write(reason, into: &buf)
+            
+        }
+    }
+}
+
+
+extension JanusGatewaySessionError: Equatable, Hashable {}
+
+extension JanusGatewaySessionError: Foundation.LocalizedError {
     public var errorDescription: String? {
         String(reflecting: self)
     }
@@ -1882,7 +2035,7 @@ public func rawJanusConnect(config: Config)async throws  -> Connection {
             completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
             freeFunc: ffi_janus_gateway_rust_future_free_pointer,
             liftFunc: FfiConverterTypeConnection.lift,
-            errorHandler: FfiConverterTypeJanusGatewayError.lift
+            errorHandler: FfiConverterTypeJanusGatewayConnectionError.lift
         )
 }
 
@@ -1904,40 +2057,40 @@ private var initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_func_raw_init_logger() != 47317) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_func_raw_janus_connect() != 50398) {
+    if (uniffi_janus_gateway_checksum_func_raw_janus_connect() != 39620) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_connection_create_session() != 11835) {
+    if (uniffi_janus_gateway_checksum_method_connection_create_session() != 39238) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_start() != 56630) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_start() != 45525) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_echotesthandle_start_event_loop() != 42772) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_start_with_jsep() != 36185) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_start_with_jsep() != 18887) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handle_fire_and_forget() != 48978) {
+    if (uniffi_janus_gateway_checksum_method_handle_fire_and_forget() != 43989) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handle_fire_and_forget_with_jsep() != 41614) {
+    if (uniffi_janus_gateway_checksum_method_handle_fire_and_forget_with_jsep() != 28005) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handle_send_waiton_ack() != 6695) {
+    if (uniffi_janus_gateway_checksum_method_handle_send_waiton_ack() != 1198) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handle_send_waiton_result() != 5807) {
+    if (uniffi_janus_gateway_checksum_method_handle_send_waiton_result() != 24292) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_handle_start_event_loop() != 781) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_session_attach() != 30742) {
+    if (uniffi_janus_gateway_checksum_method_session_attach() != 16557) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_session_attach_echo_test() != 9542) {
+    if (uniffi_janus_gateway_checksum_method_session_attach_echo_test() != 28942) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_result() != 12927) {

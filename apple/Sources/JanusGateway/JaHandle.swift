@@ -34,43 +34,39 @@ public final class JaHandle {
     /// Sends a message without waiting for any response or acknowledgment
     ///
     /// - Parameters:
-    ///     - msg: Message to be sent
-    public func fireAndForget(msg: String) async throws {
-        try await handle.fireAndForget(msg: msg)
-    }
-
-    /// Sends a message without waiting for any response or acknowledgment
-    ///
-    /// - Parameters:
-    ///     - msg: Message to be sent
+    ///     - data: Data to be sent
     ///     - jsep: JavaScript Session Establishment Protocol
-    public func fireAndForget(msg: String, jsep: Jsep) async throws {
-        try await handle.fireAndForgetWithJsep(msg: msg, jsep: jsep)
+    public func fireAndForget(data: Data, jsep: Jsep? = nil) async throws {
+        if let jsep {
+            try await handle.fireAndForgetWithJsep(data: data, jsep: jsep)
+        } else {
+            try await handle.fireAndForget(data: data)
+        }
     }
 
     /// Sends a message and waits until the server acknowledges or timeout
     ///
     /// - Parameters:
-    ///     - msg: Message to be sent
+    ///     - data: Data to be sent
     ///     - timeout: The maximum amount of time to wait on an acknowledgment before we consider
     ///     the request as failed or times out.
     public func sendWaitonAck(
-        msg: String, timeout: TimeInterval
+        data: Data, timeout: TimeInterval
     ) async throws {
-        try await handle.sendWaitonAck(msg: msg, timeout: timeout)
+        try await handle.sendWaitonAck(data: data, timeout: timeout)
     }
 
     /// Sends a message and waits until the server returns a response or timeout
     ///
     /// - Parameters:
-    ///     - msg: Message to be sent
+    ///     - data: Data to be sent
     ///     - timeout: The maximum amount of time to wait on a response before we consider the
     ///     request as failed or times out.
     public func sendWaitonResult(
-        msg: String,
+        data: Data,
         timeout: TimeInterval
-    ) async throws -> String {
-        try await handle.sendWaitonResult(msg: msg, timeout: timeout)
+    ) async throws -> Data {
+        try await handle.sendWaitonResult(data: data, timeout: timeout)
     }
 }
 
