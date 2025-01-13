@@ -45,6 +45,9 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 // A rust-owned buffer is represented by its capacity, its current length, and a
 // pointer to the underlying data.
 
+/**
+ * @suppress
+ */
 @Structure.FieldOrder("capacity", "len", "data")
 open class RustBuffer : Structure() {
     // Note: `capacity` and `len` are actually `ULong` values, but JVM only supports signed values.
@@ -97,6 +100,8 @@ open class RustBuffer : Structure() {
  * Required for callbacks taking in an out pointer.
  *
  * Size is the sum of all values in the struct.
+ *
+ * @suppress
  */
 class RustBufferByReference : ByReference(16) {
     /**
@@ -131,16 +136,20 @@ class RustBufferByReference : ByReference(16) {
 // completeness.
 
 @Structure.FieldOrder("len", "data")
-open class ForeignBytes : Structure() {
+internal open class ForeignBytes : Structure() {
     @JvmField var len: Int = 0
     @JvmField var data: Pointer? = null
 
     class ByValue : ForeignBytes(), Structure.ByValue
 }
-// The FfiConverter interface handles converter types to and from the FFI
-//
-// All implementing objects should be public to support external types.  When a
-// type is external we need to import it's FfiConverter.
+/**
+ * The FfiConverter interface handles converter types to and from the FFI
+ *
+ * All implementing objects should be public to support external types.  When a
+ * type is external we need to import it's FfiConverter.
+ *
+ * @suppress
+ */
 public interface FfiConverter<KotlinType, FfiType> {
     // Convert an FFI type to a Kotlin type
     fun lift(value: FfiType): KotlinType
@@ -203,7 +212,11 @@ public interface FfiConverter<KotlinType, FfiType> {
     }
 }
 
-// FfiConverter that uses `RustBuffer` as the FfiType
+/**
+ * FfiConverter that uses `RustBuffer` as the FfiType
+ *
+ * @suppress
+ */
 public interface FfiConverterRustBuffer<KotlinType>: FfiConverter<KotlinType, RustBuffer.ByValue> {
     override fun lift(value: RustBuffer.ByValue) = liftFromRustBuffer(value)
     override fun lower(value: KotlinType) = lowerIntoRustBuffer(value)
@@ -246,7 +259,11 @@ internal open class UniffiRustCallStatus : Structure() {
 
 class InternalException(message: String) : kotlin.Exception(message)
 
-// Each top-level error class has a companion object that can lift the error from the call status's rust buffer
+/**
+ * Each top-level error class has a companion object that can lift the error from the call status's rust buffer
+ *
+ * @suppress
+ */
 interface UniffiRustCallStatusErrorHandler<E> {
     fun lift(error_buf: RustBuffer.ByValue): E;
 }
@@ -283,7 +300,11 @@ private fun<E: kotlin.Exception> uniffiCheckCallStatus(errorHandler: UniffiRustC
     }
 }
 
-// UniffiRustCallStatusErrorHandler implementation for times when we don't expect a CALL_ERROR
+/**
+ * UniffiRustCallStatusErrorHandler implementation for times when we don't expect a CALL_ERROR
+ *
+ * @suppress
+ */
 object UniffiNullRustCallStatusErrorHandler: UniffiRustCallStatusErrorHandler<InternalException> {
     override fun lift(error_buf: RustBuffer.ByValue): InternalException {
         RustBuffer.free(error_buf)
@@ -648,24 +669,30 @@ internal interface UniffiCallbackInterfaceEchotestHandleCallbackMethod0 : com.su
 internal interface UniffiCallbackInterfaceEchotestHandleCallbackMethod1 : com.sun.jna.Callback {
     fun callback(`uniffiHandle`: Long,`echotest`: RustBuffer.ByValue,`result`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
 }
+internal interface UniffiCallbackInterfaceEchotestHandleCallbackMethod2 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`errorCode`: Short,`error`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
 internal interface UniffiCallbackInterfaceHandleCallbackMethod0 : com.sun.jna.Callback {
     fun callback(`uniffiHandle`: Long,`event`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
 }
-@Structure.FieldOrder("onResult", "onResultWithJsep", "uniffiFree")
+@Structure.FieldOrder("onResult", "onResultWithJsep", "onEchoTestError", "uniffiFree")
 internal open class UniffiVTableCallbackInterfaceEchotestHandleCallback(
     @JvmField internal var `onResult`: UniffiCallbackInterfaceEchotestHandleCallbackMethod0? = null,
     @JvmField internal var `onResultWithJsep`: UniffiCallbackInterfaceEchotestHandleCallbackMethod1? = null,
+    @JvmField internal var `onEchoTestError`: UniffiCallbackInterfaceEchotestHandleCallbackMethod2? = null,
     @JvmField internal var `uniffiFree`: UniffiCallbackInterfaceFree? = null,
 ) : Structure() {
     class UniffiByValue(
         `onResult`: UniffiCallbackInterfaceEchotestHandleCallbackMethod0? = null,
         `onResultWithJsep`: UniffiCallbackInterfaceEchotestHandleCallbackMethod1? = null,
+        `onEchoTestError`: UniffiCallbackInterfaceEchotestHandleCallbackMethod2? = null,
         `uniffiFree`: UniffiCallbackInterfaceFree? = null,
-    ): UniffiVTableCallbackInterfaceEchotestHandleCallback(`onResult`,`onResultWithJsep`,`uniffiFree`,), Structure.ByValue
+    ): UniffiVTableCallbackInterfaceEchotestHandleCallback(`onResult`,`onResultWithJsep`,`onEchoTestError`,`uniffiFree`,), Structure.ByValue
 
    internal fun uniffiSetValue(other: UniffiVTableCallbackInterfaceEchotestHandleCallback) {
         `onResult` = other.`onResult`
         `onResultWithJsep` = other.`onResultWithJsep`
+        `onEchoTestError` = other.`onEchoTestError`
         `uniffiFree` = other.`uniffiFree`
     }
 
@@ -686,6 +713,7 @@ internal open class UniffiVTableCallbackInterfaceHandleCallback(
     }
 
 }
+
 
 
 
@@ -824,13 +852,13 @@ internal interface UniffiLib : Library {
     ): Pointer
     fun uniffi_janus_gateway_fn_free_handle(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
-    fun uniffi_janus_gateway_fn_method_handle_fire_and_forget(`ptr`: Pointer,`msg`: RustBuffer.ByValue,
+    fun uniffi_janus_gateway_fn_method_handle_fire_and_forget(`ptr`: Pointer,`data`: RustBuffer.ByValue,
     ): Long
-    fun uniffi_janus_gateway_fn_method_handle_fire_and_forget_with_jsep(`ptr`: Pointer,`msg`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,
+    fun uniffi_janus_gateway_fn_method_handle_fire_and_forget_with_jsep(`ptr`: Pointer,`data`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,
     ): Long
-    fun uniffi_janus_gateway_fn_method_handle_send_waiton_ack(`ptr`: Pointer,`msg`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+    fun uniffi_janus_gateway_fn_method_handle_send_waiton_ack(`ptr`: Pointer,`data`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
     ): Long
-    fun uniffi_janus_gateway_fn_method_handle_send_waiton_result(`ptr`: Pointer,`msg`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+    fun uniffi_janus_gateway_fn_method_handle_send_waiton_result(`ptr`: Pointer,`data`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
     ): Long
     fun uniffi_janus_gateway_fn_method_handle_start_event_loop(`ptr`: Pointer,`cb`: Long,
     ): Long
@@ -992,6 +1020,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_result_with_jsep(
     ): Short
+    fun uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_echo_test_error(
+    ): Short
     fun uniffi_janus_gateway_checksum_method_handlecallback_on_event(
     ): Short
     fun ffi_janus_gateway_uniffi_contract_version(
@@ -1014,46 +1044,49 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_janus_gateway_checksum_func_raw_init_logger() != 47317.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_func_raw_janus_connect() != 50398.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_func_raw_janus_connect() != 39620.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_method_connection_create_session() != 11835.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_method_connection_create_session() != 39238.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_method_echotesthandle_start() != 56630.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_method_echotesthandle_start() != 45525.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_janus_gateway_checksum_method_echotesthandle_start_event_loop() != 42772.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_method_echotesthandle_start_with_jsep() != 36185.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_method_echotesthandle_start_with_jsep() != 18887.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_method_handle_fire_and_forget() != 48978.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_method_handle_fire_and_forget() != 43989.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_method_handle_fire_and_forget_with_jsep() != 41614.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_method_handle_fire_and_forget_with_jsep() != 28005.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_method_handle_send_waiton_ack() != 6695.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_method_handle_send_waiton_ack() != 1198.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_method_handle_send_waiton_result() != 5807.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_method_handle_send_waiton_result() != 24292.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_janus_gateway_checksum_method_handle_start_event_loop() != 781.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_method_session_attach() != 30742.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_method_session_attach() != 16557.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_method_session_attach_echo_test() != 9542.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_method_session_attach_echo_test() != 28942.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_result() != 12927.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_result_with_jsep() != 57945.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_echo_test_error() != 12056.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_janus_gateway_checksum_method_handlecallback_on_event() != 65130.toShort()) {
@@ -1124,6 +1157,9 @@ interface Disposable {
     }
 }
 
+/**
+ * @suppress
+ */
 inline fun <T : Disposable?, R> T.use(block: (T) -> R) =
     try {
         block(this)
@@ -1136,9 +1172,16 @@ inline fun <T : Disposable?, R> T.use(block: (T) -> R) =
         }
     }
 
-/** Used to instantiate an interface without an actual pointer, for fakes in tests, mostly. */
+/** 
+ * Used to instantiate an interface without an actual pointer, for fakes in tests, mostly.
+ *
+ * @suppress
+ * */
 object NoPointer
 
+/**
+ * @suppress
+ */
 public object FfiConverterUShort: FfiConverter<UShort, Short> {
     override fun lift(value: Short): UShort {
         return value.toUShort()
@@ -1159,6 +1202,9 @@ public object FfiConverterUShort: FfiConverter<UShort, Short> {
     }
 }
 
+/**
+ * @suppress
+ */
 public object FfiConverterUInt: FfiConverter<UInt, Int> {
     override fun lift(value: Int): UInt {
         return value.toUInt()
@@ -1179,6 +1225,9 @@ public object FfiConverterUInt: FfiConverter<UInt, Int> {
     }
 }
 
+/**
+ * @suppress
+ */
 public object FfiConverterBoolean: FfiConverter<Boolean, Byte> {
     override fun lift(value: Byte): Boolean {
         return value.toInt() != 0
@@ -1199,6 +1248,9 @@ public object FfiConverterBoolean: FfiConverter<Boolean, Byte> {
     }
 }
 
+/**
+ * @suppress
+ */
 public object FfiConverterString: FfiConverter<String, RustBuffer.ByValue> {
     // Note: we don't inherit from FfiConverterRustBuffer, because we use a
     // special encoding when lowering/lifting.  We can use `RustBuffer.len` to
@@ -1253,7 +1305,29 @@ public object FfiConverterString: FfiConverter<String, RustBuffer.ByValue> {
     }
 }
 
+/**
+ * @suppress
+ */
+public object FfiConverterByteArray: FfiConverterRustBuffer<ByteArray> {
+    override fun read(buf: ByteBuffer): ByteArray {
+        val len = buf.getInt()
+        val byteArr = ByteArray(len)
+        buf.get(byteArr)
+        return byteArr
+    }
+    override fun allocationSize(value: ByteArray): ULong {
+        return 4UL + value.size.toULong()
+    }
+    override fun write(value: ByteArray, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        buf.put(value)
+    }
+}
 
+
+/**
+ * @suppress
+ */
 public object FfiConverterDuration: FfiConverterRustBuffer<java.time.Duration> {
     override fun read(buf: ByteBuffer): java.time.Duration {
         // Type mismatch (should be u64) but we check for overflow/underflow below
@@ -1390,12 +1464,16 @@ public object FfiConverterDuration: FfiConverterRustBuffer<java.time.Duration> {
 //
 
 
-// The cleaner interface for Object finalization code to run.
-// This is the entry point to any implementation that we're using.
-//
-// The cleaner registers objects and returns cleanables, so now we are
-// defining a `UniffiCleaner` with a `UniffiClenaer.Cleanable` to abstract the
-// different implmentations available at compile time.
+/**
+ * The cleaner interface for Object finalization code to run.
+ * This is the entry point to any implementation that we're using.
+ *
+ * The cleaner registers objects and returns cleanables, so now we are
+ * defining a `UniffiCleaner` with a `UniffiClenaer.Cleanable` to abstract the
+ * different implmentations available at compile time.
+ *
+ * @suppress
+ */
 interface UniffiCleaner {
     interface Cleanable {
         fun clean()
@@ -1538,7 +1616,7 @@ open class Connection: Disposable, AutoCloseable, ConnectionInterface {
     }
 
     
-    @Throws(JanusGatewayException::class)
+    @Throws(JanusGatewaySessionException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
     override suspend fun `createSession`(`kaInterval`: kotlin.UInt, `timeout`: java.time.Duration) : Session {
         return uniffiRustCallAsync(
@@ -1554,7 +1632,7 @@ open class Connection: Disposable, AutoCloseable, ConnectionInterface {
         // lift function
         { FfiConverterTypeSession.lift(it) },
         // Error FFI converter
-        JanusGatewayException.ErrorHandler,
+        JanusGatewaySessionException.ErrorHandler,
     )
     }
 
@@ -1566,6 +1644,9 @@ open class Connection: Disposable, AutoCloseable, ConnectionInterface {
     
 }
 
+/**
+ * @suppress
+ */
 public object FfiConverterTypeConnection: FfiConverter<Connection, Pointer> {
 
     override fun lower(value: Connection): Pointer {
@@ -1783,7 +1864,7 @@ open class EchotestHandle: Disposable, AutoCloseable, EchotestHandleInterface {
     }
 
     
-    @Throws(JanusGatewayException::class)
+    @Throws(JanusGatewayCommunicationException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
     override suspend fun `start`(`audio`: kotlin.Boolean?, `video`: kotlin.Boolean?, `bitrate`: kotlin.UInt?) {
         return uniffiRustCallAsync(
@@ -1800,7 +1881,7 @@ open class EchotestHandle: Disposable, AutoCloseable, EchotestHandleInterface {
         { Unit },
         
         // Error FFI converter
-        JanusGatewayException.ErrorHandler,
+        JanusGatewayCommunicationException.ErrorHandler,
     )
     }
 
@@ -1826,7 +1907,7 @@ open class EchotestHandle: Disposable, AutoCloseable, EchotestHandleInterface {
     }
 
     
-    @Throws(JanusGatewayException::class)
+    @Throws(JanusGatewayCommunicationException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
     override suspend fun `startWithJsep`(`audio`: kotlin.Boolean?, `video`: kotlin.Boolean?, `bitrate`: kotlin.UInt?, `jsep`: Jsep, `timeout`: java.time.Duration) {
         return uniffiRustCallAsync(
@@ -1843,7 +1924,7 @@ open class EchotestHandle: Disposable, AutoCloseable, EchotestHandleInterface {
         { Unit },
         
         // Error FFI converter
-        JanusGatewayException.ErrorHandler,
+        JanusGatewayCommunicationException.ErrorHandler,
     )
     }
 
@@ -1855,6 +1936,9 @@ open class EchotestHandle: Disposable, AutoCloseable, EchotestHandleInterface {
     
 }
 
+/**
+ * @suppress
+ */
 public object FfiConverterTypeEchotestHandle: FfiConverter<EchotestHandle, Pointer> {
 
     override fun lower(value: EchotestHandle): Pointer {
@@ -1981,13 +2065,13 @@ public object FfiConverterTypeEchotestHandle: FfiConverter<EchotestHandle, Point
 
 public interface HandleInterface {
     
-    suspend fun `fireAndForget`(`msg`: kotlin.String)
+    suspend fun `fireAndForget`(`data`: kotlin.ByteArray)
     
-    suspend fun `fireAndForgetWithJsep`(`msg`: kotlin.String, `jsep`: Jsep)
+    suspend fun `fireAndForgetWithJsep`(`data`: kotlin.ByteArray, `jsep`: Jsep)
     
-    suspend fun `sendWaitonAck`(`msg`: kotlin.String, `timeout`: java.time.Duration)
+    suspend fun `sendWaitonAck`(`data`: kotlin.ByteArray, `timeout`: java.time.Duration)
     
-    suspend fun `sendWaitonResult`(`msg`: kotlin.String, `timeout`: java.time.Duration): kotlin.String
+    suspend fun `sendWaitonResult`(`data`: kotlin.ByteArray, `timeout`: java.time.Duration): kotlin.ByteArray
     
     suspend fun `startEventLoop`(`cb`: HandleCallback)
     
@@ -2076,14 +2160,14 @@ open class Handle: Disposable, AutoCloseable, HandleInterface {
     }
 
     
-    @Throws(JanusGatewayException::class)
+    @Throws(JanusGatewayCommunicationException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
-    override suspend fun `fireAndForget`(`msg`: kotlin.String) {
+    override suspend fun `fireAndForget`(`data`: kotlin.ByteArray) {
         return uniffiRustCallAsync(
         callWithPointer { thisPtr ->
             UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_handle_fire_and_forget(
                 thisPtr,
-                FfiConverterString.lower(`msg`),
+                FfiConverterByteArray.lower(`data`),
             )
         },
         { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_void(future, callback, continuation) },
@@ -2093,19 +2177,19 @@ open class Handle: Disposable, AutoCloseable, HandleInterface {
         { Unit },
         
         // Error FFI converter
-        JanusGatewayException.ErrorHandler,
+        JanusGatewayCommunicationException.ErrorHandler,
     )
     }
 
     
-    @Throws(JanusGatewayException::class)
+    @Throws(JanusGatewayCommunicationException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
-    override suspend fun `fireAndForgetWithJsep`(`msg`: kotlin.String, `jsep`: Jsep) {
+    override suspend fun `fireAndForgetWithJsep`(`data`: kotlin.ByteArray, `jsep`: Jsep) {
         return uniffiRustCallAsync(
         callWithPointer { thisPtr ->
             UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_handle_fire_and_forget_with_jsep(
                 thisPtr,
-                FfiConverterString.lower(`msg`),FfiConverterTypeJsep.lower(`jsep`),
+                FfiConverterByteArray.lower(`data`),FfiConverterTypeJsep.lower(`jsep`),
             )
         },
         { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_void(future, callback, continuation) },
@@ -2115,19 +2199,19 @@ open class Handle: Disposable, AutoCloseable, HandleInterface {
         { Unit },
         
         // Error FFI converter
-        JanusGatewayException.ErrorHandler,
+        JanusGatewayCommunicationException.ErrorHandler,
     )
     }
 
     
-    @Throws(JanusGatewayException::class)
+    @Throws(JanusGatewayCommunicationException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
-    override suspend fun `sendWaitonAck`(`msg`: kotlin.String, `timeout`: java.time.Duration) {
+    override suspend fun `sendWaitonAck`(`data`: kotlin.ByteArray, `timeout`: java.time.Duration) {
         return uniffiRustCallAsync(
         callWithPointer { thisPtr ->
             UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_handle_send_waiton_ack(
                 thisPtr,
-                FfiConverterString.lower(`msg`),FfiConverterDuration.lower(`timeout`),
+                FfiConverterByteArray.lower(`data`),FfiConverterDuration.lower(`timeout`),
             )
         },
         { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_void(future, callback, continuation) },
@@ -2137,28 +2221,28 @@ open class Handle: Disposable, AutoCloseable, HandleInterface {
         { Unit },
         
         // Error FFI converter
-        JanusGatewayException.ErrorHandler,
+        JanusGatewayCommunicationException.ErrorHandler,
     )
     }
 
     
-    @Throws(JanusGatewayException::class)
+    @Throws(JanusGatewayCommunicationException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
-    override suspend fun `sendWaitonResult`(`msg`: kotlin.String, `timeout`: java.time.Duration) : kotlin.String {
+    override suspend fun `sendWaitonResult`(`data`: kotlin.ByteArray, `timeout`: java.time.Duration) : kotlin.ByteArray {
         return uniffiRustCallAsync(
         callWithPointer { thisPtr ->
             UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_handle_send_waiton_result(
                 thisPtr,
-                FfiConverterString.lower(`msg`),FfiConverterDuration.lower(`timeout`),
+                FfiConverterByteArray.lower(`data`),FfiConverterDuration.lower(`timeout`),
             )
         },
         { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_rust_buffer(future, callback, continuation) },
         { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_rust_buffer(future, continuation) },
         { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_rust_buffer(future) },
         // lift function
-        { FfiConverterString.lift(it) },
+        { FfiConverterByteArray.lift(it) },
         // Error FFI converter
-        JanusGatewayException.ErrorHandler,
+        JanusGatewayCommunicationException.ErrorHandler,
     )
     }
 
@@ -2191,6 +2275,9 @@ open class Handle: Disposable, AutoCloseable, HandleInterface {
     
 }
 
+/**
+ * @suppress
+ */
 public object FfiConverterTypeHandle: FfiConverter<Handle, Pointer> {
 
     override fun lower(value: Handle): Pointer {
@@ -2406,7 +2493,7 @@ open class Session: Disposable, AutoCloseable, SessionInterface {
     }
 
     
-    @Throws(JanusGatewayException::class)
+    @Throws(JanusGatewayHandleException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
     override suspend fun `attach`(`pluginId`: kotlin.String, `timeout`: java.time.Duration) : Handle {
         return uniffiRustCallAsync(
@@ -2422,12 +2509,12 @@ open class Session: Disposable, AutoCloseable, SessionInterface {
         // lift function
         { FfiConverterTypeHandle.lift(it) },
         // Error FFI converter
-        JanusGatewayException.ErrorHandler,
+        JanusGatewayHandleException.ErrorHandler,
     )
     }
 
     
-    @Throws(JanusGatewayException::class)
+    @Throws(JanusGatewayHandleException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
     override suspend fun `attachEchoTest`(`timeout`: java.time.Duration) : EchotestHandle {
         return uniffiRustCallAsync(
@@ -2443,7 +2530,7 @@ open class Session: Disposable, AutoCloseable, SessionInterface {
         // lift function
         { FfiConverterTypeEchotestHandle.lift(it) },
         // Error FFI converter
-        JanusGatewayException.ErrorHandler,
+        JanusGatewayHandleException.ErrorHandler,
     )
     }
 
@@ -2455,6 +2542,9 @@ open class Session: Disposable, AutoCloseable, SessionInterface {
     
 }
 
+/**
+ * @suppress
+ */
 public object FfiConverterTypeSession: FfiConverter<Session, Pointer> {
 
     override fun lower(value: Session): Pointer {
@@ -2486,12 +2576,15 @@ data class Config (
     val `url`: kotlin.String, 
     val `capacity`: kotlin.UShort, 
     val `apisecret`: kotlin.String?, 
-    val `namespace`: kotlin.String?
+    val `serverRoot`: kotlin.String?
 ) {
     
     companion object
 }
 
+/**
+ * @suppress
+ */
 public object FfiConverterTypeConfig: FfiConverterRustBuffer<Config> {
     override fun read(buf: ByteBuffer): Config {
         return Config(
@@ -2506,14 +2599,14 @@ public object FfiConverterTypeConfig: FfiConverterRustBuffer<Config> {
             FfiConverterString.allocationSize(value.`url`) +
             FfiConverterUShort.allocationSize(value.`capacity`) +
             FfiConverterOptionalString.allocationSize(value.`apisecret`) +
-            FfiConverterOptionalString.allocationSize(value.`namespace`)
+            FfiConverterOptionalString.allocationSize(value.`serverRoot`)
     )
 
     override fun write(value: Config, buf: ByteBuffer) {
             FfiConverterString.write(value.`url`, buf)
             FfiConverterUShort.write(value.`capacity`, buf)
             FfiConverterOptionalString.write(value.`apisecret`, buf)
-            FfiConverterOptionalString.write(value.`namespace`, buf)
+            FfiConverterOptionalString.write(value.`serverRoot`, buf)
     }
 }
 
@@ -2527,6 +2620,9 @@ data class Jsep (
     companion object
 }
 
+/**
+ * @suppress
+ */
 public object FfiConverterTypeJsep: FfiConverterRustBuffer<Jsep> {
     override fun read(buf: ByteBuffer): Jsep {
         return Jsep(
@@ -2550,38 +2646,12 @@ public object FfiConverterTypeJsep: FfiConverterRustBuffer<Jsep> {
 
 
 
-sealed class JanusGatewayException: kotlin.Exception() {
-    
-    class ConnectionFailure(
-        
-        val `reason`: kotlin.String
-        ) : JanusGatewayException() {
-        override val message
-            get() = "reason=${ `reason` }"
-    }
-    
-    class SessionCreationFailure(
-        
-        val `reason`: kotlin.String
-        ) : JanusGatewayException() {
-        override val message
-            get() = "reason=${ `reason` }"
-    }
-    
-    class HandleCreationFailure(
-        
-        val `plugin`: kotlin.String, 
-        
-        val `reason`: kotlin.String
-        ) : JanusGatewayException() {
-        override val message
-            get() = "plugin=${ `plugin` }, reason=${ `reason` }"
-    }
+sealed class JanusGatewayCommunicationException: kotlin.Exception() {
     
     class Serialize(
         
         val `body`: kotlin.String
-        ) : JanusGatewayException() {
+        ) : JanusGatewayCommunicationException() {
         override val message
             get() = "body=${ `body` }"
     }
@@ -2589,68 +2659,45 @@ sealed class JanusGatewayException: kotlin.Exception() {
     class SendFailure(
         
         val `reason`: kotlin.String
-        ) : JanusGatewayException() {
+        ) : JanusGatewayCommunicationException() {
         override val message
             get() = "reason=${ `reason` }"
     }
     
 
-    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<JanusGatewayException> {
-        override fun lift(error_buf: RustBuffer.ByValue): JanusGatewayException = FfiConverterTypeJanusGatewayError.lift(error_buf)
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<JanusGatewayCommunicationException> {
+        override fun lift(error_buf: RustBuffer.ByValue): JanusGatewayCommunicationException = FfiConverterTypeJanusGatewayCommunicationError.lift(error_buf)
     }
 
     
 }
 
-public object FfiConverterTypeJanusGatewayError : FfiConverterRustBuffer<JanusGatewayException> {
-    override fun read(buf: ByteBuffer): JanusGatewayException {
+/**
+ * @suppress
+ */
+public object FfiConverterTypeJanusGatewayCommunicationError : FfiConverterRustBuffer<JanusGatewayCommunicationException> {
+    override fun read(buf: ByteBuffer): JanusGatewayCommunicationException {
         
 
         return when(buf.getInt()) {
-            1 -> JanusGatewayException.ConnectionFailure(
+            1 -> JanusGatewayCommunicationException.Serialize(
                 FfiConverterString.read(buf),
                 )
-            2 -> JanusGatewayException.SessionCreationFailure(
-                FfiConverterString.read(buf),
-                )
-            3 -> JanusGatewayException.HandleCreationFailure(
-                FfiConverterString.read(buf),
-                FfiConverterString.read(buf),
-                )
-            4 -> JanusGatewayException.Serialize(
-                FfiConverterString.read(buf),
-                )
-            5 -> JanusGatewayException.SendFailure(
+            2 -> JanusGatewayCommunicationException.SendFailure(
                 FfiConverterString.read(buf),
                 )
             else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
         }
     }
 
-    override fun allocationSize(value: JanusGatewayException): ULong {
+    override fun allocationSize(value: JanusGatewayCommunicationException): ULong {
         return when(value) {
-            is JanusGatewayException.ConnectionFailure -> (
-                // Add the size for the Int that specifies the variant plus the size needed for all fields
-                4UL
-                + FfiConverterString.allocationSize(value.`reason`)
-            )
-            is JanusGatewayException.SessionCreationFailure -> (
-                // Add the size for the Int that specifies the variant plus the size needed for all fields
-                4UL
-                + FfiConverterString.allocationSize(value.`reason`)
-            )
-            is JanusGatewayException.HandleCreationFailure -> (
-                // Add the size for the Int that specifies the variant plus the size needed for all fields
-                4UL
-                + FfiConverterString.allocationSize(value.`plugin`)
-                + FfiConverterString.allocationSize(value.`reason`)
-            )
-            is JanusGatewayException.Serialize -> (
+            is JanusGatewayCommunicationException.Serialize -> (
                 // Add the size for the Int that specifies the variant plus the size needed for all fields
                 4UL
                 + FfiConverterString.allocationSize(value.`body`)
             )
-            is JanusGatewayException.SendFailure -> (
+            is JanusGatewayCommunicationException.SendFailure -> (
                 // Add the size for the Int that specifies the variant plus the size needed for all fields
                 4UL
                 + FfiConverterString.allocationSize(value.`reason`)
@@ -2658,31 +2705,197 @@ public object FfiConverterTypeJanusGatewayError : FfiConverterRustBuffer<JanusGa
         }
     }
 
-    override fun write(value: JanusGatewayException, buf: ByteBuffer) {
+    override fun write(value: JanusGatewayCommunicationException, buf: ByteBuffer) {
         when(value) {
-            is JanusGatewayException.ConnectionFailure -> {
+            is JanusGatewayCommunicationException.Serialize -> {
                 buf.putInt(1)
-                FfiConverterString.write(value.`reason`, buf)
+                FfiConverterString.write(value.`body`, buf)
                 Unit
             }
-            is JanusGatewayException.SessionCreationFailure -> {
+            is JanusGatewayCommunicationException.SendFailure -> {
                 buf.putInt(2)
                 FfiConverterString.write(value.`reason`, buf)
                 Unit
             }
-            is JanusGatewayException.HandleCreationFailure -> {
-                buf.putInt(3)
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
+
+
+sealed class JanusGatewayConnectionException: kotlin.Exception() {
+    
+    class ConnectionFailure(
+        
+        val `reason`: kotlin.String
+        ) : JanusGatewayConnectionException() {
+        override val message
+            get() = "reason=${ `reason` }"
+    }
+    
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<JanusGatewayConnectionException> {
+        override fun lift(error_buf: RustBuffer.ByValue): JanusGatewayConnectionException = FfiConverterTypeJanusGatewayConnectionError.lift(error_buf)
+    }
+
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeJanusGatewayConnectionError : FfiConverterRustBuffer<JanusGatewayConnectionException> {
+    override fun read(buf: ByteBuffer): JanusGatewayConnectionException {
+        
+
+        return when(buf.getInt()) {
+            1 -> JanusGatewayConnectionException.ConnectionFailure(
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: JanusGatewayConnectionException): ULong {
+        return when(value) {
+            is JanusGatewayConnectionException.ConnectionFailure -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.`reason`)
+            )
+        }
+    }
+
+    override fun write(value: JanusGatewayConnectionException, buf: ByteBuffer) {
+        when(value) {
+            is JanusGatewayConnectionException.ConnectionFailure -> {
+                buf.putInt(1)
+                FfiConverterString.write(value.`reason`, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
+
+
+sealed class JanusGatewayHandleException: kotlin.Exception() {
+    
+    class HandleCreationFailure(
+        
+        val `plugin`: kotlin.String, 
+        
+        val `reason`: kotlin.String
+        ) : JanusGatewayHandleException() {
+        override val message
+            get() = "plugin=${ `plugin` }, reason=${ `reason` }"
+    }
+    
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<JanusGatewayHandleException> {
+        override fun lift(error_buf: RustBuffer.ByValue): JanusGatewayHandleException = FfiConverterTypeJanusGatewayHandleError.lift(error_buf)
+    }
+
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeJanusGatewayHandleError : FfiConverterRustBuffer<JanusGatewayHandleException> {
+    override fun read(buf: ByteBuffer): JanusGatewayHandleException {
+        
+
+        return when(buf.getInt()) {
+            1 -> JanusGatewayHandleException.HandleCreationFailure(
+                FfiConverterString.read(buf),
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: JanusGatewayHandleException): ULong {
+        return when(value) {
+            is JanusGatewayHandleException.HandleCreationFailure -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.`plugin`)
+                + FfiConverterString.allocationSize(value.`reason`)
+            )
+        }
+    }
+
+    override fun write(value: JanusGatewayHandleException, buf: ByteBuffer) {
+        when(value) {
+            is JanusGatewayHandleException.HandleCreationFailure -> {
+                buf.putInt(1)
                 FfiConverterString.write(value.`plugin`, buf)
                 FfiConverterString.write(value.`reason`, buf)
                 Unit
             }
-            is JanusGatewayException.Serialize -> {
-                buf.putInt(4)
-                FfiConverterString.write(value.`body`, buf)
-                Unit
-            }
-            is JanusGatewayException.SendFailure -> {
-                buf.putInt(5)
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
+
+
+sealed class JanusGatewaySessionException: kotlin.Exception() {
+    
+    class SessionCreationFailure(
+        
+        val `reason`: kotlin.String
+        ) : JanusGatewaySessionException() {
+        override val message
+            get() = "reason=${ `reason` }"
+    }
+    
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<JanusGatewaySessionException> {
+        override fun lift(error_buf: RustBuffer.ByValue): JanusGatewaySessionException = FfiConverterTypeJanusGatewaySessionError.lift(error_buf)
+    }
+
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeJanusGatewaySessionError : FfiConverterRustBuffer<JanusGatewaySessionException> {
+    override fun read(buf: ByteBuffer): JanusGatewaySessionException {
+        
+
+        return when(buf.getInt()) {
+            1 -> JanusGatewaySessionException.SessionCreationFailure(
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: JanusGatewaySessionException): ULong {
+        return when(value) {
+            is JanusGatewaySessionException.SessionCreationFailure -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.`reason`)
+            )
+        }
+    }
+
+    override fun write(value: JanusGatewaySessionException, buf: ByteBuffer) {
+        when(value) {
+            is JanusGatewaySessionException.SessionCreationFailure -> {
+                buf.putInt(1)
                 FfiConverterString.write(value.`reason`, buf)
                 Unit
             }
@@ -2702,6 +2915,9 @@ enum class JsepType {
 }
 
 
+/**
+ * @suppress
+ */
 public object FfiConverterTypeJsepType: FfiConverterRustBuffer<JsepType> {
     override fun read(buf: ByteBuffer) = try {
         JsepType.values()[buf.getInt() - 1]
@@ -2728,6 +2944,8 @@ public interface EchotestHandleCallback {
     
     fun `onResultWithJsep`(`echotest`: kotlin.String, `result`: kotlin.String, `jsep`: Jsep)
     
+    fun `onEchoTestError`(`errorCode`: kotlin.UShort, `error`: kotlin.String)
+    
     companion object
 }
 
@@ -2739,6 +2957,9 @@ internal const val UNIFFI_CALLBACK_SUCCESS = 0
 internal const val UNIFFI_CALLBACK_ERROR = 1
 internal const val UNIFFI_CALLBACK_UNEXPECTED_ERROR = 2
 
+/**
+ * @suppress
+ */
 public abstract class FfiConverterCallbackInterface<CallbackInterface: Any>: FfiConverter<CallbackInterface, Long> {
     internal val handleMap = UniffiHandleMap<CallbackInterface>()
 
@@ -2790,6 +3011,19 @@ internal object uniffiCallbackInterfaceEchotestHandleCallback {
             uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
         }
     }
+    internal object `onEchoTestError`: UniffiCallbackInterfaceEchotestHandleCallbackMethod2 {
+        override fun callback(`uniffiHandle`: Long,`errorCode`: Short,`error`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeEchotestHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onEchoTestError`(
+                    FfiConverterUShort.lift(`errorCode`),
+                    FfiConverterString.lift(`error`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
 
     internal object uniffiFree: UniffiCallbackInterfaceFree {
         override fun callback(handle: Long) {
@@ -2800,6 +3034,7 @@ internal object uniffiCallbackInterfaceEchotestHandleCallback {
     internal var vtable = UniffiVTableCallbackInterfaceEchotestHandleCallback.UniffiByValue(
         `onResult`,
         `onResultWithJsep`,
+        `onEchoTestError`,
         uniffiFree,
     )
 
@@ -2810,7 +3045,11 @@ internal object uniffiCallbackInterfaceEchotestHandleCallback {
     }
 }
 
-// The ffiConverter which transforms the Callbacks in to handles to pass to Rust.
+/**
+ * The ffiConverter which transforms the Callbacks in to handles to pass to Rust.
+ *
+ * @suppress
+ */
 public object FfiConverterTypeEchotestHandleCallback: FfiConverterCallbackInterface<EchotestHandleCallback>()
 
 
@@ -2859,12 +3098,19 @@ internal object uniffiCallbackInterfaceHandleCallback {
     }
 }
 
-// The ffiConverter which transforms the Callbacks in to handles to pass to Rust.
+/**
+ * The ffiConverter which transforms the Callbacks in to handles to pass to Rust.
+ *
+ * @suppress
+ */
 public object FfiConverterTypeHandleCallback: FfiConverterCallbackInterface<HandleCallback>()
 
 
 
 
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalUInt: FfiConverterRustBuffer<kotlin.UInt?> {
     override fun read(buf: ByteBuffer): kotlin.UInt? {
         if (buf.get().toInt() == 0) {
@@ -2894,6 +3140,9 @@ public object FfiConverterOptionalUInt: FfiConverterRustBuffer<kotlin.UInt?> {
 
 
 
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalBoolean: FfiConverterRustBuffer<kotlin.Boolean?> {
     override fun read(buf: ByteBuffer): kotlin.Boolean? {
         if (buf.get().toInt() == 0) {
@@ -2923,6 +3172,9 @@ public object FfiConverterOptionalBoolean: FfiConverterRustBuffer<kotlin.Boolean
 
 
 
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?> {
     override fun read(buf: ByteBuffer): kotlin.String? {
         if (buf.get().toInt() == 0) {
@@ -2964,7 +3216,7 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
     
     
 
-    @Throws(JanusGatewayException::class)
+    @Throws(JanusGatewayConnectionException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
      suspend fun `rawJanusConnect`(`config`: Config) : Connection {
         return uniffiRustCallAsync(
@@ -2975,7 +3227,7 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
         // lift function
         { FfiConverterTypeConnection.lift(it) },
         // Error FFI converter
-        JanusGatewayException.ErrorHandler,
+        JanusGatewayConnectionException.ErrorHandler,
     )
     }
 
