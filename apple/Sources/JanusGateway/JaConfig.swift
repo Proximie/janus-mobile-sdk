@@ -27,7 +27,7 @@ public struct JaConfig {
     ///     - url: The URL to reach this server API
     ///     - capacity: Buffer capacity
     ///     - serverRoot: The connection server root, default ot "janus"
-    ///     - apisecrent: The API secret for this server
+    ///     - apisecret: The API secret for this server
     public init(
         url: String,
         capacity: UInt16,

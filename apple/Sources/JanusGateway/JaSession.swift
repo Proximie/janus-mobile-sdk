@@ -27,4 +27,8 @@ public struct JaSession {
         let handle = try await session.attach(pluginId: pluginId, timeout: timeout)
         return JaHandle(handle: handle)
     }
+
+    public func destory(timeout: TimeInterval) async throws {
+        try await session.destory(timeout: timeout)
+    }
 }

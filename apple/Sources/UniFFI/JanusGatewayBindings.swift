@@ -843,15 +843,25 @@ public func FfiConverterTypeEchotestHandle_lower(_ value: EchotestHandle) -> Uns
 
 public protocol HandleProtocol : AnyObject {
     
+    func completeTrickle(timeout: TimeInterval) async throws 
+    
+    func detach(timeout: TimeInterval) async throws 
+    
     func fireAndForget(data: Data) async throws 
     
     func fireAndForgetWithJsep(data: Data, jsep: Jsep) async throws 
+    
+    func hangup(timeout: TimeInterval) async throws 
     
     func sendWaitonAck(data: Data, timeout: TimeInterval) async throws 
     
     func sendWaitonResult(data: Data, timeout: TimeInterval) async throws  -> Data
     
     func startEventLoop(cb: HandleCallback) async 
+    
+    func trickleCandidates(candidates: [Candidate], timeout: TimeInterval) async throws 
+    
+    func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval) async throws 
     
 }
 
@@ -905,6 +915,40 @@ open class Handle:
     
 
     
+open func completeTrickle(timeout: TimeInterval)async throws  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_handle_complete_trickle(
+                    self.uniffiClonePointer(),
+                    FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func detach(timeout: TimeInterval)async throws  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_handle_detach(
+                    self.uniffiClonePointer(),
+                    FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
 open func fireAndForget(data: Data)async throws  {
     return
         try  await uniffiRustCallAsync(
@@ -929,6 +973,23 @@ open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws  {
                 uniffi_janus_gateway_fn_method_handle_fire_and_forget_with_jsep(
                     self.uniffiClonePointer(),
                     FfiConverterData.lower(data),FfiConverterTypeJsep.lower(jsep)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func hangup(timeout: TimeInterval)async throws  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_handle_hangup(
+                    self.uniffiClonePointer(),
+                    FfiConverterDuration.lower(timeout)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_void,
@@ -988,6 +1049,40 @@ open func startEventLoop(cb: HandleCallback)async  {
             liftFunc: { $0 },
             errorHandler: nil
             
+        )
+}
+    
+open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async throws  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_handle_trickle_candidates(
+                    self.uniffiClonePointer(),
+                    FfiConverterSequenceTypeCandidate.lower(candidates),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)async throws  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_handle_trickle_single_candidate(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeCandidate.lower(candidate),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
         )
 }
     
@@ -1053,6 +1148,8 @@ public protocol SessionProtocol : AnyObject {
     func attach(pluginId: String, timeout: TimeInterval) async throws  -> Handle
     
     func attachEchoTest(timeout: TimeInterval) async throws  -> EchotestHandle
+    
+    func destory(timeout: TimeInterval) async throws 
     
 }
 
@@ -1140,6 +1237,23 @@ open func attachEchoTest(timeout: TimeInterval)async throws  -> EchotestHandle {
         )
 }
     
+open func destory(timeout: TimeInterval)async throws  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_session_destory(
+                    self.uniffiClonePointer(),
+                    FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
 
 }
 
@@ -1192,6 +1306,80 @@ public func FfiConverterTypeSession_lift(_ pointer: UnsafeMutableRawPointer) thr
 #endif
 public func FfiConverterTypeSession_lower(_ value: Session) -> UnsafeMutableRawPointer {
     return FfiConverterTypeSession.lower(value)
+}
+
+
+public struct Candidate {
+    public let candidate: String
+    public let sdpMid: String
+    public let sdpMlineIndex: String
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(candidate: String, sdpMid: String, sdpMlineIndex: String) {
+        self.candidate = candidate
+        self.sdpMid = sdpMid
+        self.sdpMlineIndex = sdpMlineIndex
+    }
+}
+
+
+
+extension Candidate: Equatable, Hashable {
+    public static func ==(lhs: Candidate, rhs: Candidate) -> Bool {
+        if lhs.candidate != rhs.candidate {
+            return false
+        }
+        if lhs.sdpMid != rhs.sdpMid {
+            return false
+        }
+        if lhs.sdpMlineIndex != rhs.sdpMlineIndex {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(candidate)
+        hasher.combine(sdpMid)
+        hasher.combine(sdpMlineIndex)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeCandidate: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Candidate {
+        return
+            try Candidate(
+                candidate: FfiConverterString.read(from: &buf), 
+                sdpMid: FfiConverterString.read(from: &buf), 
+                sdpMlineIndex: FfiConverterString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: Candidate, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.candidate, into: &buf)
+        FfiConverterString.write(value.sdpMid, into: &buf)
+        FfiConverterString.write(value.sdpMlineIndex, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeCandidate_lift(_ buf: RustBuffer) throws -> Candidate {
+    return try FfiConverterTypeCandidate.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeCandidate_lower(_ value: Candidate) -> RustBuffer {
+    return FfiConverterTypeCandidate.lower(value)
 }
 
 
@@ -1973,6 +2161,31 @@ fileprivate struct FfiConverterOptionString: FfiConverterRustBuffer {
         }
     }
 }
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceTypeCandidate: FfiConverterRustBuffer {
+    typealias SwiftType = [Candidate]
+
+    public static func write(_ value: [Candidate], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeCandidate.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [Candidate] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [Candidate]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeCandidate.read(from: &buf))
+        }
+        return seq
+    }
+}
 private let UNIFFI_RUST_FUTURE_POLL_READY: Int8 = 0
 private let UNIFFI_RUST_FUTURE_POLL_MAYBE_READY: Int8 = 1
 
@@ -2072,10 +2285,19 @@ private var initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_echotesthandle_start_with_jsep() != 18887) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_handle_complete_trickle() != 24960) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_handle_detach() != 1157) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_handle_fire_and_forget() != 43989) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_handle_fire_and_forget_with_jsep() != 28005) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_handle_hangup() != 23669) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_handle_send_waiton_ack() != 1198) {
@@ -2087,10 +2309,19 @@ private var initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_handle_start_event_loop() != 781) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_handle_trickle_candidates() != 17041) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_handle_trickle_single_candidate() != 48289) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_session_attach() != 16557) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_session_attach_echo_test() != 28942) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_session_destory() != 62073) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_result() != 12927) {

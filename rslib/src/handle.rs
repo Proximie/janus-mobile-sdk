@@ -1,5 +1,6 @@
 use crate::error::JanusGatewayCommunicationError;
-use crate::protocol::{Candidate, Jsep};
+use crate::protocol::Candidate;
+use crate::protocol::Jsep;
 use jarust::core::jahandle::JaHandle;
 use jarust::interface::japrotocol::JaResponse;
 use serde_json::Value;

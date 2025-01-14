@@ -68,6 +68,32 @@ public final class JaHandle {
     ) async throws -> Data {
         try await handle.sendWaitonResult(data: data, timeout: timeout)
     }
+
+    public func hangup(timeout: TimeInterval) async throws {
+        try await handle.hangup(timeout: timeout)
+    }
+
+    public func detach(timeout: TimeInterval) async throws {
+        try await handle.detach(timeout: timeout)
+    }
+
+    public func trickleSingleCandidate(
+        candidate: Candidate, timeout: TimeInterval
+    ) async throws {
+        try await handle
+            .trickleSingleCandidate(candidate: candidate, timeout: timeout)
+    }
+
+    public func trickleCandidates(
+        candidates: [Candidate], timeout: TimeInterval
+    ) async throws {
+        try await handle
+            .trickleCandidates(candidates: candidates, timeout: timeout)
+    }
+
+    public func completeTrickle(timeout: TimeInterval) async throws {
+        try await handle.completeTrickle(timeout: timeout)
+    }
 }
 
 extension JaHandle: HandleCallback {
