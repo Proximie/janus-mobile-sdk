@@ -1,4 +1,5 @@
 use jarust::interface::japrotocol::Candidate as ExternalCandidate;
+use jarust::interface::japrotocol::GenericEvent as ExternalGenericEvent;
 use jarust::interface::japrotocol::Jsep as ExternalJsep;
 use jarust::interface::japrotocol::JsepType as ExternalJsepType;
 
@@ -52,6 +53,35 @@ impl From<Candidate> for ExternalCandidate {
             candidate: val.candidate,
             sdp_mid: val.sdp_mid,
             sdp_mline_index: val.sdp_mline_index,
+        }
+    }
+}
+
+#[derive(uniffi::Enum)]
+pub enum GenericEvent {
+    Detached,
+    /// The PeerConnection was closed, either by Janus or by the user/application, and as such cannot be used anymore.
+    Hangup,
+    /// Whether Janus is receiving (receiving: true/false) audio/video (type: "audio/video") on this PeerConnection.
+    Media,
+    Timeout,
+    /// ICE and DTLS succeeded, and so Janus correctly established a PeerConnection with the user/application.
+    WebrtcUp,
+    /// Whether Janus is reporting trouble sending/receiving (uplink: true/false) media on this PeerConnection.
+    Slowlink,
+    Trickle,
+}
+
+impl From<ExternalGenericEvent> for GenericEvent {
+    fn from(val: ExternalGenericEvent) -> Self {
+        match val {
+            ExternalGenericEvent::Detached => GenericEvent::Detached,
+            ExternalGenericEvent::Hangup => GenericEvent::Hangup,
+            ExternalGenericEvent::Media => GenericEvent::Media,
+            ExternalGenericEvent::Timeout => GenericEvent::Timeout,
+            ExternalGenericEvent::WebrtcUp => GenericEvent::WebrtcUp,
+            ExternalGenericEvent::Slowlink => GenericEvent::Slowlink,
+            ExternalGenericEvent::Trickle => GenericEvent::Trickle,
         }
     }
 }
