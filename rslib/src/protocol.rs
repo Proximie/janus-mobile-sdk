@@ -90,7 +90,7 @@ impl From<ExternalGenericEvent> for GenericEvent {
 }
 
 #[derive(uniffi::Record)]
-pub struct ServerInfoRsp {
+pub struct ServerInfo {
     pub name: String,
     pub version: u64,
     pub version_string: String,
@@ -126,9 +126,9 @@ pub struct ServerInfoRsp {
     pub plugins: HashMap<String, MetaData>,
 }
 
-impl From<ExternalServerInfoRsp> for ServerInfoRsp {
+impl From<ExternalServerInfoRsp> for ServerInfo {
     fn from(val: ExternalServerInfoRsp) -> Self {
-        ServerInfoRsp {
+        ServerInfo {
             name: val.name,
             version: val.version,
             version_string: val.version_string,

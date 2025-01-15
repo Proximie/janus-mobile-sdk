@@ -2,7 +2,7 @@ use crate::config::Config;
 use crate::error::JanusGatewayCommunicationError;
 use crate::error::JanusGatewayConnectionError;
 use crate::error::JanusGatewaySessionError;
-use crate::protocol::ServerInfoRsp;
+use crate::protocol::ServerInfo;
 use crate::session::Session;
 use jarust::core::connect;
 use jarust::core::jaconfig::JaConfig;
@@ -59,7 +59,7 @@ impl Connection {
     pub async fn server_info(
         &self,
         timeout: Duration,
-    ) -> Result<ServerInfoRsp, JanusGatewayCommunicationError> {
+    ) -> Result<ServerInfo, JanusGatewayCommunicationError> {
         let info = match self.inner.server_info(timeout).await {
             Ok(info) => info,
             Err(why) => {

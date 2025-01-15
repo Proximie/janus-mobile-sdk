@@ -562,7 +562,7 @@ public protocol ConnectionProtocol : AnyObject {
     
     func createSession(kaInterval: UInt32, timeout: TimeInterval) async throws  -> Session
     
-    func serverInfo(timeout: TimeInterval) async throws  -> ServerInfoRsp
+    func serverInfo(timeout: TimeInterval) async throws  -> ServerInfo
     
 }
 
@@ -633,7 +633,7 @@ open func createSession(kaInterval: UInt32, timeout: TimeInterval)async throws  
         )
 }
     
-open func serverInfo(timeout: TimeInterval)async throws  -> ServerInfoRsp {
+open func serverInfo(timeout: TimeInterval)async throws  -> ServerInfo {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -645,7 +645,7 @@ open func serverInfo(timeout: TimeInterval)async throws  -> ServerInfoRsp {
             pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
-            liftFunc: FfiConverterTypeServerInfoRsp.lift,
+            liftFunc: FfiConverterTypeServerInfo.lift,
             errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
         )
 }
@@ -1656,7 +1656,7 @@ public func FfiConverterTypeMetaData_lower(_ value: MetaData) -> RustBuffer {
 }
 
 
-public struct ServerInfoRsp {
+public struct ServerInfo {
     public let name: String
     public let version: UInt64
     public let versionString: String
@@ -1732,8 +1732,8 @@ public struct ServerInfoRsp {
 
 
 
-extension ServerInfoRsp: Equatable, Hashable {
-    public static func ==(lhs: ServerInfoRsp, rhs: ServerInfoRsp) -> Bool {
+extension ServerInfo: Equatable, Hashable {
+    public static func ==(lhs: ServerInfo, rhs: ServerInfo) -> Bool {
         if lhs.name != rhs.name {
             return false
         }
@@ -1877,10 +1877,10 @@ extension ServerInfoRsp: Equatable, Hashable {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public struct FfiConverterTypeServerInfoRsp: FfiConverterRustBuffer {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> ServerInfoRsp {
+public struct FfiConverterTypeServerInfo: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> ServerInfo {
         return
-            try ServerInfoRsp(
+            try ServerInfo(
                 name: FfiConverterString.read(from: &buf), 
                 version: FfiConverterUInt64.read(from: &buf), 
                 versionString: FfiConverterString.read(from: &buf), 
@@ -1917,7 +1917,7 @@ public struct FfiConverterTypeServerInfoRsp: FfiConverterRustBuffer {
         )
     }
 
-    public static func write(_ value: ServerInfoRsp, into buf: inout [UInt8]) {
+    public static func write(_ value: ServerInfo, into buf: inout [UInt8]) {
         FfiConverterString.write(value.name, into: &buf)
         FfiConverterUInt64.write(value.version, into: &buf)
         FfiConverterString.write(value.versionString, into: &buf)
@@ -1958,15 +1958,15 @@ public struct FfiConverterTypeServerInfoRsp: FfiConverterRustBuffer {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeServerInfoRsp_lift(_ buf: RustBuffer) throws -> ServerInfoRsp {
-    return try FfiConverterTypeServerInfoRsp.lift(buf)
+public func FfiConverterTypeServerInfo_lift(_ buf: RustBuffer) throws -> ServerInfo {
+    return try FfiConverterTypeServerInfo.lift(buf)
 }
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeServerInfoRsp_lower(_ value: ServerInfoRsp) -> RustBuffer {
-    return FfiConverterTypeServerInfoRsp.lower(value)
+public func FfiConverterTypeServerInfo_lower(_ value: ServerInfo) -> RustBuffer {
+    return FfiConverterTypeServerInfo.lower(value)
 }
 
 // Note that we don't yet support `indirect` for enums.
@@ -2904,7 +2904,7 @@ private var initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_connection_create_session() != 39238) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_connection_server_info() != 18308) {
+    if (uniffi_janus_gateway_checksum_method_connection_server_info() != 16292) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_echotesthandle_start() != 45525) {
