@@ -431,6 +431,22 @@ fileprivate struct FfiConverterUInt32: FfiConverterPrimitive {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterUInt64: FfiConverterPrimitive {
+    typealias FfiType = UInt64
+    typealias SwiftType = UInt64
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> UInt64 {
+        return try lift(readInt(&buf))
+    }
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(value))
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterBool : FfiConverter {
     typealias FfiType = Int8
     typealias SwiftType = Bool
@@ -546,6 +562,8 @@ public protocol ConnectionProtocol : AnyObject {
     
     func createSession(kaInterval: UInt32, timeout: TimeInterval) async throws  -> Session
     
+    func serverInfo(timeout: TimeInterval) async throws  -> ServerInfoRsp
+    
 }
 
 open class Connection:
@@ -612,6 +630,23 @@ open func createSession(kaInterval: UInt32, timeout: TimeInterval)async throws  
             freeFunc: ffi_janus_gateway_rust_future_free_pointer,
             liftFunc: FfiConverterTypeSession.lift,
             errorHandler: FfiConverterTypeJanusGatewaySessionError.lift
+        )
+}
+    
+open func serverInfo(timeout: TimeInterval)async throws  -> ServerInfoRsp {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_connection_server_info(
+                    self.uniffiClonePointer(),
+                    FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterTypeServerInfoRsp.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
         )
 }
     
@@ -1531,6 +1566,521 @@ public func FfiConverterTypeJsep_lower(_ value: Jsep) -> RustBuffer {
 }
 
 
+public struct MetaData {
+    public let name: String
+    public let author: String
+    public let description: String
+    public let versionString: String
+    public let version: UInt64
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(name: String, author: String, description: String, versionString: String, version: UInt64) {
+        self.name = name
+        self.author = author
+        self.description = description
+        self.versionString = versionString
+        self.version = version
+    }
+}
+
+
+
+extension MetaData: Equatable, Hashable {
+    public static func ==(lhs: MetaData, rhs: MetaData) -> Bool {
+        if lhs.name != rhs.name {
+            return false
+        }
+        if lhs.author != rhs.author {
+            return false
+        }
+        if lhs.description != rhs.description {
+            return false
+        }
+        if lhs.versionString != rhs.versionString {
+            return false
+        }
+        if lhs.version != rhs.version {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
+        hasher.combine(author)
+        hasher.combine(description)
+        hasher.combine(versionString)
+        hasher.combine(version)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMetaData: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MetaData {
+        return
+            try MetaData(
+                name: FfiConverterString.read(from: &buf), 
+                author: FfiConverterString.read(from: &buf), 
+                description: FfiConverterString.read(from: &buf), 
+                versionString: FfiConverterString.read(from: &buf), 
+                version: FfiConverterUInt64.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MetaData, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.name, into: &buf)
+        FfiConverterString.write(value.author, into: &buf)
+        FfiConverterString.write(value.description, into: &buf)
+        FfiConverterString.write(value.versionString, into: &buf)
+        FfiConverterUInt64.write(value.version, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMetaData_lift(_ buf: RustBuffer) throws -> MetaData {
+    return try FfiConverterTypeMetaData.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMetaData_lower(_ value: MetaData) -> RustBuffer {
+    return FfiConverterTypeMetaData.lower(value)
+}
+
+
+public struct ServerInfoRsp {
+    public let name: String
+    public let version: UInt64
+    public let versionString: String
+    public let author: String
+    public let commitHash: String
+    public let compileTime: String
+    public let logToStdout: Bool
+    public let logToFile: Bool
+    public let dataChannels: Bool
+    public let acceptingNewSessions: Bool
+    public let sessionTimeout: UInt64
+    public let reclaimSessionTimeout: UInt64
+    public let candidatesTimeout: UInt64
+    public let serverName: String
+    public let localIp: String
+    public let ipv6: Bool
+    public let iceLite: Bool
+    public let iceTcp: Bool
+    public let iceNomination: String
+    public let iceKeepaliveConncheck: Bool
+    public let fullTrickle: Bool
+    public let mdnsEnabled: Bool
+    public let minNackQueue: UInt64
+    public let twccPeriod: UInt64
+    public let dtlsMtu: UInt64
+    public let staticEventLoops: UInt64
+    public let apiSecret: Bool
+    public let authToken: Bool
+    public let eventHandlers: Bool
+    public let opaqueidInApi: Bool
+    public let dependencies: [String: String]
+    public let transports: [String: MetaData]
+    public let plugins: [String: MetaData]
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(name: String, version: UInt64, versionString: String, author: String, commitHash: String, compileTime: String, logToStdout: Bool, logToFile: Bool, dataChannels: Bool, acceptingNewSessions: Bool, sessionTimeout: UInt64, reclaimSessionTimeout: UInt64, candidatesTimeout: UInt64, serverName: String, localIp: String, ipv6: Bool, iceLite: Bool, iceTcp: Bool, iceNomination: String, iceKeepaliveConncheck: Bool, fullTrickle: Bool, mdnsEnabled: Bool, minNackQueue: UInt64, twccPeriod: UInt64, dtlsMtu: UInt64, staticEventLoops: UInt64, apiSecret: Bool, authToken: Bool, eventHandlers: Bool, opaqueidInApi: Bool, dependencies: [String: String], transports: [String: MetaData], plugins: [String: MetaData]) {
+        self.name = name
+        self.version = version
+        self.versionString = versionString
+        self.author = author
+        self.commitHash = commitHash
+        self.compileTime = compileTime
+        self.logToStdout = logToStdout
+        self.logToFile = logToFile
+        self.dataChannels = dataChannels
+        self.acceptingNewSessions = acceptingNewSessions
+        self.sessionTimeout = sessionTimeout
+        self.reclaimSessionTimeout = reclaimSessionTimeout
+        self.candidatesTimeout = candidatesTimeout
+        self.serverName = serverName
+        self.localIp = localIp
+        self.ipv6 = ipv6
+        self.iceLite = iceLite
+        self.iceTcp = iceTcp
+        self.iceNomination = iceNomination
+        self.iceKeepaliveConncheck = iceKeepaliveConncheck
+        self.fullTrickle = fullTrickle
+        self.mdnsEnabled = mdnsEnabled
+        self.minNackQueue = minNackQueue
+        self.twccPeriod = twccPeriod
+        self.dtlsMtu = dtlsMtu
+        self.staticEventLoops = staticEventLoops
+        self.apiSecret = apiSecret
+        self.authToken = authToken
+        self.eventHandlers = eventHandlers
+        self.opaqueidInApi = opaqueidInApi
+        self.dependencies = dependencies
+        self.transports = transports
+        self.plugins = plugins
+    }
+}
+
+
+
+extension ServerInfoRsp: Equatable, Hashable {
+    public static func ==(lhs: ServerInfoRsp, rhs: ServerInfoRsp) -> Bool {
+        if lhs.name != rhs.name {
+            return false
+        }
+        if lhs.version != rhs.version {
+            return false
+        }
+        if lhs.versionString != rhs.versionString {
+            return false
+        }
+        if lhs.author != rhs.author {
+            return false
+        }
+        if lhs.commitHash != rhs.commitHash {
+            return false
+        }
+        if lhs.compileTime != rhs.compileTime {
+            return false
+        }
+        if lhs.logToStdout != rhs.logToStdout {
+            return false
+        }
+        if lhs.logToFile != rhs.logToFile {
+            return false
+        }
+        if lhs.dataChannels != rhs.dataChannels {
+            return false
+        }
+        if lhs.acceptingNewSessions != rhs.acceptingNewSessions {
+            return false
+        }
+        if lhs.sessionTimeout != rhs.sessionTimeout {
+            return false
+        }
+        if lhs.reclaimSessionTimeout != rhs.reclaimSessionTimeout {
+            return false
+        }
+        if lhs.candidatesTimeout != rhs.candidatesTimeout {
+            return false
+        }
+        if lhs.serverName != rhs.serverName {
+            return false
+        }
+        if lhs.localIp != rhs.localIp {
+            return false
+        }
+        if lhs.ipv6 != rhs.ipv6 {
+            return false
+        }
+        if lhs.iceLite != rhs.iceLite {
+            return false
+        }
+        if lhs.iceTcp != rhs.iceTcp {
+            return false
+        }
+        if lhs.iceNomination != rhs.iceNomination {
+            return false
+        }
+        if lhs.iceKeepaliveConncheck != rhs.iceKeepaliveConncheck {
+            return false
+        }
+        if lhs.fullTrickle != rhs.fullTrickle {
+            return false
+        }
+        if lhs.mdnsEnabled != rhs.mdnsEnabled {
+            return false
+        }
+        if lhs.minNackQueue != rhs.minNackQueue {
+            return false
+        }
+        if lhs.twccPeriod != rhs.twccPeriod {
+            return false
+        }
+        if lhs.dtlsMtu != rhs.dtlsMtu {
+            return false
+        }
+        if lhs.staticEventLoops != rhs.staticEventLoops {
+            return false
+        }
+        if lhs.apiSecret != rhs.apiSecret {
+            return false
+        }
+        if lhs.authToken != rhs.authToken {
+            return false
+        }
+        if lhs.eventHandlers != rhs.eventHandlers {
+            return false
+        }
+        if lhs.opaqueidInApi != rhs.opaqueidInApi {
+            return false
+        }
+        if lhs.dependencies != rhs.dependencies {
+            return false
+        }
+        if lhs.transports != rhs.transports {
+            return false
+        }
+        if lhs.plugins != rhs.plugins {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
+        hasher.combine(version)
+        hasher.combine(versionString)
+        hasher.combine(author)
+        hasher.combine(commitHash)
+        hasher.combine(compileTime)
+        hasher.combine(logToStdout)
+        hasher.combine(logToFile)
+        hasher.combine(dataChannels)
+        hasher.combine(acceptingNewSessions)
+        hasher.combine(sessionTimeout)
+        hasher.combine(reclaimSessionTimeout)
+        hasher.combine(candidatesTimeout)
+        hasher.combine(serverName)
+        hasher.combine(localIp)
+        hasher.combine(ipv6)
+        hasher.combine(iceLite)
+        hasher.combine(iceTcp)
+        hasher.combine(iceNomination)
+        hasher.combine(iceKeepaliveConncheck)
+        hasher.combine(fullTrickle)
+        hasher.combine(mdnsEnabled)
+        hasher.combine(minNackQueue)
+        hasher.combine(twccPeriod)
+        hasher.combine(dtlsMtu)
+        hasher.combine(staticEventLoops)
+        hasher.combine(apiSecret)
+        hasher.combine(authToken)
+        hasher.combine(eventHandlers)
+        hasher.combine(opaqueidInApi)
+        hasher.combine(dependencies)
+        hasher.combine(transports)
+        hasher.combine(plugins)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeServerInfoRsp: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> ServerInfoRsp {
+        return
+            try ServerInfoRsp(
+                name: FfiConverterString.read(from: &buf), 
+                version: FfiConverterUInt64.read(from: &buf), 
+                versionString: FfiConverterString.read(from: &buf), 
+                author: FfiConverterString.read(from: &buf), 
+                commitHash: FfiConverterString.read(from: &buf), 
+                compileTime: FfiConverterString.read(from: &buf), 
+                logToStdout: FfiConverterBool.read(from: &buf), 
+                logToFile: FfiConverterBool.read(from: &buf), 
+                dataChannels: FfiConverterBool.read(from: &buf), 
+                acceptingNewSessions: FfiConverterBool.read(from: &buf), 
+                sessionTimeout: FfiConverterUInt64.read(from: &buf), 
+                reclaimSessionTimeout: FfiConverterUInt64.read(from: &buf), 
+                candidatesTimeout: FfiConverterUInt64.read(from: &buf), 
+                serverName: FfiConverterString.read(from: &buf), 
+                localIp: FfiConverterString.read(from: &buf), 
+                ipv6: FfiConverterBool.read(from: &buf), 
+                iceLite: FfiConverterBool.read(from: &buf), 
+                iceTcp: FfiConverterBool.read(from: &buf), 
+                iceNomination: FfiConverterString.read(from: &buf), 
+                iceKeepaliveConncheck: FfiConverterBool.read(from: &buf), 
+                fullTrickle: FfiConverterBool.read(from: &buf), 
+                mdnsEnabled: FfiConverterBool.read(from: &buf), 
+                minNackQueue: FfiConverterUInt64.read(from: &buf), 
+                twccPeriod: FfiConverterUInt64.read(from: &buf), 
+                dtlsMtu: FfiConverterUInt64.read(from: &buf), 
+                staticEventLoops: FfiConverterUInt64.read(from: &buf), 
+                apiSecret: FfiConverterBool.read(from: &buf), 
+                authToken: FfiConverterBool.read(from: &buf), 
+                eventHandlers: FfiConverterBool.read(from: &buf), 
+                opaqueidInApi: FfiConverterBool.read(from: &buf), 
+                dependencies: FfiConverterDictionaryStringString.read(from: &buf), 
+                transports: FfiConverterDictionaryStringTypeMetaData.read(from: &buf), 
+                plugins: FfiConverterDictionaryStringTypeMetaData.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: ServerInfoRsp, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.name, into: &buf)
+        FfiConverterUInt64.write(value.version, into: &buf)
+        FfiConverterString.write(value.versionString, into: &buf)
+        FfiConverterString.write(value.author, into: &buf)
+        FfiConverterString.write(value.commitHash, into: &buf)
+        FfiConverterString.write(value.compileTime, into: &buf)
+        FfiConverterBool.write(value.logToStdout, into: &buf)
+        FfiConverterBool.write(value.logToFile, into: &buf)
+        FfiConverterBool.write(value.dataChannels, into: &buf)
+        FfiConverterBool.write(value.acceptingNewSessions, into: &buf)
+        FfiConverterUInt64.write(value.sessionTimeout, into: &buf)
+        FfiConverterUInt64.write(value.reclaimSessionTimeout, into: &buf)
+        FfiConverterUInt64.write(value.candidatesTimeout, into: &buf)
+        FfiConverterString.write(value.serverName, into: &buf)
+        FfiConverterString.write(value.localIp, into: &buf)
+        FfiConverterBool.write(value.ipv6, into: &buf)
+        FfiConverterBool.write(value.iceLite, into: &buf)
+        FfiConverterBool.write(value.iceTcp, into: &buf)
+        FfiConverterString.write(value.iceNomination, into: &buf)
+        FfiConverterBool.write(value.iceKeepaliveConncheck, into: &buf)
+        FfiConverterBool.write(value.fullTrickle, into: &buf)
+        FfiConverterBool.write(value.mdnsEnabled, into: &buf)
+        FfiConverterUInt64.write(value.minNackQueue, into: &buf)
+        FfiConverterUInt64.write(value.twccPeriod, into: &buf)
+        FfiConverterUInt64.write(value.dtlsMtu, into: &buf)
+        FfiConverterUInt64.write(value.staticEventLoops, into: &buf)
+        FfiConverterBool.write(value.apiSecret, into: &buf)
+        FfiConverterBool.write(value.authToken, into: &buf)
+        FfiConverterBool.write(value.eventHandlers, into: &buf)
+        FfiConverterBool.write(value.opaqueidInApi, into: &buf)
+        FfiConverterDictionaryStringString.write(value.dependencies, into: &buf)
+        FfiConverterDictionaryStringTypeMetaData.write(value.transports, into: &buf)
+        FfiConverterDictionaryStringTypeMetaData.write(value.plugins, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeServerInfoRsp_lift(_ buf: RustBuffer) throws -> ServerInfoRsp {
+    return try FfiConverterTypeServerInfoRsp.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeServerInfoRsp_lower(_ value: ServerInfoRsp) -> RustBuffer {
+    return FfiConverterTypeServerInfoRsp.lower(value)
+}
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+
+public enum GenericEvent {
+    
+    case detached
+    /**
+     * The PeerConnection was closed, either by Janus or by the user/application, and as such cannot be used anymore.
+     */
+    case hangup
+    /**
+     * Whether Janus is receiving (receiving: true/false) audio/video (type: "audio/video") on this PeerConnection.
+     */
+    case media
+    case timeout
+    /**
+     * ICE and DTLS succeeded, and so Janus correctly established a PeerConnection with the user/application.
+     */
+    case webrtcUp
+    /**
+     * Whether Janus is reporting trouble sending/receiving (uplink: true/false) media on this PeerConnection.
+     */
+    case slowlink
+    case trickle
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeGenericEvent: FfiConverterRustBuffer {
+    typealias SwiftType = GenericEvent
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> GenericEvent {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .detached
+        
+        case 2: return .hangup
+        
+        case 3: return .media
+        
+        case 4: return .timeout
+        
+        case 5: return .webrtcUp
+        
+        case 6: return .slowlink
+        
+        case 7: return .trickle
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: GenericEvent, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .detached:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .hangup:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .media:
+            writeInt(&buf, Int32(3))
+        
+        
+        case .timeout:
+            writeInt(&buf, Int32(4))
+        
+        
+        case .webrtcUp:
+            writeInt(&buf, Int32(5))
+        
+        
+        case .slowlink:
+            writeInt(&buf, Int32(6))
+        
+        
+        case .trickle:
+            writeInt(&buf, Int32(7))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeGenericEvent_lift(_ buf: RustBuffer) throws -> GenericEvent {
+    return try FfiConverterTypeGenericEvent.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeGenericEvent_lower(_ value: GenericEvent) -> RustBuffer {
+    return FfiConverterTypeGenericEvent.lower(value)
+}
+
+
+
+extension GenericEvent: Equatable, Hashable {}
+
+
+
+
 public enum JanusGatewayCommunicationError {
 
     
@@ -1996,7 +2546,9 @@ extension FfiConverterCallbackInterfaceEchotestHandleCallback : FfiConverter {
 
 public protocol HandleCallback : AnyObject {
     
-    func onEvent(event: String) 
+    func onPluginEvent(event: Data) 
+    
+    func onHandleEvent(event: GenericEvent) 
     
 }
 
@@ -2008,7 +2560,7 @@ fileprivate struct UniffiCallbackInterfaceHandleCallback {
     // Create the VTable using a series of closures.
     // Swift automatically converts these into C callback functions.
     static var vtable: UniffiVTableCallbackInterfaceHandleCallback = UniffiVTableCallbackInterfaceHandleCallback(
-        onEvent: { (
+        onPluginEvent: { (
             uniffiHandle: UInt64,
             event: RustBuffer,
             uniffiOutReturn: UnsafeMutableRawPointer,
@@ -2019,8 +2571,32 @@ fileprivate struct UniffiCallbackInterfaceHandleCallback {
                 guard let uniffiObj = try? FfiConverterCallbackInterfaceHandleCallback.handleMap.get(handle: uniffiHandle) else {
                     throw UniffiInternalError.unexpectedStaleHandle
                 }
-                return uniffiObj.onEvent(
-                     event: try FfiConverterString.lift(event)
+                return uniffiObj.onPluginEvent(
+                     event: try FfiConverterData.lift(event)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onHandleEvent: { (
+            uniffiHandle: UInt64,
+            event: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onHandleEvent(
+                     event: try FfiConverterTypeGenericEvent.lift(event)
                 )
             }
 
@@ -2186,6 +2762,58 @@ fileprivate struct FfiConverterSequenceTypeCandidate: FfiConverterRustBuffer {
         return seq
     }
 }
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterDictionaryStringString: FfiConverterRustBuffer {
+    public static func write(_ value: [String: String], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for (key, value) in value {
+            FfiConverterString.write(key, into: &buf)
+            FfiConverterString.write(value, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [String: String] {
+        let len: Int32 = try readInt(&buf)
+        var dict = [String: String]()
+        dict.reserveCapacity(Int(len))
+        for _ in 0..<len {
+            let key = try FfiConverterString.read(from: &buf)
+            let value = try FfiConverterString.read(from: &buf)
+            dict[key] = value
+        }
+        return dict
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterDictionaryStringTypeMetaData: FfiConverterRustBuffer {
+    public static func write(_ value: [String: MetaData], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for (key, value) in value {
+            FfiConverterString.write(key, into: &buf)
+            FfiConverterTypeMetaData.write(value, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [String: MetaData] {
+        let len: Int32 = try readInt(&buf)
+        var dict = [String: MetaData]()
+        dict.reserveCapacity(Int(len))
+        for _ in 0..<len {
+            let key = try FfiConverterString.read(from: &buf)
+            let value = try FfiConverterTypeMetaData.read(from: &buf)
+            dict[key] = value
+        }
+        return dict
+    }
+}
 private let UNIFFI_RUST_FUTURE_POLL_READY: Int8 = 0
 private let UNIFFI_RUST_FUTURE_POLL_MAYBE_READY: Int8 = 1
 
@@ -2276,6 +2904,9 @@ private var initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_connection_create_session() != 39238) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_connection_server_info() != 18308) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_echotesthandle_start() != 45525) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -2333,7 +2964,10 @@ private var initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_echo_test_error() != 12056) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handlecallback_on_event() != 65130) {
+    if (uniffi_janus_gateway_checksum_method_handlecallback_on_plugin_event() != 21699) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_handlecallback_on_handle_event() != 1626) {
         return InitializationResult.apiChecksumMismatch
     }
 

@@ -122,16 +122,18 @@ impl Handle {
 
         let join_handle = tokio::spawn(async move {
             while let Some(item) = receiver.recv().await {
-                if let ResponseType::Event(event) = item.janus { match event {
-                    JaHandleEvent::PluginEvent { plugin_data } => {
-                        if let Ok(plugin_data) = serde_json::to_string(&plugin_data) {
-                            cb.on_plugin_event(plugin_data);
+                if let ResponseType::Event(event) = item.janus {
+                    match event {
+                        JaHandleEvent::PluginEvent { plugin_data } => {
+                            if let Ok(plugin_data) = serde_json::to_vec(&plugin_data) {
+                                cb.on_plugin_event(plugin_data);
+                            }
+                        }
+                        JaHandleEvent::GenericEvent(generic_event) => {
+                            cb.on_handle_event(generic_event.into());
                         }
                     }
-                    JaHandleEvent::GenericEvent(generic_event) => {
-                        cb.on_handle_event(generic_event.into());
-                    }
-                } };
+                };
             }
         });
 
@@ -204,6 +206,6 @@ impl Drop for Handle {
 
 #[uniffi::export(callback_interface)]
 pub trait HandleCallback: Send + Sync + Debug {
-    fn on_plugin_event(&self, event: String);
+    fn on_plugin_event(&self, event: Vec<u8>);
     fn on_handle_event(&self, event: GenericEvent);
 }

@@ -37,4 +37,8 @@ public struct JaConnection {
         let session = try await connection.createSession(kaInterval: kaInterval, timeout: timeout)
         return JaSession(session: session)
     }
+
+    public func serverInfo(timeout: TimeInterval) async throws -> ServerInfoRsp {
+        return try await connection.serverInfo(timeout: timeout)
+    }
 }

@@ -97,8 +97,11 @@ public final class JaHandle {
 }
 
 extension JaHandle: HandleCallback {
-    public func onEvent(event: String) {
-        delegate?.didReceive(event: event)
-        continuation?.yield(event)
+    public func onPluginEvent(event: Data) {
+        // TODO
+    }
+
+    public func onHandleEvent(event: GenericEvent) {
+        // TODO
     }
 }

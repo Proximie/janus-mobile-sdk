@@ -790,9 +790,9 @@ checksum = "49f1f14873335454500d59611f1cf4a4b0f786f9ac11f4312a78e4cf2566695b"
 
 [[package]]
 name = "jarust"
-version = "1.1.0"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f346a45a9fff94061eb3128a5f842acde2df5a538868c968e66fde73308b37d8"
+checksum = "494c745703227f638a7a05b50a00f2491189625833b195f7463714b92c70e6fb"
 dependencies = [
  "jarust_core",
  "jarust_interface",
@@ -801,9 +801,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_core"
-version = "1.1.0"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "410b897240c9bc53a21b38f2683f2f0875dd2431430256f0e3aa471d80fac53b"
+checksum = "6dbf696784442bfeb04ab08d970279b7687a557887bed5a935035e8f485acd54"
 dependencies = [
  "async-trait",
  "jarust_interface",
@@ -816,9 +816,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_interface"
-version = "1.1.0"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "603be01bbdd71cd16374c6be12e96d682ee367fb63c58568888cb020a5cab34b"
+checksum = "7b7f19872b8218d9729f2747be9d2019eb779634519b420e99cc4ff3dc0489d5"
 dependencies = [
  "async-trait",
  "bytes",
@@ -839,9 +839,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_plugins"
-version = "1.1.0"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3f746d3b5c8b27686a95d286cb2a6115d7c721a1e516095448064d7cb071c78"
+checksum = "eca34f1f313cd7ebf1207cc686e94883dfe639e7f3bd778cc02d860454041bd6"
 dependencies = [
  "async-trait",
  "jarust_core",
@@ -856,9 +856,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_rt"
-version = "1.1.0"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d990f7ac1f5f4d3f4a177b8491458061eca9b5de5a1605d5a5e9afcc5d7f646d"
+checksum = "62f575ece473cb88dc274c7a7148aa5d82528c778d2a5cca6d93e9442d9a1830"
 dependencies = [
  "futures-util",
  "tokio",
