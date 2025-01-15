@@ -12,12 +12,12 @@ import UniFFI
 public final class JaHandle {
     let handle: Handle
     public var delegate: JaHandleDelegate?
-    private var continuation: AsyncStream<String>.Continuation?
+    private var continuation: AsyncStream<JaHandleEvent>.Continuation?
 
     /// Get an async stream of incoming Janus events for this handle
     ///
     /// - Returns: An async stream of incoming events
-    public var events: AsyncStream<String> {
+    public var events: AsyncStream<JaHandleEvent> {
         get async {
             await handle.startEventLoop(cb: self)
 
@@ -69,10 +69,20 @@ public final class JaHandle {
         try await handle.sendWaitonResult(data: data, timeout: timeout)
     }
 
+    /// Hang up the associated PeerConnection but keep the handle alive
+    ///
+    /// - Parameters:
+    ///     - timeout: The maximum amount of time to wait on a response before we consider the
+    ///     request as failed or times out.
     public func hangup(timeout: TimeInterval) async throws {
         try await handle.hangup(timeout: timeout)
     }
 
+    /// Destroy the plugin handle
+    ///
+    /// - Parameters:
+    ///     - timeout: The maximum amount of time to wait on a response before we consider the
+    ///     request as failed or times out.
     public func detach(timeout: TimeInterval) async throws {
         try await handle.detach(timeout: timeout)
     }
@@ -98,10 +108,12 @@ public final class JaHandle {
 
 extension JaHandle: HandleCallback {
     public func onPluginEvent(event: Data) {
-        // TODO
+        delegate?.didReceiveHandleEvent(event: .plugin(event))
+        continuation?.yield(.plugin(event))
     }
 
     public func onHandleEvent(event: GenericEvent) {
-        // TODO
+        delegate?.didReceiveHandleEvent(event: .handle(event))
+        continuation?.yield(.handle(event))
     }
 }

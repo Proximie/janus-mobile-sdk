@@ -6,5 +6,5 @@
 //
 
 public protocol JaHandleDelegate {
-    func didReceive(event: String)
+    func didReceiveHandleEvent(event: JaHandleEvent)
 }

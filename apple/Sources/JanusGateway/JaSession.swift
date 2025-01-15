@@ -28,6 +28,11 @@ public struct JaSession {
         return JaHandle(handle: handle)
     }
 
+    /// Destroy the current session
+    ///
+    /// - Parameters:
+    ///     - timeout: The maximum amount of time to wait on an acknowledgment before we consider
+    ///     the request as failed or times out.
     public func destory(timeout: TimeInterval) async throws {
         try await session.destory(timeout: timeout)
     }
