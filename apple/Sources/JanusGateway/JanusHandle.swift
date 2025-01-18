@@ -1,23 +1,16 @@
-//
-//  JaHandle.swift
-//
-//
-//  Created by Hamza Jadid on 16/09/2024.
-//
-
 import Foundation
 import UniFFI
 
 /// General purpose plugin handle
-public final class JaHandle {
+public final class JanusHandle {
     let handle: Handle
-    public var delegate: JaHandleDelegate?
-    private var continuation: AsyncStream<JaHandleEvent>.Continuation?
+    public var delegate: JanusHandleDelegate?
+    private var continuation: AsyncStream<JanusHandleEvent>.Continuation?
 
     /// Get an async stream of incoming Janus events for this handle
     ///
     /// - Returns: An async stream of incoming events
-    public var events: AsyncStream<JaHandleEvent> {
+    public var events: AsyncStream<JanusHandleEvent> {
         get async {
             await handle.startEventLoop(cb: self)
 
@@ -106,7 +99,7 @@ public final class JaHandle {
     }
 }
 
-extension JaHandle: HandleCallback {
+extension JanusHandle: HandleCallback {
     public func onPluginEvent(event: Data) {
         delegate?.didReceiveHandleEvent(event: .plugin(event))
         continuation?.yield(.plugin(event))

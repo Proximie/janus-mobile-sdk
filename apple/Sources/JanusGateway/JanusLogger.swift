@@ -1,14 +1,9 @@
-//
-//  JaLogger.swift
-//
-//
-//  Created by Hamza Jadid on 05/04/2024.
-//
-
 import UniFFI
 
 /// The Logger used in JanusGateway
-public struct JaLogger {
+public struct JanusLogger {
+    private init() { }
+
     public static func initLogger() {
         rawInitLogger()
     }

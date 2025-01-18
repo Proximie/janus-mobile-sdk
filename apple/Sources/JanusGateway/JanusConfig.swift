@@ -1,14 +1,7 @@
-//
-//  JaConfig.swift
-//
-//
-//  Created by Hamza Jadid on 16/09/2024.
-//
-
 import UniFFI
 
 /// A struct describing a janus server (e.g. url, secret).
-public struct JaConfig {
+public struct JanusConfig {
     let url: String
     let capacity: UInt16
     let serverRoot: String?

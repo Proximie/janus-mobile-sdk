@@ -1,15 +1,8 @@
-//
-//  JaSession.swift
-//
-//
-//  Created by Hamza Jadid on 16/09/2024.
-//
-
 import Foundation
 import UniFFI
 
 /// Client-Server Session with Janus
-public struct JaSession {
+public struct JanusSession {
     let session: Session
 
     public var lower: Session { session }
@@ -23,9 +16,9 @@ public struct JaSession {
     /// - Returns: A general purpose plugin handle
     public func attach(
         pluginId: String, timeout: TimeInterval
-    ) async throws -> JaHandle {
+    ) async throws -> JanusHandle {
         let handle = try await session.attach(pluginId: pluginId, timeout: timeout)
-        return JaHandle(handle: handle)
+        return JanusHandle(handle: handle)
     }
 
     /// Destroy the current session

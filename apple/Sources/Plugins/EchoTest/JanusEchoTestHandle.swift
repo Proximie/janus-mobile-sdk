@@ -1,10 +1,3 @@
-//
-//  Dummy.swift
-//
-//
-//  Created by Hamza Jadid on 16/09/2024.
-//
-
 import Foundation
 import UniFFI
 
@@ -12,15 +5,15 @@ import UniFFI
 ///
 /// The purpose of this plugin is for testing. A peer attaching to this plugin will receive the same packets he
 /// sends.
-public final class JaEchoTestHandle {
+public final class JanusEchoTestHandle {
     let handle: EchotestHandle
-    public var delegate: JaEchoTestHandleDelegate?
-    private var continuation: AsyncStream<JaEchoTestEvent>.Continuation?
+    public var delegate: JanusEchoTestHandleDelegate?
+    private var continuation: AsyncStream<JanusEchoTestEvent>.Continuation?
 
-    /// Get an async stream of incoming Janus echotest events, check ``JaEchotestEvent``
+    /// Get an async stream of incoming Janus echotest events, check ``JanusEchoTestEvent``
     ///
-    /// - Returns: An async stream of incoming events as ``JaEchotestEvent``
-    public var events: AsyncStream<JaEchoTestEvent> {
+    /// - Returns: An async stream of incoming events as ``JanusEchoTestEvent``
+    public var events: AsyncStream<JanusEchoTestEvent> {
         get async {
             await handle.startEventLoop(cb: self)
 
@@ -78,7 +71,7 @@ public final class JaEchoTestHandle {
     }
 }
 
-extension JaEchoTestHandle: EchotestHandleCallback {
+extension JanusEchoTestHandle: EchotestHandleCallback {
     public func onResult(echotest: String, result: String) {
         delegate?.didReceiveEchoTestEvent(echotest: echotest, result: result)
         continuation?.yield(.result(echotest: echotest, result: result))
