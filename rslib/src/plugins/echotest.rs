@@ -1,9 +1,12 @@
+use crate::base_handle;
 use crate::error::JanusGatewayCommunicationError;
+use crate::protocol::Candidate;
 use crate::protocol::Jsep;
 use jarust::plugins::echo_test::events::EchoTestEvent;
 use jarust::plugins::echo_test::events::PluginEvent;
 use jarust::plugins::echo_test::handle::EchoTestHandle as JaEchoTestHandle;
 use jarust::plugins::echo_test::params::EchoTestStartParams;
+use serde_json::Value;
 use std::fmt::Debug;
 use std::sync::Mutex;
 use std::time::Duration;
@@ -112,13 +115,7 @@ impl EchotestHandle {
     }
 }
 
-impl Drop for EchotestHandle {
-    fn drop(&mut self) {
-        if let Ok(Some(abort_handle)) = self.abort_handle.lock().map(|mut x| x.take()) {
-            abort_handle.abort();
-        }
-    }
-}
+base_handle!(EchotestHandle);
 
 #[uniffi::export(callback_interface)]
 pub trait EchotestHandleCallback: Send + Sync + Debug {

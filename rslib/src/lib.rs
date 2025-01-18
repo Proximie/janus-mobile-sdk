@@ -7,4 +7,7 @@ pub mod plugins;
 pub mod protocol;
 pub mod session;
 
+#[macro_use]
+mod macros;
+
 uniffi::setup_scaffolding!();
