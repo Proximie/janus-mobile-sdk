@@ -709,11 +709,29 @@ public func FfiConverterTypeConnection_lower(_ value: Connection) -> UnsafeMutab
 
 public protocol EchotestHandleProtocol : AnyObject {
     
+    func completeTrickle(timeout: TimeInterval) async throws 
+    
+    func detach(timeout: TimeInterval) async throws 
+    
+    func fireAndForget(data: Data) async throws 
+    
+    func fireAndForgetWithJsep(data: Data, jsep: Jsep) async throws 
+    
+    func hangup(timeout: TimeInterval) async throws 
+    
+    func sendWaitonAck(data: Data, timeout: TimeInterval) async throws 
+    
+    func sendWaitonResult(data: Data, timeout: TimeInterval) async throws  -> Data
+    
     func start(audio: Bool?, video: Bool?, bitrate: UInt32?) async throws 
     
     func startEventLoop(cb: EchotestHandleCallback) async 
     
     func startWithJsep(audio: Bool?, video: Bool?, bitrate: UInt32?, jsep: Jsep, timeout: TimeInterval) async throws 
+    
+    func trickleCandidates(candidates: [Candidate], timeout: TimeInterval) async throws 
+    
+    func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval) async throws 
     
 }
 
@@ -767,6 +785,125 @@ open class EchotestHandle:
     
 
     
+open func completeTrickle(timeout: TimeInterval)async throws  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_echotesthandle_complete_trickle(
+                    self.uniffiClonePointer(),
+                    FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func detach(timeout: TimeInterval)async throws  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_echotesthandle_detach(
+                    self.uniffiClonePointer(),
+                    FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func fireAndForget(data: Data)async throws  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_echotesthandle_fire_and_forget(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_echotesthandle_fire_and_forget_with_jsep(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterTypeJsep.lower(jsep)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func hangup(timeout: TimeInterval)async throws  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_echotesthandle_hangup(
+                    self.uniffiClonePointer(),
+                    FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_echotesthandle_send_waiton_ack(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Data {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_echotesthandle_send_waiton_result(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterData.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
 open func start(audio: Bool?, video: Bool?, bitrate: UInt32?)async throws  {
     return
         try  await uniffiRustCallAsync(
@@ -809,6 +946,40 @@ open func startWithJsep(audio: Bool?, video: Bool?, bitrate: UInt32?, jsep: Jsep
                 uniffi_janus_gateway_fn_method_echotesthandle_start_with_jsep(
                     self.uniffiClonePointer(),
                     FfiConverterOptionBool.lower(audio),FfiConverterOptionBool.lower(video),FfiConverterOptionUInt32.lower(bitrate),FfiConverterTypeJsep.lower(jsep),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async throws  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_echotesthandle_trickle_candidates(
+                    self.uniffiClonePointer(),
+                    FfiConverterSequenceTypeCandidate.lower(candidates),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)async throws  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_echotesthandle_trickle_single_candidate(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeCandidate.lower(candidate),FfiConverterDuration.lower(timeout)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_void,
@@ -2387,6 +2558,8 @@ public protocol EchotestHandleCallback : AnyObject {
     
     func onEchoTestError(errorCode: UInt16, error: String) 
     
+    func onHandleEvent(event: GenericEvent) 
+    
 }
 
 // Magic number for the Rust proxy to call using the same mechanism as every other method,
@@ -2472,6 +2645,30 @@ fileprivate struct UniffiCallbackInterfaceEchotestHandleCallback {
                 return uniffiObj.onEchoTestError(
                      errorCode: try FfiConverterUInt16.lift(errorCode),
                      error: try FfiConverterString.lift(error)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onHandleEvent: { (
+            uniffiHandle: UInt64,
+            event: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceEchotestHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onHandleEvent(
+                     event: try FfiConverterTypeGenericEvent.lift(event)
                 )
             }
 
@@ -2907,6 +3104,27 @@ private var initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_connection_server_info() != 16292) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_complete_trickle() != 25982) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_detach() != 23878) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_fire_and_forget() != 6820) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_fire_and_forget_with_jsep() != 31372) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_hangup() != 29523) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_send_waiton_ack() != 51386) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_send_waiton_result() != 15964) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_echotesthandle_start() != 45525) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -2914,6 +3132,12 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_echotesthandle_start_with_jsep() != 18887) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_trickle_candidates() != 101) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_trickle_single_candidate() != 3746) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_handle_complete_trickle() != 24960) {
@@ -2962,6 +3186,9 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_echo_test_error() != 12056) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_handle_event() != 49029) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_handlecallback_on_plugin_event() != 21699) {

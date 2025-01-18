@@ -4,7 +4,7 @@
 import PackageDescription
 
 // Never push to remote with this flag set to true
-let useLocalFramework = false
+let useLocalFramework = true
 let releaseTag = "0.3.0"
 let releaseChecksum = "d7ca2ed0c9167c5aa4bbdabb1321f6f99f39e410ee9a61cb1eb91508a61a979b"
 

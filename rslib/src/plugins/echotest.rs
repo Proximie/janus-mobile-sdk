@@ -1,6 +1,7 @@
 use crate::base_handle;
 use crate::error::JanusGatewayCommunicationError;
 use crate::protocol::Candidate;
+use crate::protocol::GenericEvent;
 use crate::protocol::Jsep;
 use jarust::plugins::echo_test::events::EchoTestEvent;
 use jarust::plugins::echo_test::events::PluginEvent;
@@ -122,4 +123,5 @@ pub trait EchotestHandleCallback: Send + Sync + Debug {
     fn on_result(&self, echotest: String, result: String);
     fn on_result_with_jsep(&self, echotest: String, result: String, jsep: Jsep);
     fn on_echo_test_error(&self, error_code: u16, error: String);
+    fn on_handle_event(&self, event: GenericEvent);
 }
