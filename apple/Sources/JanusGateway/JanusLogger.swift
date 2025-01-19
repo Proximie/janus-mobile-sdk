@@ -1,4 +1,4 @@
-import UniFFI
+import JanusGatewayBindings
 
 /// The Logger used in JanusGateway
 public struct JanusLogger {

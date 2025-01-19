@@ -1,5 +1,5 @@
 import Foundation
-import UniFFI
+import JanusGatewayBindings
 
 /// EchoTest plugin handle,
 ///

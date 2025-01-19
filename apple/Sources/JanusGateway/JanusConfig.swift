@@ -1,4 +1,4 @@
-import UniFFI
+import JanusGatewayBindings
 
 /// A struct describing a janus server (e.g. url, secret).
 public struct JanusConfig {

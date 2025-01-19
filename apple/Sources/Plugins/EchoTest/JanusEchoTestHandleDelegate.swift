@@ -1,4 +1,4 @@
-import UniFFI
+import JanusGatewayBindings
 
 public protocol JanusEchoTestHandleDelegate {
     func didReceiveEchoTestEvent(echotest: String, result: String)

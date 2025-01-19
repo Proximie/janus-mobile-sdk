@@ -4,7 +4,7 @@
 import PackageDescription
 
 // Never push to remote with this flag set to true
-let useLocalFramework = true
+let useLocalFramework = false
 let releaseTag = "0.3.0"
 let releaseChecksum = "d7ca2ed0c9167c5aa4bbdabb1321f6f99f39e410ee9a61cb1eb91508a61a979b"
 
@@ -32,7 +32,7 @@ let package = Package(
         binaryTarget,
         .target(
             name: "JanusGateway",
-            dependencies: [.target(name: "UniFFI")],
+            dependencies: [.target(name: "JanusGatewayBindings")],
             path: "apple/Sources/JanusGateway",
             resources: [
                 .process("Resources/PrivacyInfo.xcprivacy")
@@ -41,7 +41,7 @@ let package = Package(
         .target(
             name: "JanusGatewayPlugins",
             dependencies: [
-                .target(name: "UniFFI"),
+                .target(name: "JanusGatewayBindings"),
                 .target(name: "JanusGateway")
             ],
             path: "apple/Sources/Plugins",
@@ -50,9 +50,9 @@ let package = Package(
             ]
         ),
         .target(
-            name: "UniFFI",
+            name: "JanusGatewayBindings",
             dependencies: [.target(name: "JanusGatewayFFI")],
-            path: "apple/Sources/UniFFI"
+            path: "apple/Sources/Bindings"
         ),
         .testTarget(
             name: "JanusGatewayTests",

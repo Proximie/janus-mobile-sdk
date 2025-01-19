@@ -1,4 +1,4 @@
-import UniFFI
+import JanusGatewayBindings
 
 /// Asynchronous incoming event type
 public enum JanusEchoTestEvent {

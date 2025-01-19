@@ -1,5 +1,5 @@
 import Foundation
-import UniFFI
+import JanusGatewayBindings
 
 public enum JanusHandleEvent {
     case plugin(Data)

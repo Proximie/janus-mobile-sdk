@@ -1,5 +1,5 @@
 import Foundation
-import UniFFI
+import JanusGatewayBindings
 
 /// General purpose plugin handle
 public final class JanusHandle {

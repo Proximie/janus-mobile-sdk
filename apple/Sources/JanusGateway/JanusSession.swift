@@ -1,5 +1,5 @@
 import Foundation
-import UniFFI
+import JanusGatewayBindings
 
 /// Client-Server Session with Janus
 public struct JanusSession {

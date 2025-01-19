@@ -1,5 +1,5 @@
 import Foundation
-import UniFFI
+import JanusGatewayBindings
 
 /// Connection with a Janus server
 public struct JanusConnection {
