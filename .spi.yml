@@ -1,5 +1,6 @@
 version: 1
 builder:
   configs:
-    - documentation_targets: [JanusGateway, JanusGatewayPlugins]
+    - documentation_targets:
+        [JanusGateway, JanusGatewayPlugins, JanusGatewayBindings]
       platform: ios
