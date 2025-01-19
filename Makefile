@@ -42,8 +42,8 @@ apple_generate_ffi:
 		--library target/aarch64-apple-ios/release/lib$(LIBNAME).dylib \
 		--language swift \
 		--out-dir target/uniffi-xcframework-staging
-	@mkdir -p ./apple/Sources/UniFFI/
-	@mv target/uniffi-xcframework-staging/*.swift ./apple/Sources/UniFFI/
+	@mkdir -p ./apple/Sources/Bindings/
+	@mv target/uniffi-xcframework-staging/*.swift ./apple/Sources/Bindings/
 	@mv target/uniffi-xcframework-staging/$(MODULENAME)FFI.modulemap target/uniffi-xcframework-staging/module.modulemap
 
 apple_create_fat_simulator_lib:
@@ -75,6 +75,7 @@ apple_gh_release:
 		version=$$(cargo metadata --format-version 1 | jq -r '.packages[] | select(.name=="rslib") .version'); \
 		git checkout -b release/$$version-$$shortcommit; \
 		git add ./Package.swift; \
+		git add ./rslib/Cargo.toml; \
 		git commit -m "Update Package.swift for $$version release"; \
 		git tag -a $$version -m "$$version"; \
 		git push origin HEAD; \
