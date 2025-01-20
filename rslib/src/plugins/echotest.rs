@@ -104,8 +104,14 @@ impl EchotestHandle {
                     PluginEvent::EchoTestEvent(EchoTestEvent::Error { error_code, error }) => {
                         cb.on_echo_test_error(error_code, error)
                     }
-                    PluginEvent::EchoTestEvent(EchoTestEvent::Other(_))
-                    | PluginEvent::GenericEvent(_) => {}
+                    PluginEvent::EchoTestEvent(EchoTestEvent::Other(data)) => {
+                        if let Ok(data) = serde_json::to_vec(&data) {
+                            cb.on_other(data);
+                        }
+                    }
+                    PluginEvent::GenericEvent(generic_event) => {
+                        cb.on_handle_event(generic_event.into());
+                    }
                 }
             }
         });
@@ -124,4 +130,5 @@ pub trait EchotestHandleCallback: Send + Sync + Debug {
     fn on_result_with_jsep(&self, echotest: String, result: String, jsep: Jsep);
     fn on_echo_test_error(&self, error_code: u16, error: String);
     fn on_handle_event(&self, event: GenericEvent);
+    fn on_other(&self, data: Vec<u8>);
 }
