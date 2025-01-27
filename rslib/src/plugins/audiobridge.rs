@@ -3,6 +3,7 @@ use crate::error::JanusGatewayCommunicationError;
 use crate::protocol::Candidate;
 use crate::protocol::GenericEvent;
 use crate::protocol::Jsep;
+use jarust::plugins::audio_bridge::events::AudioBridgeEvent;
 use jarust::plugins::audio_bridge::events::PluginEvent;
 use jarust::plugins::audio_bridge::handle::AudioBridgeHandle as JaAudioBridgeHandle;
 use serde_json::Value;
@@ -42,6 +43,18 @@ impl AudioBridgeHandle {
         let join_handle = tokio::spawn(async move {
             while let Some(event) = receiver.recv().await {
                 match event {
+                    PluginEvent::GenericEvent(generic_event) => {
+                        cb.on_handle_event(generic_event.into());
+                    }
+                    PluginEvent::AudioBridgeEvent(AudioBridgeEvent::Error {
+                        error_code,
+                        error,
+                    }) => cb.on_audio_bridge_error(error_code, error),
+                    PluginEvent::AudioBridgeEvent(AudioBridgeEvent::Other(data)) => {
+                        if let Ok(data) = serde_json::to_vec(&data) {
+                            cb.on_other(data);
+                        }
+                    }
                     _ => {}
                 }
             }
@@ -58,4 +71,6 @@ base_handle!(AudioBridgeHandle);
 #[uniffi::export(callback_interface)]
 pub trait AudioBridgeHandleCallback: Send + Sync + Debug {
     fn on_handle_event(&self, event: GenericEvent);
+    fn on_audio_bridge_error(&self, error_code: u16, error: String);
+    fn on_other(&self, data: Vec<u8>);
 }
