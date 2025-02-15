@@ -4400,6 +4400,16 @@ extension JsepType: Equatable, Hashable {}
 
 public protocol AudioBridgeHandleCallback: AnyObject {
     
+    func onRoomJoinedWithJsep(id: JanusId, room: JanusId, participants: [AudioBridgeParticipant], jsep: Jsep) 
+    
+    func onRoomJoined(id: JanusId, room: JanusId, participants: [AudioBridgeParticipant]) 
+    
+    func onParticipantsJoined(room: JanusId, participants: [AudioBridgeParticipant]) 
+    
+    func onParticipantsUpdated(room: JanusId, participants: [AudioBridgeParticipant]) 
+    
+    func onParticipantLeft(room: JanusId, participantId: JanusId) 
+    
     func onHandleEvent(event: GenericEvent) 
     
     func onAudioBridgeError(errorCode: UInt16, error: String) 
@@ -4424,6 +4434,142 @@ fileprivate struct UniffiCallbackInterfaceAudioBridgeHandleCallback {
     // This creates 1-element array, since this seems to be the only way to construct a const
     // pointer that we can pass to the Rust code.
     static let vtable: [UniffiVTableCallbackInterfaceAudioBridgeHandleCallback] = [UniffiVTableCallbackInterfaceAudioBridgeHandleCallback(
+        onRoomJoinedWithJsep: { (
+            uniffiHandle: UInt64,
+            id: RustBuffer,
+            room: RustBuffer,
+            participants: RustBuffer,
+            jsep: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceAudioBridgeHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onRoomJoinedWithJsep(
+                     id: try FfiConverterTypeJanusId_lift(id),
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     participants: try FfiConverterSequenceTypeAudioBridgeParticipant.lift(participants),
+                     jsep: try FfiConverterTypeJsep_lift(jsep)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onRoomJoined: { (
+            uniffiHandle: UInt64,
+            id: RustBuffer,
+            room: RustBuffer,
+            participants: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceAudioBridgeHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onRoomJoined(
+                     id: try FfiConverterTypeJanusId_lift(id),
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     participants: try FfiConverterSequenceTypeAudioBridgeParticipant.lift(participants)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onParticipantsJoined: { (
+            uniffiHandle: UInt64,
+            room: RustBuffer,
+            participants: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceAudioBridgeHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onParticipantsJoined(
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     participants: try FfiConverterSequenceTypeAudioBridgeParticipant.lift(participants)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onParticipantsUpdated: { (
+            uniffiHandle: UInt64,
+            room: RustBuffer,
+            participants: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceAudioBridgeHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onParticipantsUpdated(
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     participants: try FfiConverterSequenceTypeAudioBridgeParticipant.lift(participants)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onParticipantLeft: { (
+            uniffiHandle: UInt64,
+            room: RustBuffer,
+            participantId: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceAudioBridgeHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onParticipantLeft(
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     participantId: try FfiConverterTypeJanusId_lift(participantId)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
         onHandleEvent: { (
             uniffiHandle: UInt64,
             event: RustBuffer,
@@ -5544,13 +5690,28 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_session_destory() != 62073) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_handle_event() != 29862) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_room_joined_with_jsep() != 4510) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_audio_bridge_error() != 3044) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_room_joined() != 30462) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_other() != 24336) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_participants_joined() != 24256) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_participants_updated() != 45805) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_participant_left() != 59172) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_handle_event() != 30804) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_audio_bridge_error() != 32404) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_other() != 48333) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_result() != 12927) {

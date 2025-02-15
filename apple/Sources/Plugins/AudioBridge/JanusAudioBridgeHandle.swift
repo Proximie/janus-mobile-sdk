@@ -1,11 +1,28 @@
+import Combine
 import Foundation
 import JanusGatewayBindings
 
 public final class JanusAudioBridgeHandle {
+    private let sharedPublisher: AnyPublisher<JanusAudioBridgeEvent, Never>
+    private let subject = PassthroughSubject<JanusAudioBridgeEvent, Never>()
+    private var cancellables = Set<AnyCancellable>()
     let handle: AudioBridgeHandle
 
     init(handle: AudioBridgeHandle) {
         self.handle = handle
+        self.sharedPublisher = subject
+            .share()
+            .eraseToAnyPublisher()
+    }
+
+    public func events() async -> AsyncStream<JanusAudioBridgeEvent> {
+        let stream = AsyncStream<JanusAudioBridgeEvent>.makeStream()
+
+        sharedPublisher
+            .sink { stream.continuation.yield($0) }
+            .store(in: &cancellables)
+
+        return stream.stream
     }
 
     public func createRoom(
@@ -113,4 +130,65 @@ public final class JanusAudioBridgeHandle {
     public func completeTrickle(timeout: TimeInterval) async throws {
         try await handle.completeTrickle(timeout: timeout)
     }
+}
+
+extension JanusAudioBridgeHandle: AudioBridgeHandleCallback {
+    public func onRoomJoinedWithJsep(
+        id: JanusId,
+        room: JanusId,
+        participants: [AudioBridgeParticipant],
+        jsep: Jsep
+    ) {
+        subject
+            .send(
+                .roomJoinedWithJsep(
+                    id: id,
+                    room: room,
+                    participants: participants,
+                    jsep: jsep
+                )
+            )
+    }
+
+    public func onRoomJoined(
+        id: JanusId,
+        room: JanusId,
+        participants: [AudioBridgeParticipant]
+    ) {
+        subject
+            .send(.roomJoined(id: id, room: room, participants: participants))
+    }
+
+    public func onParticipantsJoined(
+        room: JanusId,
+        participants: [AudioBridgeParticipant]
+    ) {
+        subject
+            .send(.participantsJoined(room: room, participants: participants))
+    }
+
+    public func onParticipantsUpdated(
+        room: JanusId,
+        participants: [AudioBridgeParticipant]
+    ) {
+        subject
+            .send(.participantsUpdated(room: room, participants: participants))
+    }
+
+    public func onParticipantLeft(
+        room: JanusId,
+        participantId: JanusId
+    ) {
+        subject.send(.participantLeft(room: room, participantId: participantId))
+    }
+
+    public func onHandleEvent(event: GenericEvent) {
+        subject.send(.generic(event))
+    }
+
+    public func onAudioBridgeError(errorCode: UInt16, error: String) {
+        subject.send(.error(errorCode: errorCode, error: error))
+    }
+
+    public func onOther(data: Data) { }
 }

@@ -1,6 +1,7 @@
 use super::params::AudioBridgeCreateParams;
 use super::params::AudioBridgeJoinParamsOptional;
 use super::responses::AudioBridgeListParticipantsRsp;
+use super::responses::AudioBridgeParticipant;
 use super::responses::AudioBridgeRoomCreatedRsp;
 use crate::base_handle;
 use crate::error::JanusGatewayCommunicationError;
@@ -63,6 +64,29 @@ impl AudioBridgeHandle {
                             cb.on_other(data);
                         }
                     }
+                    PluginEvent::AudioBridgeEvent(AudioBridgeEvent::RoomJoined {
+                        id,
+                        room,
+                        participants,
+                    }) => cb.on_room_joined(id, room, participants),
+                    PluginEvent::AudioBridgeEvent(AudioBridgeEvent::RoomJoinedWithJsep {
+                        id,
+                        room,
+                        participants,
+                        jsep,
+                    }) => cb.on_room_joined_with_jsep(id, room, participants, jsep),
+                    PluginEvent::AudioBridgeEvent(AudioBridgeEvent::ParticipantsJoined {
+                        room,
+                        participants,
+                    }) => cb.on_participants_joined(room, participants),
+                    PluginEvent::AudioBridgeEvent(AudioBridgeEvent::ParticipantsUpdated {
+                        room,
+                        participants,
+                    }) => cb.on_participants_updated(room, participants),
+                    PluginEvent::AudioBridgeEvent(AudioBridgeEvent::ParticipantLeft {
+                        room,
+                        leaving,
+                    }) => cb.on_participant_left(room, leaving),
                     _ => {}
                 }
             }
@@ -151,6 +175,17 @@ base_handle!(AudioBridgeHandle);
 
 #[uniffi::export(callback_interface)]
 pub trait AudioBridgeHandleCallback: Send + Sync + Debug {
+    fn on_room_joined_with_jsep(
+        &self,
+        id: JanusId,
+        room: JanusId,
+        participants: Vec<AudioBridgeParticipant>,
+        jsep: Jsep,
+    );
+    fn on_room_joined(&self, id: JanusId, room: JanusId, participants: Vec<AudioBridgeParticipant>);
+    fn on_participants_joined(&self, room: JanusId, participants: Vec<AudioBridgeParticipant>);
+    fn on_participants_updated(&self, room: JanusId, participants: Vec<AudioBridgeParticipant>);
+    fn on_participant_left(&self, room: JanusId, participant_id: JanusId);
     fn on_handle_event(&self, event: GenericEvent);
     fn on_audio_bridge_error(&self, error_code: u16, error: String);
     fn on_other(&self, data: Vec<u8>);
