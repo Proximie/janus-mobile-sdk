@@ -1,3 +1,5 @@
+use super::params::AudioBridgeCreateParams;
+use super::responses::AudioBridgeRoomCreatedRsp;
 use crate::base_handle;
 use crate::error::JanusGatewayCommunicationError;
 use crate::protocol::Candidate;
@@ -44,7 +46,7 @@ impl AudioBridgeHandle {
             while let Some(event) = receiver.recv().await {
                 match event {
                     PluginEvent::GenericEvent(generic_event) => {
-                        cb.on_handle_event(generic_event.into());
+                        cb.on_handle_event(generic_event);
                     }
                     PluginEvent::AudioBridgeEvent(AudioBridgeEvent::Error {
                         error_code,
@@ -62,6 +64,19 @@ impl AudioBridgeHandle {
 
         if let Ok(mut abort_handle) = self.abort_handle.lock() {
             *abort_handle = Some(join_handle.abort_handle());
+        }
+    }
+
+    pub async fn create_room(
+        &self,
+        params: AudioBridgeCreateParams,
+        timeout: Duration,
+    ) -> Result<AudioBridgeRoomCreatedRsp, JanusGatewayCommunicationError> {
+        match self.inner.create_room_with_config(params, timeout).await {
+            Ok(rsp) => Ok(rsp),
+            Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            }),
         }
     }
 }

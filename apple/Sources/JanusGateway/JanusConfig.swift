@@ -4,7 +4,7 @@ import JanusGatewayBindings
 public struct JanusConfig {
     let url: String
     let capacity: UInt16
-    let serverRoot: String?
+    let serverRoot: String
     let apisecret: String?
 
     var lower: Config {
@@ -24,7 +24,7 @@ public struct JanusConfig {
     public init(
         url: String,
         capacity: UInt16,
-        serverRoot: String? = nil,
+        serverRoot: String = "janus",
         apisecret: String? = nil
     ) {
         self.url = url

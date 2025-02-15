@@ -3,5 +3,6 @@ pub struct Config {
     pub url: String,
     pub capacity: u16,
     pub apisecret: Option<String>,
-    pub server_root: Option<String>,
+    #[uniffi(default = "janus")]
+    pub server_root: String,
 }

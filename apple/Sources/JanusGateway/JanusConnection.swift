@@ -42,7 +42,7 @@ public struct JanusConnection {
     ///     - timeout: The maximum amount of time to wait on an acknowledgment before we consider
     ///     the request as failed or times out.
     /// - Returns: Janus server info
-    public func serverInfo(timeout: TimeInterval) async throws -> ServerInfo {
+    public func serverInfo(timeout: TimeInterval) async throws -> ServerInfoRsp {
         return try await connection.serverInfo(timeout: timeout)
     }
 }

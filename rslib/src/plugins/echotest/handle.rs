@@ -35,20 +35,9 @@ impl EchotestHandle {
 impl EchotestHandle {
     pub async fn start(
         &self,
-        audio: Option<bool>,
-        video: Option<bool>,
-        bitrate: Option<u32>,
+        params: EchoTestStartParams,
     ) -> Result<(), JanusGatewayCommunicationError> {
-        if let Err(why) = self
-            .inner
-            .start(EchoTestStartParams {
-                audio,
-                video,
-                bitrate,
-                ..Default::default()
-            })
-            .await
-        {
+        if let Err(why) = self.inner.start(params).await {
             return Err(JanusGatewayCommunicationError::SendFailure {
                 reason: why.to_string(),
             });
@@ -58,26 +47,11 @@ impl EchotestHandle {
 
     pub async fn start_with_jsep(
         &self,
-        audio: Option<bool>,
-        video: Option<bool>,
-        bitrate: Option<u32>,
+        params: EchoTestStartParams,
         jsep: Jsep,
         timeout: Duration,
     ) -> Result<(), JanusGatewayCommunicationError> {
-        if let Err(why) = self
-            .inner
-            .start_with_jsep(
-                EchoTestStartParams {
-                    audio,
-                    video,
-                    bitrate,
-                    ..Default::default()
-                },
-                jsep.into(),
-                timeout,
-            )
-            .await
-        {
+        if let Err(why) = self.inner.start_with_jsep(params, jsep, timeout).await {
             return Err(JanusGatewayCommunicationError::SendFailure {
                 reason: why.to_string(),
             });
@@ -100,7 +74,7 @@ impl EchotestHandle {
                         echotest,
                         result,
                         jsep,
-                    }) => cb.on_result_with_jsep(echotest, result, jsep.into()),
+                    }) => cb.on_result_with_jsep(echotest, result, jsep),
                     PluginEvent::EchoTestEvent(EchoTestEvent::Error { error_code, error }) => {
                         cb.on_echo_test_error(error_code, error)
                     }
@@ -110,7 +84,7 @@ impl EchotestHandle {
                         }
                     }
                     PluginEvent::GenericEvent(generic_event) => {
-                        cb.on_handle_event(generic_event.into());
+                        cb.on_handle_event(generic_event);
                     }
                 }
             }

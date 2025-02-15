@@ -48,7 +48,7 @@ impl Handle {
                             }
                         }
                         JaHandleEvent::GenericEvent(generic_event) => {
-                            cb.on_handle_event(generic_event.into());
+                            cb.on_handle_event(generic_event);
                         }
                     }
                 };

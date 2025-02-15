@@ -33,16 +33,8 @@ public final class JanusEchoTestHandle {
     ///     - audio: enable/disable sending back audio
     ///     - video: enable/disable sending back video
     ///     - bitrate: to cap bitrate at the provided value
-    public func start(
-        audio: Bool = false,
-        video: Bool = false,
-        bitrate: UInt32? = nil
-    ) async throws {
-        try await handle.start(
-            audio: audio,
-            video: video,
-            bitrate: bitrate
-        )
+    public func start(params: EchoTestStartParams) async throws {
+        try await handle.start(params: params)
     }
 
     /// Start the testing
@@ -55,16 +47,12 @@ public final class JanusEchoTestHandle {
     ///     - timeout: The maximum amount of time to wait on an acknowledgment before we consider
     ///     the request as failed or times out
     public func start(
-        audio: Bool = false,
-        video: Bool = false,
-        bitrate: UInt32? = nil,
+        params: EchoTestStartParams,
         jsep: Jsep,
         timeout: TimeInterval
     ) async throws {
         try await handle.startWithJsep(
-            audio: audio,
-            video: video,
-            bitrate: bitrate,
+            params: params,
             jsep: jsep,
             timeout: timeout
         )
@@ -168,4 +156,6 @@ extension JanusEchoTestHandle: EchotestHandleCallback {
     public func onHandleEvent(event: GenericEvent) {
         continuation?.yield(.generic(event))
     }
+
+    public func onOther(data: Data) { }
 }

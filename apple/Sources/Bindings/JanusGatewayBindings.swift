@@ -281,7 +281,7 @@ private func makeRustCall<T, E: Swift.Error>(
     _ callback: (UnsafeMutablePointer<RustCallStatus>) -> T,
     errorHandler: ((RustBuffer) throws -> E)?
 ) throws -> T {
-    uniffiEnsureInitialized()
+    uniffiEnsureJanusGatewayInitialized()
     var callStatus = RustCallStatus.init()
     let returnedVal = callback(&callStatus)
     try uniffiCheckCallStatus(callStatus: callStatus, errorHandler: errorHandler)
@@ -352,9 +352,10 @@ private func uniffiTraitInterfaceCallWithError<T, E>(
         callStatus.pointee.errorBuf = FfiConverterString.lower(String(describing: error))
     }
 }
-fileprivate class UniffiHandleMap<T> {
-    private var map: [UInt64: T] = [:]
+fileprivate final class UniffiHandleMap<T>: @unchecked Sendable {
+    // All mutation happens with this lock held, which is why we implement @unchecked Sendable.
     private let lock = NSLock()
+    private var map: [UInt64: T] = [:]
     private var currentHandle: UInt64 = 1
 
     func insert(obj: T) -> UInt64 {
@@ -424,6 +425,22 @@ fileprivate struct FfiConverterUInt32: FfiConverterPrimitive {
     }
 
     public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(value))
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterInt32: FfiConverterPrimitive {
+    typealias FfiType = Int32
+    typealias SwiftType = Int32
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Int32 {
+        return try lift(readInt(&buf))
+    }
+
+    public static func write(_ value: Int32, into buf: inout [UInt8]) {
         writeInt(&buf, lower(value))
     }
 }
@@ -558,16 +575,334 @@ fileprivate struct FfiConverterDuration: FfiConverterRustBuffer {
 
 
 
-public protocol ConnectionProtocol : AnyObject {
+public protocol AudioBridgeHandleProtocol: AnyObject {
+    
+    func completeTrickle(timeout: TimeInterval) async throws 
+    
+    func createRoom(params: AudioBridgeCreateParams, timeout: TimeInterval) async throws  -> AudioBridgeRoomCreatedRsp
+    
+    func detach(timeout: TimeInterval) async throws 
+    
+    func fireAndForget(data: Data) async throws 
+    
+    func fireAndForgetWithJsep(data: Data, jsep: Jsep) async throws 
+    
+    func hangup(timeout: TimeInterval) async throws 
+    
+    func sendWaitonAck(data: Data, timeout: TimeInterval) async throws 
+    
+    func sendWaitonResult(data: Data, timeout: TimeInterval) async throws  -> Data
+    
+    func startEventLoop(cb: AudioBridgeHandleCallback) async 
+    
+    func trickleCandidates(candidates: [Candidate], timeout: TimeInterval) async throws 
+    
+    func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval) async throws 
+    
+}
+open class AudioBridgeHandle: AudioBridgeHandleProtocol, @unchecked Sendable {
+    fileprivate let pointer: UnsafeMutableRawPointer!
+
+    /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public struct NoPointer {
+        public init() {}
+    }
+
+    // TODO: We'd like this to be `private` but for Swifty reasons,
+    // we can't implement `FfiConverter` without making this `required` and we can't
+    // make it `required` without making it `public`.
+    required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
+        self.pointer = pointer
+    }
+
+    // This constructor can be used to instantiate a fake object.
+    // - Parameter noPointer: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    //
+    // - Warning:
+    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing [Pointer] the FFI lower functions will crash.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public init(noPointer: NoPointer) {
+        self.pointer = nil
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public func uniffiClonePointer() -> UnsafeMutableRawPointer {
+        return try! rustCall { uniffi_janus_gateway_fn_clone_audiobridgehandle(self.pointer, $0) }
+    }
+    // No primary constructor declared for this class.
+
+    deinit {
+        guard let pointer = pointer else {
+            return
+        }
+
+        try! rustCall { uniffi_janus_gateway_fn_free_audiobridgehandle(pointer, $0) }
+    }
+
+    
+
+    
+open func completeTrickle(timeout: TimeInterval)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_complete_trickle(
+                    self.uniffiClonePointer(),
+                    FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func createRoom(params: AudioBridgeCreateParams, timeout: TimeInterval)async throws  -> AudioBridgeRoomCreatedRsp  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_create_room(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeAudioBridgeCreateParams_lower(params),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterTypeAudioBridgeRoomCreatedRsp_lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func detach(timeout: TimeInterval)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_detach(
+                    self.uniffiClonePointer(),
+                    FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func fireAndForget(data: Data)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_fire_and_forget(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_fire_and_forget_with_jsep(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func hangup(timeout: TimeInterval)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_hangup(
+                    self.uniffiClonePointer(),
+                    FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_send_waiton_ack(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Data  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_send_waiton_result(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterData.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func startEventLoop(cb: AudioBridgeHandleCallback)async   {
+    return
+        try!  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_start_event_loop(
+                    self.uniffiClonePointer(),
+                    FfiConverterCallbackInterfaceAudioBridgeHandleCallback_lower(cb)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: nil
+            
+        )
+}
+    
+open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_trickle_candidates(
+                    self.uniffiClonePointer(),
+                    FfiConverterSequenceTypeCandidate.lower(candidates),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_trickle_single_candidate(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeCandidate_lower(candidate),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeAudioBridgeHandle: FfiConverter {
+
+    typealias FfiType = UnsafeMutableRawPointer
+    typealias SwiftType = AudioBridgeHandle
+
+    public static func lift(_ pointer: UnsafeMutableRawPointer) throws -> AudioBridgeHandle {
+        return AudioBridgeHandle(unsafeFromRawPointer: pointer)
+    }
+
+    public static func lower(_ value: AudioBridgeHandle) -> UnsafeMutableRawPointer {
+        return value.uniffiClonePointer()
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AudioBridgeHandle {
+        let v: UInt64 = try readInt(&buf)
+        // The Rust code won't compile if a pointer won't fit in a UInt64.
+        // We have to go via `UInt` because that's the thing that's the size of a pointer.
+        let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: v))
+        if (ptr == nil) {
+            throw UniffiInternalError.unexpectedNullPointer
+        }
+        return try lift(ptr!)
+    }
+
+    public static func write(_ value: AudioBridgeHandle, into buf: inout [UInt8]) {
+        // This fiddling is because `Int` is the thing that's the same size as a pointer.
+        // The Rust code won't compile if a pointer won't fit in a `UInt64`.
+        writeInt(&buf, UInt64(bitPattern: Int64(Int(bitPattern: lower(value)))))
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeHandle_lift(_ pointer: UnsafeMutableRawPointer) throws -> AudioBridgeHandle {
+    return try FfiConverterTypeAudioBridgeHandle.lift(pointer)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeHandle_lower(_ value: AudioBridgeHandle) -> UnsafeMutableRawPointer {
+    return FfiConverterTypeAudioBridgeHandle.lower(value)
+}
+
+
+
+
+
+
+public protocol ConnectionProtocol: AnyObject {
     
     func createSession(kaInterval: UInt32, timeout: TimeInterval) async throws  -> Session
     
-    func serverInfo(timeout: TimeInterval) async throws  -> ServerInfo
+    func serverInfo(timeout: TimeInterval) async throws  -> ServerInfoRsp
     
 }
-
-open class Connection:
-    ConnectionProtocol {
+open class Connection: ConnectionProtocol, @unchecked Sendable {
     fileprivate let pointer: UnsafeMutableRawPointer!
 
     /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
@@ -616,7 +951,7 @@ open class Connection:
     
 
     
-open func createSession(kaInterval: UInt32, timeout: TimeInterval)async throws  -> Session {
+open func createSession(kaInterval: UInt32, timeout: TimeInterval)async throws  -> Session  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -628,12 +963,12 @@ open func createSession(kaInterval: UInt32, timeout: TimeInterval)async throws  
             pollFunc: ffi_janus_gateway_rust_future_poll_pointer,
             completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
             freeFunc: ffi_janus_gateway_rust_future_free_pointer,
-            liftFunc: FfiConverterTypeSession.lift,
+            liftFunc: FfiConverterTypeSession_lift,
             errorHandler: FfiConverterTypeJanusGatewaySessionError.lift
         )
 }
     
-open func serverInfo(timeout: TimeInterval)async throws  -> ServerInfo {
+open func serverInfo(timeout: TimeInterval)async throws  -> ServerInfoRsp  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -645,13 +980,14 @@ open func serverInfo(timeout: TimeInterval)async throws  -> ServerInfo {
             pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
-            liftFunc: FfiConverterTypeServerInfo.lift,
+            liftFunc: FfiConverterTypeServerInfoRsp_lift,
             errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
         )
 }
     
 
 }
+
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -688,8 +1024,6 @@ public struct FfiConverterTypeConnection: FfiConverter {
 }
 
 
-
-
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
@@ -707,7 +1041,9 @@ public func FfiConverterTypeConnection_lower(_ value: Connection) -> UnsafeMutab
 
 
 
-public protocol EchotestHandleProtocol : AnyObject {
+
+
+public protocol EchotestHandleProtocol: AnyObject {
     
     func completeTrickle(timeout: TimeInterval) async throws 
     
@@ -723,20 +1059,18 @@ public protocol EchotestHandleProtocol : AnyObject {
     
     func sendWaitonResult(data: Data, timeout: TimeInterval) async throws  -> Data
     
-    func start(audio: Bool?, video: Bool?, bitrate: UInt32?) async throws 
+    func start(params: EchoTestStartParams) async throws 
     
     func startEventLoop(cb: EchotestHandleCallback) async 
     
-    func startWithJsep(audio: Bool?, video: Bool?, bitrate: UInt32?, jsep: Jsep, timeout: TimeInterval) async throws 
+    func startWithJsep(params: EchoTestStartParams, jsep: Jsep, timeout: TimeInterval) async throws 
     
     func trickleCandidates(candidates: [Candidate], timeout: TimeInterval) async throws 
     
     func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval) async throws 
     
 }
-
-open class EchotestHandle:
-    EchotestHandleProtocol {
+open class EchotestHandle: EchotestHandleProtocol, @unchecked Sendable {
     fileprivate let pointer: UnsafeMutableRawPointer!
 
     /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
@@ -785,7 +1119,7 @@ open class EchotestHandle:
     
 
     
-open func completeTrickle(timeout: TimeInterval)async throws  {
+open func completeTrickle(timeout: TimeInterval)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -802,7 +1136,7 @@ open func completeTrickle(timeout: TimeInterval)async throws  {
         )
 }
     
-open func detach(timeout: TimeInterval)async throws  {
+open func detach(timeout: TimeInterval)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -819,7 +1153,7 @@ open func detach(timeout: TimeInterval)async throws  {
         )
 }
     
-open func fireAndForget(data: Data)async throws  {
+open func fireAndForget(data: Data)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -836,13 +1170,13 @@ open func fireAndForget(data: Data)async throws  {
         )
 }
     
-open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws  {
+open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_fire_and_forget_with_jsep(
                     self.uniffiClonePointer(),
-                    FfiConverterData.lower(data),FfiConverterTypeJsep.lower(jsep)
+                    FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_void,
@@ -853,7 +1187,7 @@ open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws  {
         )
 }
     
-open func hangup(timeout: TimeInterval)async throws  {
+open func hangup(timeout: TimeInterval)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -870,7 +1204,7 @@ open func hangup(timeout: TimeInterval)async throws  {
         )
 }
     
-open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  {
+open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -887,7 +1221,7 @@ open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  {
         )
 }
     
-open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Data {
+open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Data  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -904,13 +1238,13 @@ open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Da
         )
 }
     
-open func start(audio: Bool?, video: Bool?, bitrate: UInt32?)async throws  {
+open func start(params: EchoTestStartParams)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_start(
                     self.uniffiClonePointer(),
-                    FfiConverterOptionBool.lower(audio),FfiConverterOptionBool.lower(video),FfiConverterOptionUInt32.lower(bitrate)
+                    FfiConverterTypeEchoTestStartParams_lower(params)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_void,
@@ -921,13 +1255,13 @@ open func start(audio: Bool?, video: Bool?, bitrate: UInt32?)async throws  {
         )
 }
     
-open func startEventLoop(cb: EchotestHandleCallback)async  {
+open func startEventLoop(cb: EchotestHandleCallback)async   {
     return
         try!  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_start_event_loop(
                     self.uniffiClonePointer(),
-                    FfiConverterCallbackInterfaceEchotestHandleCallback.lower(cb)
+                    FfiConverterCallbackInterfaceEchotestHandleCallback_lower(cb)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_void,
@@ -939,13 +1273,13 @@ open func startEventLoop(cb: EchotestHandleCallback)async  {
         )
 }
     
-open func startWithJsep(audio: Bool?, video: Bool?, bitrate: UInt32?, jsep: Jsep, timeout: TimeInterval)async throws  {
+open func startWithJsep(params: EchoTestStartParams, jsep: Jsep, timeout: TimeInterval)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_start_with_jsep(
                     self.uniffiClonePointer(),
-                    FfiConverterOptionBool.lower(audio),FfiConverterOptionBool.lower(video),FfiConverterOptionUInt32.lower(bitrate),FfiConverterTypeJsep.lower(jsep),FfiConverterDuration.lower(timeout)
+                    FfiConverterTypeEchoTestStartParams_lower(params),FfiConverterTypeJsep_lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_void,
@@ -956,7 +1290,7 @@ open func startWithJsep(audio: Bool?, video: Bool?, bitrate: UInt32?, jsep: Jsep
         )
 }
     
-open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async throws  {
+open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -973,13 +1307,13 @@ open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async
         )
 }
     
-open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)async throws  {
+open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_trickle_single_candidate(
                     self.uniffiClonePointer(),
-                    FfiConverterTypeCandidate.lower(candidate),FfiConverterDuration.lower(timeout)
+                    FfiConverterTypeCandidate_lower(candidate),FfiConverterDuration.lower(timeout)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_void,
@@ -992,6 +1326,7 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
     
 
 }
+
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -1028,8 +1363,6 @@ public struct FfiConverterTypeEchotestHandle: FfiConverter {
 }
 
 
-
-
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
@@ -1047,7 +1380,9 @@ public func FfiConverterTypeEchotestHandle_lower(_ value: EchotestHandle) -> Uns
 
 
 
-public protocol HandleProtocol : AnyObject {
+
+
+public protocol HandleProtocol: AnyObject {
     
     func completeTrickle(timeout: TimeInterval) async throws 
     
@@ -1070,9 +1405,7 @@ public protocol HandleProtocol : AnyObject {
     func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval) async throws 
     
 }
-
-open class Handle:
-    HandleProtocol {
+open class Handle: HandleProtocol, @unchecked Sendable {
     fileprivate let pointer: UnsafeMutableRawPointer!
 
     /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
@@ -1121,7 +1454,7 @@ open class Handle:
     
 
     
-open func completeTrickle(timeout: TimeInterval)async throws  {
+open func completeTrickle(timeout: TimeInterval)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -1138,7 +1471,7 @@ open func completeTrickle(timeout: TimeInterval)async throws  {
         )
 }
     
-open func detach(timeout: TimeInterval)async throws  {
+open func detach(timeout: TimeInterval)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -1155,7 +1488,7 @@ open func detach(timeout: TimeInterval)async throws  {
         )
 }
     
-open func fireAndForget(data: Data)async throws  {
+open func fireAndForget(data: Data)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -1172,13 +1505,13 @@ open func fireAndForget(data: Data)async throws  {
         )
 }
     
-open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws  {
+open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_fire_and_forget_with_jsep(
                     self.uniffiClonePointer(),
-                    FfiConverterData.lower(data),FfiConverterTypeJsep.lower(jsep)
+                    FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_void,
@@ -1189,7 +1522,7 @@ open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws  {
         )
 }
     
-open func hangup(timeout: TimeInterval)async throws  {
+open func hangup(timeout: TimeInterval)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -1206,7 +1539,7 @@ open func hangup(timeout: TimeInterval)async throws  {
         )
 }
     
-open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  {
+open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -1223,7 +1556,7 @@ open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  {
         )
 }
     
-open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Data {
+open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Data  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -1240,13 +1573,13 @@ open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Da
         )
 }
     
-open func startEventLoop(cb: HandleCallback)async  {
+open func startEventLoop(cb: HandleCallback)async   {
     return
         try!  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_start_event_loop(
                     self.uniffiClonePointer(),
-                    FfiConverterCallbackInterfaceHandleCallback.lower(cb)
+                    FfiConverterCallbackInterfaceHandleCallback_lower(cb)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_void,
@@ -1258,7 +1591,7 @@ open func startEventLoop(cb: HandleCallback)async  {
         )
 }
     
-open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async throws  {
+open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -1275,13 +1608,13 @@ open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async
         )
 }
     
-open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)async throws  {
+open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_trickle_single_candidate(
                     self.uniffiClonePointer(),
-                    FfiConverterTypeCandidate.lower(candidate),FfiConverterDuration.lower(timeout)
+                    FfiConverterTypeCandidate_lower(candidate),FfiConverterDuration.lower(timeout)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_void,
@@ -1294,6 +1627,7 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
     
 
 }
+
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -1330,8 +1664,6 @@ public struct FfiConverterTypeHandle: FfiConverter {
 }
 
 
-
-
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
@@ -1349,18 +1681,20 @@ public func FfiConverterTypeHandle_lower(_ value: Handle) -> UnsafeMutableRawPoi
 
 
 
-public protocol SessionProtocol : AnyObject {
+
+
+public protocol SessionProtocol: AnyObject {
     
     func attach(pluginId: String, timeout: TimeInterval) async throws  -> Handle
+    
+    func attachAudioBridge(timeout: TimeInterval) async throws  -> AudioBridgeHandle
     
     func attachEchoTest(timeout: TimeInterval) async throws  -> EchotestHandle
     
     func destory(timeout: TimeInterval) async throws 
     
 }
-
-open class Session:
-    SessionProtocol {
+open class Session: SessionProtocol, @unchecked Sendable {
     fileprivate let pointer: UnsafeMutableRawPointer!
 
     /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
@@ -1409,7 +1743,7 @@ open class Session:
     
 
     
-open func attach(pluginId: String, timeout: TimeInterval)async throws  -> Handle {
+open func attach(pluginId: String, timeout: TimeInterval)async throws  -> Handle  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -1421,12 +1755,29 @@ open func attach(pluginId: String, timeout: TimeInterval)async throws  -> Handle
             pollFunc: ffi_janus_gateway_rust_future_poll_pointer,
             completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
             freeFunc: ffi_janus_gateway_rust_future_free_pointer,
-            liftFunc: FfiConverterTypeHandle.lift,
+            liftFunc: FfiConverterTypeHandle_lift,
             errorHandler: FfiConverterTypeJanusGatewayHandleError.lift
         )
 }
     
-open func attachEchoTest(timeout: TimeInterval)async throws  -> EchotestHandle {
+open func attachAudioBridge(timeout: TimeInterval)async throws  -> AudioBridgeHandle  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_session_attach_audio_bridge(
+                    self.uniffiClonePointer(),
+                    FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_pointer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
+            freeFunc: ffi_janus_gateway_rust_future_free_pointer,
+            liftFunc: FfiConverterTypeAudioBridgeHandle_lift,
+            errorHandler: FfiConverterTypeJanusGatewayHandleError.lift
+        )
+}
+    
+open func attachEchoTest(timeout: TimeInterval)async throws  -> EchotestHandle  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -1438,12 +1789,12 @@ open func attachEchoTest(timeout: TimeInterval)async throws  -> EchotestHandle {
             pollFunc: ffi_janus_gateway_rust_future_poll_pointer,
             completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
             freeFunc: ffi_janus_gateway_rust_future_free_pointer,
-            liftFunc: FfiConverterTypeEchotestHandle.lift,
+            liftFunc: FfiConverterTypeEchotestHandle_lift,
             errorHandler: FfiConverterTypeJanusGatewayHandleError.lift
         )
 }
     
-open func destory(timeout: TimeInterval)async throws  {
+open func destory(timeout: TimeInterval)async throws   {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
@@ -1462,6 +1813,7 @@ open func destory(timeout: TimeInterval)async throws  {
     
 
 }
+
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -1498,8 +1850,6 @@ public struct FfiConverterTypeSession: FfiConverter {
 }
 
 
-
-
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
@@ -1512,6 +1862,300 @@ public func FfiConverterTypeSession_lift(_ pointer: UnsafeMutableRawPointer) thr
 #endif
 public func FfiConverterTypeSession_lower(_ value: Session) -> UnsafeMutableRawPointer {
     return FfiConverterTypeSession.lower(value)
+}
+
+
+
+
+public struct AudioBridgeCreateParams {
+    public let room: JanusId?
+    public let permanent: Bool?
+    public let description: String?
+    public let secret: String?
+    public let pin: String?
+    public let isPrivate: Bool?
+    public let allowed: [String]?
+    public let samplingRate: UInt64?
+    public let spatialAudio: Bool?
+    public let audiolevelExt: Bool?
+    public let audiolevelEvent: Bool?
+    public let audioActivePackets: UInt64?
+    public let defaultExpectedloss: UInt64?
+    public let defaultBitrate: UInt64?
+    public let record: Bool?
+    public let recordFile: String?
+    public let recordDir: String?
+    public let mjrs: Bool?
+    public let mjrsDir: String?
+    public let allowRtpParticipants: Bool?
+    public let groups: [String]?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(room: JanusId? = nil, permanent: Bool? = nil, description: String? = nil, secret: String? = nil, pin: String? = nil, isPrivate: Bool? = nil, allowed: [String]? = nil, samplingRate: UInt64? = nil, spatialAudio: Bool? = nil, audiolevelExt: Bool? = nil, audiolevelEvent: Bool? = nil, audioActivePackets: UInt64? = nil, defaultExpectedloss: UInt64? = nil, defaultBitrate: UInt64? = nil, record: Bool? = nil, recordFile: String? = nil, recordDir: String? = nil, mjrs: Bool? = nil, mjrsDir: String? = nil, allowRtpParticipants: Bool? = nil, groups: [String]? = nil) {
+        self.room = room
+        self.permanent = permanent
+        self.description = description
+        self.secret = secret
+        self.pin = pin
+        self.isPrivate = isPrivate
+        self.allowed = allowed
+        self.samplingRate = samplingRate
+        self.spatialAudio = spatialAudio
+        self.audiolevelExt = audiolevelExt
+        self.audiolevelEvent = audiolevelEvent
+        self.audioActivePackets = audioActivePackets
+        self.defaultExpectedloss = defaultExpectedloss
+        self.defaultBitrate = defaultBitrate
+        self.record = record
+        self.recordFile = recordFile
+        self.recordDir = recordDir
+        self.mjrs = mjrs
+        self.mjrsDir = mjrsDir
+        self.allowRtpParticipants = allowRtpParticipants
+        self.groups = groups
+    }
+}
+
+#if compiler(>=6)
+extension AudioBridgeCreateParams: Sendable {}
+#endif
+
+
+extension AudioBridgeCreateParams: Equatable, Hashable {
+    public static func ==(lhs: AudioBridgeCreateParams, rhs: AudioBridgeCreateParams) -> Bool {
+        if lhs.room != rhs.room {
+            return false
+        }
+        if lhs.permanent != rhs.permanent {
+            return false
+        }
+        if lhs.description != rhs.description {
+            return false
+        }
+        if lhs.secret != rhs.secret {
+            return false
+        }
+        if lhs.pin != rhs.pin {
+            return false
+        }
+        if lhs.isPrivate != rhs.isPrivate {
+            return false
+        }
+        if lhs.allowed != rhs.allowed {
+            return false
+        }
+        if lhs.samplingRate != rhs.samplingRate {
+            return false
+        }
+        if lhs.spatialAudio != rhs.spatialAudio {
+            return false
+        }
+        if lhs.audiolevelExt != rhs.audiolevelExt {
+            return false
+        }
+        if lhs.audiolevelEvent != rhs.audiolevelEvent {
+            return false
+        }
+        if lhs.audioActivePackets != rhs.audioActivePackets {
+            return false
+        }
+        if lhs.defaultExpectedloss != rhs.defaultExpectedloss {
+            return false
+        }
+        if lhs.defaultBitrate != rhs.defaultBitrate {
+            return false
+        }
+        if lhs.record != rhs.record {
+            return false
+        }
+        if lhs.recordFile != rhs.recordFile {
+            return false
+        }
+        if lhs.recordDir != rhs.recordDir {
+            return false
+        }
+        if lhs.mjrs != rhs.mjrs {
+            return false
+        }
+        if lhs.mjrsDir != rhs.mjrsDir {
+            return false
+        }
+        if lhs.allowRtpParticipants != rhs.allowRtpParticipants {
+            return false
+        }
+        if lhs.groups != rhs.groups {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(room)
+        hasher.combine(permanent)
+        hasher.combine(description)
+        hasher.combine(secret)
+        hasher.combine(pin)
+        hasher.combine(isPrivate)
+        hasher.combine(allowed)
+        hasher.combine(samplingRate)
+        hasher.combine(spatialAudio)
+        hasher.combine(audiolevelExt)
+        hasher.combine(audiolevelEvent)
+        hasher.combine(audioActivePackets)
+        hasher.combine(defaultExpectedloss)
+        hasher.combine(defaultBitrate)
+        hasher.combine(record)
+        hasher.combine(recordFile)
+        hasher.combine(recordDir)
+        hasher.combine(mjrs)
+        hasher.combine(mjrsDir)
+        hasher.combine(allowRtpParticipants)
+        hasher.combine(groups)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeAudioBridgeCreateParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AudioBridgeCreateParams {
+        return
+            try AudioBridgeCreateParams(
+                room: FfiConverterOptionTypeJanusId.read(from: &buf), 
+                permanent: FfiConverterOptionBool.read(from: &buf), 
+                description: FfiConverterOptionString.read(from: &buf), 
+                secret: FfiConverterOptionString.read(from: &buf), 
+                pin: FfiConverterOptionString.read(from: &buf), 
+                isPrivate: FfiConverterOptionBool.read(from: &buf), 
+                allowed: FfiConverterOptionSequenceString.read(from: &buf), 
+                samplingRate: FfiConverterOptionUInt64.read(from: &buf), 
+                spatialAudio: FfiConverterOptionBool.read(from: &buf), 
+                audiolevelExt: FfiConverterOptionBool.read(from: &buf), 
+                audiolevelEvent: FfiConverterOptionBool.read(from: &buf), 
+                audioActivePackets: FfiConverterOptionUInt64.read(from: &buf), 
+                defaultExpectedloss: FfiConverterOptionUInt64.read(from: &buf), 
+                defaultBitrate: FfiConverterOptionUInt64.read(from: &buf), 
+                record: FfiConverterOptionBool.read(from: &buf), 
+                recordFile: FfiConverterOptionString.read(from: &buf), 
+                recordDir: FfiConverterOptionString.read(from: &buf), 
+                mjrs: FfiConverterOptionBool.read(from: &buf), 
+                mjrsDir: FfiConverterOptionString.read(from: &buf), 
+                allowRtpParticipants: FfiConverterOptionBool.read(from: &buf), 
+                groups: FfiConverterOptionSequenceString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: AudioBridgeCreateParams, into buf: inout [UInt8]) {
+        FfiConverterOptionTypeJanusId.write(value.room, into: &buf)
+        FfiConverterOptionBool.write(value.permanent, into: &buf)
+        FfiConverterOptionString.write(value.description, into: &buf)
+        FfiConverterOptionString.write(value.secret, into: &buf)
+        FfiConverterOptionString.write(value.pin, into: &buf)
+        FfiConverterOptionBool.write(value.isPrivate, into: &buf)
+        FfiConverterOptionSequenceString.write(value.allowed, into: &buf)
+        FfiConverterOptionUInt64.write(value.samplingRate, into: &buf)
+        FfiConverterOptionBool.write(value.spatialAudio, into: &buf)
+        FfiConverterOptionBool.write(value.audiolevelExt, into: &buf)
+        FfiConverterOptionBool.write(value.audiolevelEvent, into: &buf)
+        FfiConverterOptionUInt64.write(value.audioActivePackets, into: &buf)
+        FfiConverterOptionUInt64.write(value.defaultExpectedloss, into: &buf)
+        FfiConverterOptionUInt64.write(value.defaultBitrate, into: &buf)
+        FfiConverterOptionBool.write(value.record, into: &buf)
+        FfiConverterOptionString.write(value.recordFile, into: &buf)
+        FfiConverterOptionString.write(value.recordDir, into: &buf)
+        FfiConverterOptionBool.write(value.mjrs, into: &buf)
+        FfiConverterOptionString.write(value.mjrsDir, into: &buf)
+        FfiConverterOptionBool.write(value.allowRtpParticipants, into: &buf)
+        FfiConverterOptionSequenceString.write(value.groups, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeCreateParams_lift(_ buf: RustBuffer) throws -> AudioBridgeCreateParams {
+    return try FfiConverterTypeAudioBridgeCreateParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeCreateParams_lower(_ value: AudioBridgeCreateParams) -> RustBuffer {
+    return FfiConverterTypeAudioBridgeCreateParams.lower(value)
+}
+
+
+public struct AudioBridgeRoomCreatedRsp {
+    public let room: JanusId
+    public let permanent: Bool
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(room: JanusId, permanent: Bool) {
+        self.room = room
+        self.permanent = permanent
+    }
+}
+
+#if compiler(>=6)
+extension AudioBridgeRoomCreatedRsp: Sendable {}
+#endif
+
+
+extension AudioBridgeRoomCreatedRsp: Equatable, Hashable {
+    public static func ==(lhs: AudioBridgeRoomCreatedRsp, rhs: AudioBridgeRoomCreatedRsp) -> Bool {
+        if lhs.room != rhs.room {
+            return false
+        }
+        if lhs.permanent != rhs.permanent {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(room)
+        hasher.combine(permanent)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeAudioBridgeRoomCreatedRsp: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AudioBridgeRoomCreatedRsp {
+        return
+            try AudioBridgeRoomCreatedRsp(
+                room: FfiConverterTypeJanusId.read(from: &buf), 
+                permanent: FfiConverterBool.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: AudioBridgeRoomCreatedRsp, into buf: inout [UInt8]) {
+        FfiConverterTypeJanusId.write(value.room, into: &buf)
+        FfiConverterBool.write(value.permanent, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeRoomCreatedRsp_lift(_ buf: RustBuffer) throws -> AudioBridgeRoomCreatedRsp {
+    return try FfiConverterTypeAudioBridgeRoomCreatedRsp.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeRoomCreatedRsp_lower(_ value: AudioBridgeRoomCreatedRsp) -> RustBuffer {
+    return FfiConverterTypeAudioBridgeRoomCreatedRsp.lower(value)
 }
 
 
@@ -1529,6 +2173,9 @@ public struct Candidate {
     }
 }
 
+#if compiler(>=6)
+extension Candidate: Sendable {}
+#endif
 
 
 extension Candidate: Equatable, Hashable {
@@ -1551,6 +2198,7 @@ extension Candidate: Equatable, Hashable {
         hasher.combine(sdpMlineIndex)
     }
 }
+
 
 
 #if swift(>=5.8)
@@ -1593,11 +2241,11 @@ public struct Config {
     public let url: String
     public let capacity: UInt16
     public let apisecret: String?
-    public let serverRoot: String?
+    public let serverRoot: String
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(url: String, capacity: UInt16, apisecret: String?, serverRoot: String?) {
+    public init(url: String, capacity: UInt16, apisecret: String?, serverRoot: String = "janus") {
         self.url = url
         self.capacity = capacity
         self.apisecret = apisecret
@@ -1605,6 +2253,9 @@ public struct Config {
     }
 }
 
+#if compiler(>=6)
+extension Config: Sendable {}
+#endif
 
 
 extension Config: Equatable, Hashable {
@@ -1633,6 +2284,7 @@ extension Config: Equatable, Hashable {
 }
 
 
+
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
@@ -1643,7 +2295,7 @@ public struct FfiConverterTypeConfig: FfiConverterRustBuffer {
                 url: FfiConverterString.read(from: &buf), 
                 capacity: FfiConverterUInt16.read(from: &buf), 
                 apisecret: FfiConverterOptionString.read(from: &buf), 
-                serverRoot: FfiConverterOptionString.read(from: &buf)
+                serverRoot: FfiConverterString.read(from: &buf)
         )
     }
 
@@ -1651,7 +2303,7 @@ public struct FfiConverterTypeConfig: FfiConverterRustBuffer {
         FfiConverterString.write(value.url, into: &buf)
         FfiConverterUInt16.write(value.capacity, into: &buf)
         FfiConverterOptionString.write(value.apisecret, into: &buf)
-        FfiConverterOptionString.write(value.serverRoot, into: &buf)
+        FfiConverterString.write(value.serverRoot, into: &buf)
     }
 }
 
@@ -1671,23 +2323,221 @@ public func FfiConverterTypeConfig_lower(_ value: Config) -> RustBuffer {
 }
 
 
-public struct Jsep {
-    public let jsepType: JsepType
-    public let sdp: String
+public struct EchoTestStartParams {
+    public let audio: Bool?
+    public let video: Bool?
+    public let bitrate: UInt32?
+    public let record: Bool?
+    public let filename: String?
+    public let substream: UInt32?
+    public let temporal: UInt32?
+    public let fallback: UInt32?
+    public let svc: Bool?
+    public let spatialLayer: UInt32?
+    public let temporalLayer: UInt32?
+    public let audiocodec: String?
+    public let videocodec: String?
+    public let videoprofile: String?
+    public let opusred: Bool?
+    public let minDelay: Int32?
+    public let maxDelay: Int32?
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(jsepType: JsepType, sdp: String) {
-        self.jsepType = jsepType
-        self.sdp = sdp
+    public init(audio: Bool? = nil, video: Bool? = nil, bitrate: UInt32? = nil, record: Bool? = nil, filename: String? = nil, substream: UInt32? = nil, temporal: UInt32? = nil, fallback: UInt32? = nil, svc: Bool? = nil, spatialLayer: UInt32? = nil, temporalLayer: UInt32? = nil, audiocodec: String? = nil, videocodec: String? = nil, videoprofile: String? = nil, opusred: Bool? = nil, minDelay: Int32? = nil, maxDelay: Int32? = nil) {
+        self.audio = audio
+        self.video = video
+        self.bitrate = bitrate
+        self.record = record
+        self.filename = filename
+        self.substream = substream
+        self.temporal = temporal
+        self.fallback = fallback
+        self.svc = svc
+        self.spatialLayer = spatialLayer
+        self.temporalLayer = temporalLayer
+        self.audiocodec = audiocodec
+        self.videocodec = videocodec
+        self.videoprofile = videoprofile
+        self.opusred = opusred
+        self.minDelay = minDelay
+        self.maxDelay = maxDelay
+    }
+}
+
+#if compiler(>=6)
+extension EchoTestStartParams: Sendable {}
+#endif
+
+
+extension EchoTestStartParams: Equatable, Hashable {
+    public static func ==(lhs: EchoTestStartParams, rhs: EchoTestStartParams) -> Bool {
+        if lhs.audio != rhs.audio {
+            return false
+        }
+        if lhs.video != rhs.video {
+            return false
+        }
+        if lhs.bitrate != rhs.bitrate {
+            return false
+        }
+        if lhs.record != rhs.record {
+            return false
+        }
+        if lhs.filename != rhs.filename {
+            return false
+        }
+        if lhs.substream != rhs.substream {
+            return false
+        }
+        if lhs.temporal != rhs.temporal {
+            return false
+        }
+        if lhs.fallback != rhs.fallback {
+            return false
+        }
+        if lhs.svc != rhs.svc {
+            return false
+        }
+        if lhs.spatialLayer != rhs.spatialLayer {
+            return false
+        }
+        if lhs.temporalLayer != rhs.temporalLayer {
+            return false
+        }
+        if lhs.audiocodec != rhs.audiocodec {
+            return false
+        }
+        if lhs.videocodec != rhs.videocodec {
+            return false
+        }
+        if lhs.videoprofile != rhs.videoprofile {
+            return false
+        }
+        if lhs.opusred != rhs.opusred {
+            return false
+        }
+        if lhs.minDelay != rhs.minDelay {
+            return false
+        }
+        if lhs.maxDelay != rhs.maxDelay {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(audio)
+        hasher.combine(video)
+        hasher.combine(bitrate)
+        hasher.combine(record)
+        hasher.combine(filename)
+        hasher.combine(substream)
+        hasher.combine(temporal)
+        hasher.combine(fallback)
+        hasher.combine(svc)
+        hasher.combine(spatialLayer)
+        hasher.combine(temporalLayer)
+        hasher.combine(audiocodec)
+        hasher.combine(videocodec)
+        hasher.combine(videoprofile)
+        hasher.combine(opusred)
+        hasher.combine(minDelay)
+        hasher.combine(maxDelay)
     }
 }
 
 
 
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeEchoTestStartParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> EchoTestStartParams {
+        return
+            try EchoTestStartParams(
+                audio: FfiConverterOptionBool.read(from: &buf), 
+                video: FfiConverterOptionBool.read(from: &buf), 
+                bitrate: FfiConverterOptionUInt32.read(from: &buf), 
+                record: FfiConverterOptionBool.read(from: &buf), 
+                filename: FfiConverterOptionString.read(from: &buf), 
+                substream: FfiConverterOptionUInt32.read(from: &buf), 
+                temporal: FfiConverterOptionUInt32.read(from: &buf), 
+                fallback: FfiConverterOptionUInt32.read(from: &buf), 
+                svc: FfiConverterOptionBool.read(from: &buf), 
+                spatialLayer: FfiConverterOptionUInt32.read(from: &buf), 
+                temporalLayer: FfiConverterOptionUInt32.read(from: &buf), 
+                audiocodec: FfiConverterOptionString.read(from: &buf), 
+                videocodec: FfiConverterOptionString.read(from: &buf), 
+                videoprofile: FfiConverterOptionString.read(from: &buf), 
+                opusred: FfiConverterOptionBool.read(from: &buf), 
+                minDelay: FfiConverterOptionInt32.read(from: &buf), 
+                maxDelay: FfiConverterOptionInt32.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: EchoTestStartParams, into buf: inout [UInt8]) {
+        FfiConverterOptionBool.write(value.audio, into: &buf)
+        FfiConverterOptionBool.write(value.video, into: &buf)
+        FfiConverterOptionUInt32.write(value.bitrate, into: &buf)
+        FfiConverterOptionBool.write(value.record, into: &buf)
+        FfiConverterOptionString.write(value.filename, into: &buf)
+        FfiConverterOptionUInt32.write(value.substream, into: &buf)
+        FfiConverterOptionUInt32.write(value.temporal, into: &buf)
+        FfiConverterOptionUInt32.write(value.fallback, into: &buf)
+        FfiConverterOptionBool.write(value.svc, into: &buf)
+        FfiConverterOptionUInt32.write(value.spatialLayer, into: &buf)
+        FfiConverterOptionUInt32.write(value.temporalLayer, into: &buf)
+        FfiConverterOptionString.write(value.audiocodec, into: &buf)
+        FfiConverterOptionString.write(value.videocodec, into: &buf)
+        FfiConverterOptionString.write(value.videoprofile, into: &buf)
+        FfiConverterOptionBool.write(value.opusred, into: &buf)
+        FfiConverterOptionInt32.write(value.minDelay, into: &buf)
+        FfiConverterOptionInt32.write(value.maxDelay, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeEchoTestStartParams_lift(_ buf: RustBuffer) throws -> EchoTestStartParams {
+    return try FfiConverterTypeEchoTestStartParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeEchoTestStartParams_lower(_ value: EchoTestStartParams) -> RustBuffer {
+    return FfiConverterTypeEchoTestStartParams.lower(value)
+}
+
+
+public struct Jsep {
+    public let jsepType: JsepType
+    public let trickle: Bool?
+    public let sdp: String
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(jsepType: JsepType, trickle: Bool? = nil, sdp: String) {
+        self.jsepType = jsepType
+        self.trickle = trickle
+        self.sdp = sdp
+    }
+}
+
+#if compiler(>=6)
+extension Jsep: Sendable {}
+#endif
+
+
 extension Jsep: Equatable, Hashable {
     public static func ==(lhs: Jsep, rhs: Jsep) -> Bool {
         if lhs.jsepType != rhs.jsepType {
+            return false
+        }
+        if lhs.trickle != rhs.trickle {
             return false
         }
         if lhs.sdp != rhs.sdp {
@@ -1698,9 +2548,11 @@ extension Jsep: Equatable, Hashable {
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(jsepType)
+        hasher.combine(trickle)
         hasher.combine(sdp)
     }
 }
+
 
 
 #if swift(>=5.8)
@@ -1711,12 +2563,14 @@ public struct FfiConverterTypeJsep: FfiConverterRustBuffer {
         return
             try Jsep(
                 jsepType: FfiConverterTypeJsepType.read(from: &buf), 
+                trickle: FfiConverterOptionBool.read(from: &buf), 
                 sdp: FfiConverterString.read(from: &buf)
         )
     }
 
     public static func write(_ value: Jsep, into buf: inout [UInt8]) {
         FfiConverterTypeJsepType.write(value.jsepType, into: &buf)
+        FfiConverterOptionBool.write(value.trickle, into: &buf)
         FfiConverterString.write(value.sdp, into: &buf)
     }
 }
@@ -1755,6 +2609,9 @@ public struct MetaData {
     }
 }
 
+#if compiler(>=6)
+extension MetaData: Sendable {}
+#endif
 
 
 extension MetaData: Equatable, Hashable {
@@ -1785,6 +2642,7 @@ extension MetaData: Equatable, Hashable {
         hasher.combine(version)
     }
 }
+
 
 
 #if swift(>=5.8)
@@ -1827,7 +2685,7 @@ public func FfiConverterTypeMetaData_lower(_ value: MetaData) -> RustBuffer {
 }
 
 
-public struct ServerInfo {
+public struct ServerInfoRsp {
     public let name: String
     public let version: UInt64
     public let versionString: String
@@ -1901,10 +2759,13 @@ public struct ServerInfo {
     }
 }
 
+#if compiler(>=6)
+extension ServerInfoRsp: Sendable {}
+#endif
 
 
-extension ServerInfo: Equatable, Hashable {
-    public static func ==(lhs: ServerInfo, rhs: ServerInfo) -> Bool {
+extension ServerInfoRsp: Equatable, Hashable {
+    public static func ==(lhs: ServerInfoRsp, rhs: ServerInfoRsp) -> Bool {
         if lhs.name != rhs.name {
             return false
         }
@@ -2045,13 +2906,14 @@ extension ServerInfo: Equatable, Hashable {
 }
 
 
+
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public struct FfiConverterTypeServerInfo: FfiConverterRustBuffer {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> ServerInfo {
+public struct FfiConverterTypeServerInfoRsp: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> ServerInfoRsp {
         return
-            try ServerInfo(
+            try ServerInfoRsp(
                 name: FfiConverterString.read(from: &buf), 
                 version: FfiConverterUInt64.read(from: &buf), 
                 versionString: FfiConverterString.read(from: &buf), 
@@ -2088,7 +2950,7 @@ public struct FfiConverterTypeServerInfo: FfiConverterRustBuffer {
         )
     }
 
-    public static func write(_ value: ServerInfo, into buf: inout [UInt8]) {
+    public static func write(_ value: ServerInfoRsp, into buf: inout [UInt8]) {
         FfiConverterString.write(value.name, into: &buf)
         FfiConverterUInt64.write(value.version, into: &buf)
         FfiConverterString.write(value.versionString, into: &buf)
@@ -2129,15 +2991,77 @@ public struct FfiConverterTypeServerInfo: FfiConverterRustBuffer {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeServerInfo_lift(_ buf: RustBuffer) throws -> ServerInfo {
-    return try FfiConverterTypeServerInfo.lift(buf)
+public func FfiConverterTypeServerInfoRsp_lift(_ buf: RustBuffer) throws -> ServerInfoRsp {
+    return try FfiConverterTypeServerInfoRsp.lift(buf)
 }
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeServerInfo_lower(_ value: ServerInfo) -> RustBuffer {
-    return FfiConverterTypeServerInfo.lower(value)
+public func FfiConverterTypeServerInfoRsp_lower(_ value: ServerInfoRsp) -> RustBuffer {
+    return FfiConverterTypeServerInfoRsp.lower(value)
+}
+
+
+public struct U63 {
+    public let inner: UInt64
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(inner: UInt64) {
+        self.inner = inner
+    }
+}
+
+#if compiler(>=6)
+extension U63: Sendable {}
+#endif
+
+
+extension U63: Equatable, Hashable {
+    public static func ==(lhs: U63, rhs: U63) -> Bool {
+        if lhs.inner != rhs.inner {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(inner)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeU63: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> U63 {
+        return
+            try U63(
+                inner: FfiConverterUInt64.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: U63, into buf: inout [UInt8]) {
+        FfiConverterUInt64.write(value.inner, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeU63_lift(_ buf: RustBuffer) throws -> U63 {
+    return try FfiConverterTypeU63.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeU63_lower(_ value: U63) -> RustBuffer {
+    return FfiConverterTypeU63.lower(value)
 }
 
 // Note that we don't yet support `indirect` for enums.
@@ -2166,6 +3090,10 @@ public enum GenericEvent {
     case trickle
 }
 
+
+#if compiler(>=6)
+extension GenericEvent: Sendable {}
+#endif
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -2246,7 +3174,6 @@ public func FfiConverterTypeGenericEvent_lower(_ value: GenericEvent) -> RustBuf
 }
 
 
-
 extension GenericEvent: Equatable, Hashable {}
 
 
@@ -2308,13 +3235,31 @@ public struct FfiConverterTypeJanusGatewayCommunicationError: FfiConverterRustBu
 }
 
 
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeJanusGatewayCommunicationError_lift(_ buf: RustBuffer) throws -> JanusGatewayCommunicationError {
+    return try FfiConverterTypeJanusGatewayCommunicationError.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeJanusGatewayCommunicationError_lower(_ value: JanusGatewayCommunicationError) -> RustBuffer {
+    return FfiConverterTypeJanusGatewayCommunicationError.lower(value)
+}
+
+
 extension JanusGatewayCommunicationError: Equatable, Hashable {}
+
+
 
 extension JanusGatewayCommunicationError: Foundation.LocalizedError {
     public var errorDescription: String? {
         String(reflecting: self)
     }
 }
+
 
 
 public enum JanusGatewayConnectionError {
@@ -2363,13 +3308,31 @@ public struct FfiConverterTypeJanusGatewayConnectionError: FfiConverterRustBuffe
 }
 
 
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeJanusGatewayConnectionError_lift(_ buf: RustBuffer) throws -> JanusGatewayConnectionError {
+    return try FfiConverterTypeJanusGatewayConnectionError.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeJanusGatewayConnectionError_lower(_ value: JanusGatewayConnectionError) -> RustBuffer {
+    return FfiConverterTypeJanusGatewayConnectionError.lower(value)
+}
+
+
 extension JanusGatewayConnectionError: Equatable, Hashable {}
+
+
 
 extension JanusGatewayConnectionError: Foundation.LocalizedError {
     public var errorDescription: String? {
         String(reflecting: self)
     }
 }
+
 
 
 public enum JanusGatewayHandleError {
@@ -2420,13 +3383,31 @@ public struct FfiConverterTypeJanusGatewayHandleError: FfiConverterRustBuffer {
 }
 
 
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeJanusGatewayHandleError_lift(_ buf: RustBuffer) throws -> JanusGatewayHandleError {
+    return try FfiConverterTypeJanusGatewayHandleError.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeJanusGatewayHandleError_lower(_ value: JanusGatewayHandleError) -> RustBuffer {
+    return FfiConverterTypeJanusGatewayHandleError.lower(value)
+}
+
+
 extension JanusGatewayHandleError: Equatable, Hashable {}
+
+
 
 extension JanusGatewayHandleError: Foundation.LocalizedError {
     public var errorDescription: String? {
         String(reflecting: self)
     }
 }
+
 
 
 public enum JanusGatewaySessionError {
@@ -2475,13 +3456,104 @@ public struct FfiConverterTypeJanusGatewaySessionError: FfiConverterRustBuffer {
 }
 
 
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeJanusGatewaySessionError_lift(_ buf: RustBuffer) throws -> JanusGatewaySessionError {
+    return try FfiConverterTypeJanusGatewaySessionError.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeJanusGatewaySessionError_lower(_ value: JanusGatewaySessionError) -> RustBuffer {
+    return FfiConverterTypeJanusGatewaySessionError.lower(value)
+}
+
+
 extension JanusGatewaySessionError: Equatable, Hashable {}
+
+
 
 extension JanusGatewaySessionError: Foundation.LocalizedError {
     public var errorDescription: String? {
         String(reflecting: self)
     }
 }
+
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+
+public enum JanusId {
+    
+    case string(String
+    )
+    case uint(U63
+    )
+}
+
+
+#if compiler(>=6)
+extension JanusId: Sendable {}
+#endif
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeJanusId: FfiConverterRustBuffer {
+    typealias SwiftType = JanusId
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> JanusId {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .string(try FfiConverterString.read(from: &buf)
+        )
+        
+        case 2: return .uint(try FfiConverterTypeU63.read(from: &buf)
+        )
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: JanusId, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case let .string(v1):
+            writeInt(&buf, Int32(1))
+            FfiConverterString.write(v1, into: &buf)
+            
+        
+        case let .uint(v1):
+            writeInt(&buf, Int32(2))
+            FfiConverterTypeU63.write(v1, into: &buf)
+            
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeJanusId_lift(_ buf: RustBuffer) throws -> JanusId {
+    return try FfiConverterTypeJanusId.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeJanusId_lower(_ value: JanusId) -> RustBuffer {
+    return FfiConverterTypeJanusId.lower(value)
+}
+
+
+extension JanusId: Equatable, Hashable {}
+
+
 
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
@@ -2492,6 +3564,10 @@ public enum JsepType {
     case answer
 }
 
+
+#if compiler(>=6)
+extension JsepType: Sendable {}
+#endif
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -2542,7 +3618,6 @@ public func FfiConverterTypeJsepType_lower(_ value: JsepType) -> RustBuffer {
 }
 
 
-
 extension JsepType: Equatable, Hashable {}
 
 
@@ -2550,18 +3625,15 @@ extension JsepType: Equatable, Hashable {}
 
 
 
-public protocol EchotestHandleCallback : AnyObject {
-    
-    func onResult(echotest: String, result: String) 
-    
-    func onResultWithJsep(echotest: String, result: String, jsep: Jsep) 
-    
-    func onEchoTestError(errorCode: UInt16, error: String) 
+public protocol AudioBridgeHandleCallback: AnyObject {
     
     func onHandleEvent(event: GenericEvent) 
     
+    func onAudioBridgeError(errorCode: UInt16, error: String) 
+    
+    func onOther(data: Data) 
+    
 }
-
 // Magic number for the Rust proxy to call using the same mechanism as every other method,
 // to free the callback once it's dropped by Rust.
 private let IDX_CALLBACK_FREE: Int32 = 0
@@ -2571,11 +3643,188 @@ private let UNIFFI_CALLBACK_ERROR: Int32 = 1
 private let UNIFFI_CALLBACK_UNEXPECTED_ERROR: Int32 = 2
 
 // Put the implementation in a struct so we don't pollute the top-level namespace
+fileprivate struct UniffiCallbackInterfaceAudioBridgeHandleCallback {
+
+    // Create the VTable using a series of closures.
+    // Swift automatically converts these into C callback functions.
+    //
+    // This creates 1-element array, since this seems to be the only way to construct a const
+    // pointer that we can pass to the Rust code.
+    static let vtable: [UniffiVTableCallbackInterfaceAudioBridgeHandleCallback] = [UniffiVTableCallbackInterfaceAudioBridgeHandleCallback(
+        onHandleEvent: { (
+            uniffiHandle: UInt64,
+            event: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceAudioBridgeHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onHandleEvent(
+                     event: try FfiConverterTypeGenericEvent_lift(event)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onAudioBridgeError: { (
+            uniffiHandle: UInt64,
+            errorCode: UInt16,
+            error: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceAudioBridgeHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onAudioBridgeError(
+                     errorCode: try FfiConverterUInt16.lift(errorCode),
+                     error: try FfiConverterString.lift(error)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onOther: { (
+            uniffiHandle: UInt64,
+            data: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceAudioBridgeHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onOther(
+                     data: try FfiConverterData.lift(data)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        uniffiFree: { (uniffiHandle: UInt64) -> () in
+            let result = try? FfiConverterCallbackInterfaceAudioBridgeHandleCallback.handleMap.remove(handle: uniffiHandle)
+            if result == nil {
+                print("Uniffi callback interface AudioBridgeHandleCallback: handle missing in uniffiFree")
+            }
+        }
+    )]
+}
+
+private func uniffiCallbackInitAudioBridgeHandleCallback() {
+    uniffi_janus_gateway_fn_init_callback_vtable_audiobridgehandlecallback(UniffiCallbackInterfaceAudioBridgeHandleCallback.vtable)
+}
+
+// FfiConverter protocol for callback interfaces
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterCallbackInterfaceAudioBridgeHandleCallback {
+    fileprivate static let handleMap = UniffiHandleMap<AudioBridgeHandleCallback>()
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+extension FfiConverterCallbackInterfaceAudioBridgeHandleCallback : FfiConverter {
+    typealias SwiftType = AudioBridgeHandleCallback
+    typealias FfiType = UInt64
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func lift(_ handle: UInt64) throws -> SwiftType {
+        try handleMap.get(handle: handle)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func lower(_ v: SwiftType) -> UInt64 {
+        return handleMap.insert(obj: v)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func write(_ v: SwiftType, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(v))
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterCallbackInterfaceAudioBridgeHandleCallback_lift(_ handle: UInt64) throws -> AudioBridgeHandleCallback {
+    return try FfiConverterCallbackInterfaceAudioBridgeHandleCallback.lift(handle)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterCallbackInterfaceAudioBridgeHandleCallback_lower(_ v: AudioBridgeHandleCallback) -> UInt64 {
+    return FfiConverterCallbackInterfaceAudioBridgeHandleCallback.lower(v)
+}
+
+
+
+
+public protocol EchotestHandleCallback: AnyObject {
+    
+    func onResult(echotest: String, result: String) 
+    
+    func onResultWithJsep(echotest: String, result: String, jsep: Jsep) 
+    
+    func onEchoTestError(errorCode: UInt16, error: String) 
+    
+    func onHandleEvent(event: GenericEvent) 
+    
+    func onOther(data: Data) 
+    
+}
+
+
+// Put the implementation in a struct so we don't pollute the top-level namespace
 fileprivate struct UniffiCallbackInterfaceEchotestHandleCallback {
 
     // Create the VTable using a series of closures.
     // Swift automatically converts these into C callback functions.
-    static var vtable: UniffiVTableCallbackInterfaceEchotestHandleCallback = UniffiVTableCallbackInterfaceEchotestHandleCallback(
+    //
+    // This creates 1-element array, since this seems to be the only way to construct a const
+    // pointer that we can pass to the Rust code.
+    static let vtable: [UniffiVTableCallbackInterfaceEchotestHandleCallback] = [UniffiVTableCallbackInterfaceEchotestHandleCallback(
         onResult: { (
             uniffiHandle: UInt64,
             echotest: RustBuffer,
@@ -2618,7 +3867,7 @@ fileprivate struct UniffiCallbackInterfaceEchotestHandleCallback {
                 return uniffiObj.onResultWithJsep(
                      echotest: try FfiConverterString.lift(echotest),
                      result: try FfiConverterString.lift(result),
-                     jsep: try FfiConverterTypeJsep.lift(jsep)
+                     jsep: try FfiConverterTypeJsep_lift(jsep)
                 )
             }
 
@@ -2668,7 +3917,31 @@ fileprivate struct UniffiCallbackInterfaceEchotestHandleCallback {
                     throw UniffiInternalError.unexpectedStaleHandle
                 }
                 return uniffiObj.onHandleEvent(
-                     event: try FfiConverterTypeGenericEvent.lift(event)
+                     event: try FfiConverterTypeGenericEvent_lift(event)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onOther: { (
+            uniffiHandle: UInt64,
+            data: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceEchotestHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onOther(
+                     data: try FfiConverterData.lift(data)
                 )
             }
 
@@ -2686,11 +3959,11 @@ fileprivate struct UniffiCallbackInterfaceEchotestHandleCallback {
                 print("Uniffi callback interface EchotestHandleCallback: handle missing in uniffiFree")
             }
         }
-    )
+    )]
 }
 
 private func uniffiCallbackInitEchotestHandleCallback() {
-    uniffi_janus_gateway_fn_init_callback_vtable_echotesthandlecallback(&UniffiCallbackInterfaceEchotestHandleCallback.vtable)
+    uniffi_janus_gateway_fn_init_callback_vtable_echotesthandlecallback(UniffiCallbackInterfaceEchotestHandleCallback.vtable)
 }
 
 // FfiConverter protocol for callback interfaces
@@ -2698,7 +3971,7 @@ private func uniffiCallbackInitEchotestHandleCallback() {
 @_documentation(visibility: private)
 #endif
 fileprivate struct FfiConverterCallbackInterfaceEchotestHandleCallback {
-    fileprivate static var handleMap = UniffiHandleMap<EchotestHandleCallback>()
+    fileprivate static let handleMap = UniffiHandleMap<EchotestHandleCallback>()
 }
 
 #if swift(>=5.8)
@@ -2739,9 +4012,24 @@ extension FfiConverterCallbackInterfaceEchotestHandleCallback : FfiConverter {
 }
 
 
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterCallbackInterfaceEchotestHandleCallback_lift(_ handle: UInt64) throws -> EchotestHandleCallback {
+    return try FfiConverterCallbackInterfaceEchotestHandleCallback.lift(handle)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterCallbackInterfaceEchotestHandleCallback_lower(_ v: EchotestHandleCallback) -> UInt64 {
+    return FfiConverterCallbackInterfaceEchotestHandleCallback.lower(v)
+}
 
 
-public protocol HandleCallback : AnyObject {
+
+
+public protocol HandleCallback: AnyObject {
     
     func onPluginEvent(event: Data) 
     
@@ -2750,13 +4038,15 @@ public protocol HandleCallback : AnyObject {
 }
 
 
-
 // Put the implementation in a struct so we don't pollute the top-level namespace
 fileprivate struct UniffiCallbackInterfaceHandleCallback {
 
     // Create the VTable using a series of closures.
     // Swift automatically converts these into C callback functions.
-    static var vtable: UniffiVTableCallbackInterfaceHandleCallback = UniffiVTableCallbackInterfaceHandleCallback(
+    //
+    // This creates 1-element array, since this seems to be the only way to construct a const
+    // pointer that we can pass to the Rust code.
+    static let vtable: [UniffiVTableCallbackInterfaceHandleCallback] = [UniffiVTableCallbackInterfaceHandleCallback(
         onPluginEvent: { (
             uniffiHandle: UInt64,
             event: RustBuffer,
@@ -2793,7 +4083,7 @@ fileprivate struct UniffiCallbackInterfaceHandleCallback {
                     throw UniffiInternalError.unexpectedStaleHandle
                 }
                 return uniffiObj.onHandleEvent(
-                     event: try FfiConverterTypeGenericEvent.lift(event)
+                     event: try FfiConverterTypeGenericEvent_lift(event)
                 )
             }
 
@@ -2811,11 +4101,11 @@ fileprivate struct UniffiCallbackInterfaceHandleCallback {
                 print("Uniffi callback interface HandleCallback: handle missing in uniffiFree")
             }
         }
-    )
+    )]
 }
 
 private func uniffiCallbackInitHandleCallback() {
-    uniffi_janus_gateway_fn_init_callback_vtable_handlecallback(&UniffiCallbackInterfaceHandleCallback.vtable)
+    uniffi_janus_gateway_fn_init_callback_vtable_handlecallback(UniffiCallbackInterfaceHandleCallback.vtable)
 }
 
 // FfiConverter protocol for callback interfaces
@@ -2823,7 +4113,7 @@ private func uniffiCallbackInitHandleCallback() {
 @_documentation(visibility: private)
 #endif
 fileprivate struct FfiConverterCallbackInterfaceHandleCallback {
-    fileprivate static var handleMap = UniffiHandleMap<HandleCallback>()
+    fileprivate static let handleMap = UniffiHandleMap<HandleCallback>()
 }
 
 #if swift(>=5.8)
@@ -2863,6 +4153,21 @@ extension FfiConverterCallbackInterfaceHandleCallback : FfiConverter {
     }
 }
 
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterCallbackInterfaceHandleCallback_lift(_ handle: UInt64) throws -> HandleCallback {
+    return try FfiConverterCallbackInterfaceHandleCallback.lift(handle)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterCallbackInterfaceHandleCallback_lower(_ v: HandleCallback) -> UInt64 {
+    return FfiConverterCallbackInterfaceHandleCallback.lower(v)
+}
+
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
@@ -2882,6 +4187,54 @@ fileprivate struct FfiConverterOptionUInt32: FfiConverterRustBuffer {
         switch try readInt(&buf) as Int8 {
         case 0: return nil
         case 1: return try FfiConverterUInt32.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionInt32: FfiConverterRustBuffer {
+    typealias SwiftType = Int32?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterInt32.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterInt32.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionUInt64: FfiConverterRustBuffer {
+    typealias SwiftType = UInt64?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterUInt64.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterUInt64.read(from: &buf)
         default: throw UniffiInternalError.unexpectedOptionalTag
         }
     }
@@ -2932,6 +4285,79 @@ fileprivate struct FfiConverterOptionString: FfiConverterRustBuffer {
         case 1: return try FfiConverterString.read(from: &buf)
         default: throw UniffiInternalError.unexpectedOptionalTag
         }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionTypeJanusId: FfiConverterRustBuffer {
+    typealias SwiftType = JanusId?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeJanusId.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeJanusId.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionSequenceString: FfiConverterRustBuffer {
+    typealias SwiftType = [String]?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterSequenceString.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterSequenceString.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceString: FfiConverterRustBuffer {
+    typealias SwiftType = [String]
+
+    public static func write(_ value: [String], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterString.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [String] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [String]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterString.read(from: &buf))
+        }
+        return seq
     }
 }
 
@@ -3024,9 +4450,9 @@ fileprivate func uniffiRustCallAsync<F, T>(
     liftFunc: (F) throws -> T,
     errorHandler: ((RustBuffer) throws -> Swift.Error)?
 ) async throws -> T {
-    // Make sure to call uniffiEnsureInitialized() since future creation doesn't have a
+    // Make sure to call the ensure init function since future creation doesn't have a
     // RustCallStatus param, so doesn't use makeRustCall()
-    uniffiEnsureInitialized()
+    uniffiEnsureJanusGatewayInitialized()
     let rustFuture = rustFutureFunc()
     defer {
         freeFunc(rustFuture)
@@ -3057,22 +4483,22 @@ fileprivate func uniffiFutureContinuationCallback(handle: UInt64, pollResult: In
         print("uniffiFutureContinuationCallback invalid handle")
     }
 }
-public func rawInitLogger() {try! rustCall() {
+public func rawInitLogger()  {try! rustCall() {
     uniffi_janus_gateway_fn_func_raw_init_logger($0
     )
 }
 }
-public func rawJanusConnect(config: Config)async throws  -> Connection {
+public func rawJanusConnect(config: Config)async throws  -> Connection  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
-                uniffi_janus_gateway_fn_func_raw_janus_connect(FfiConverterTypeConfig.lower(config)
+                uniffi_janus_gateway_fn_func_raw_janus_connect(FfiConverterTypeConfig_lower(config)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_pointer,
             completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
             freeFunc: ffi_janus_gateway_rust_future_free_pointer,
-            liftFunc: FfiConverterTypeConnection.lift,
+            liftFunc: FfiConverterTypeConnection_lift,
             errorHandler: FfiConverterTypeJanusGatewayConnectionError.lift
         )
 }
@@ -3084,9 +4510,9 @@ private enum InitializationResult {
 }
 // Use a global variable to perform the versioning checks. Swift ensures that
 // the code inside is only computed once.
-private var initializationResult: InitializationResult = {
+private let initializationResult: InitializationResult = {
     // Get the bindings contract version from our ComponentInterface
-    let bindings_contract_version = 26
+    let bindings_contract_version = 29
     // Get the scaffolding contract version by calling the into the dylib
     let scaffolding_contract_version = ffi_janus_gateway_uniffi_contract_version()
     if bindings_contract_version != scaffolding_contract_version {
@@ -3098,10 +4524,43 @@ private var initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_func_raw_janus_connect() != 39620) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_complete_trickle() != 64327) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_create_room() != 56852) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_detach() != 50253) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_fire_and_forget() != 33585) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_fire_and_forget_with_jsep() != 6039) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_hangup() != 1409) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_send_waiton_ack() != 44496) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_send_waiton_result() != 47125) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_start_event_loop() != 16772) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_trickle_candidates() != 5622) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_trickle_single_candidate() != 56691) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_connection_create_session() != 39238) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_connection_server_info() != 16292) {
+    if (uniffi_janus_gateway_checksum_method_connection_server_info() != 18308) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_echotesthandle_complete_trickle() != 25982) {
@@ -3125,13 +4584,13 @@ private var initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_echotesthandle_send_waiton_result() != 15964) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_start() != 45525) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_start() != 6138) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_echotesthandle_start_event_loop() != 42772) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_start_with_jsep() != 18887) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_start_with_jsep() != 58592) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_echotesthandle_trickle_candidates() != 101) {
@@ -3173,10 +4632,22 @@ private var initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_session_attach() != 16557) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_session_attach_audio_bridge() != 17158) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_session_attach_echo_test() != 28942) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_session_destory() != 62073) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_handle_event() != 29862) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_audio_bridge_error() != 3044) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_other() != 24336) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_result() != 12927) {
@@ -3191,6 +4662,9 @@ private var initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_handle_event() != 49029) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_other() != 50197) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_handlecallback_on_plugin_event() != 21699) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -3198,12 +4672,15 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
 
+    uniffiCallbackInitAudioBridgeHandleCallback()
     uniffiCallbackInitEchotestHandleCallback()
     uniffiCallbackInitHandleCallback()
     return InitializationResult.ok
 }()
 
-private func uniffiEnsureInitialized() {
+// Make the ensure init function public so that other modules which have external type references to
+// our types can call it.
+public func uniffiEnsureJanusGatewayInitialized() {
     switch initializationResult {
     case .ok:
         break

@@ -1,66 +1,21 @@
-use jarust::interface::japrotocol::Candidate as ExternalCandidate;
-use jarust::interface::japrotocol::GenericEvent as ExternalGenericEvent;
-use jarust::interface::japrotocol::Jsep as ExternalJsep;
-use jarust::interface::japrotocol::JsepType as ExternalJsepType;
-use jarust::interface::japrotocol::MetaData as ExternalMetaData;
-use jarust::interface::japrotocol::ServerInfoRsp as ExternalServerInfoRsp;
+use jarust::interface::japrotocol;
 use std::collections::HashMap;
 
-#[derive(uniffi::Record)]
-pub struct Jsep {
-    pub jsep_type: JsepType,
-    pub sdp: String,
-}
+pub type Jsep = japrotocol::Jsep;
+pub type JsepType = japrotocol::JsepType;
+pub type Candidate = japrotocol::Candidate;
+pub type GenericEvent = japrotocol::GenericEvent;
+pub type ServerInfoRsp = japrotocol::ServerInfoRsp;
+pub type MetaData = japrotocol::MetaData;
 
-#[derive(uniffi::Enum)]
-pub enum JsepType {
-    Offer,
-    Answer,
-}
-
-impl From<Jsep> for ExternalJsep {
-    fn from(val: Jsep) -> Self {
-        ExternalJsep {
-            jsep_type: match val.jsep_type {
-                JsepType::Offer => ExternalJsepType::Offer,
-                JsepType::Answer => ExternalJsepType::Answer,
-            },
-            trickle: None,
-            sdp: val.sdp,
-        }
-    }
-}
-
-impl From<ExternalJsep> for Jsep {
-    fn from(val: ExternalJsep) -> Self {
-        Jsep {
-            jsep_type: match val.jsep_type {
-                ExternalJsepType::Offer => JsepType::Offer,
-                ExternalJsepType::Answer => JsepType::Answer,
-            },
-            sdp: val.sdp,
-        }
-    }
-}
-
-#[derive(uniffi::Record)]
+#[uniffi::remote(Record)]
 pub struct Candidate {
     pub candidate: String,
     pub sdp_mid: String,
     pub sdp_mline_index: String,
 }
 
-impl From<Candidate> for ExternalCandidate {
-    fn from(val: Candidate) -> Self {
-        ExternalCandidate {
-            candidate: val.candidate,
-            sdp_mid: val.sdp_mid,
-            sdp_mline_index: val.sdp_mline_index,
-        }
-    }
-}
-
-#[derive(uniffi::Enum)]
+#[uniffi::remote(Enum)]
 pub enum GenericEvent {
     Detached,
     /// The PeerConnection was closed, either by Janus or by the user/application, and as such cannot be used anymore.
@@ -75,22 +30,8 @@ pub enum GenericEvent {
     Trickle,
 }
 
-impl From<ExternalGenericEvent> for GenericEvent {
-    fn from(val: ExternalGenericEvent) -> Self {
-        match val {
-            ExternalGenericEvent::Detached => GenericEvent::Detached,
-            ExternalGenericEvent::Hangup => GenericEvent::Hangup,
-            ExternalGenericEvent::Media => GenericEvent::Media,
-            ExternalGenericEvent::Timeout => GenericEvent::Timeout,
-            ExternalGenericEvent::WebrtcUp => GenericEvent::WebrtcUp,
-            ExternalGenericEvent::Slowlink => GenericEvent::Slowlink,
-            ExternalGenericEvent::Trickle => GenericEvent::Trickle,
-        }
-    }
-}
-
-#[derive(uniffi::Record)]
-pub struct ServerInfo {
+#[uniffi::remote(Record)]
+pub struct ServerInfoRsp {
     pub name: String,
     pub version: u64,
     pub version_string: String,
@@ -126,55 +67,7 @@ pub struct ServerInfo {
     pub plugins: HashMap<String, MetaData>,
 }
 
-impl From<ExternalServerInfoRsp> for ServerInfo {
-    fn from(val: ExternalServerInfoRsp) -> Self {
-        ServerInfo {
-            name: val.name,
-            version: val.version,
-            version_string: val.version_string,
-            author: val.author,
-            commit_hash: val.commit_hash,
-            compile_time: val.compile_time,
-            log_to_stdout: val.log_to_stdout,
-            log_to_file: val.log_to_file,
-            data_channels: val.data_channels,
-            accepting_new_sessions: val.accepting_new_sessions,
-            session_timeout: val.session_timeout,
-            reclaim_session_timeout: val.reclaim_session_timeout,
-            candidates_timeout: val.candidates_timeout,
-            server_name: val.server_name,
-            local_ip: val.local_ip,
-            ipv6: val.ipv6,
-            ice_lite: val.ice_lite,
-            ice_tcp: val.ice_tcp,
-            ice_nomination: val.ice_nomination,
-            ice_keepalive_conncheck: val.ice_keepalive_conncheck,
-            full_trickle: val.full_trickle,
-            mdns_enabled: val.mdns_enabled,
-            min_nack_queue: val.min_nack_queue,
-            twcc_period: val.twcc_period,
-            dtls_mtu: val.dtls_mtu,
-            static_event_loops: val.static_event_loops,
-            api_secret: val.api_secret,
-            auth_token: val.auth_token,
-            event_handlers: val.event_handlers,
-            opaqueid_in_api: val.opaqueid_in_api,
-            dependencies: val.dependencies,
-            transports: val
-                .transports
-                .into_iter()
-                .map(|(k, v)| (k, v.into()))
-                .collect(),
-            plugins: val
-                .plugins
-                .into_iter()
-                .map(|(k, v)| (k, v.into()))
-                .collect(),
-        }
-    }
-}
-
-#[derive(uniffi::Record)]
+#[uniffi::remote(Record)]
 pub struct MetaData {
     pub name: String,
     pub author: String,
@@ -183,14 +76,16 @@ pub struct MetaData {
     pub version: u64,
 }
 
-impl From<ExternalMetaData> for MetaData {
-    fn from(val: ExternalMetaData) -> Self {
-        MetaData {
-            name: val.name,
-            author: val.author,
-            description: val.description,
-            version_string: val.version_string,
-            version: val.version,
-        }
-    }
+#[uniffi::remote(Enum)]
+pub enum JsepType {
+    Offer,
+    Answer,
+}
+
+#[uniffi::remote(Record)]
+pub struct Jsep {
+    pub jsep_type: JsepType,
+    #[uniffi(default = None)]
+    pub trickle: Option<bool>,
+    pub sdp: String,
 }

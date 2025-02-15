@@ -2,7 +2,7 @@ use crate::config::Config;
 use crate::error::JanusGatewayCommunicationError;
 use crate::error::JanusGatewayConnectionError;
 use crate::error::JanusGatewaySessionError;
-use crate::protocol::ServerInfo;
+use crate::protocol::ServerInfoRsp;
 use crate::session::Session;
 use jarust::core::connect;
 use jarust::core::jaconfig::JaConfig;
@@ -22,7 +22,7 @@ pub async fn raw_janus_connect(config: Config) -> Result<Connection, JanusGatewa
         url: config.url,
         capacity: config.capacity.into(),
         apisecret: config.apisecret,
-        server_root: config.server_root.unwrap_or("janus".to_string()),
+        server_root: config.server_root,
     };
 
     let connection = match connect(config, JanusAPI::WebSocket, RandomTransactionGenerator).await {
@@ -59,7 +59,7 @@ impl Connection {
     pub async fn server_info(
         &self,
         timeout: Duration,
-    ) -> Result<ServerInfo, JanusGatewayCommunicationError> {
+    ) -> Result<ServerInfoRsp, JanusGatewayCommunicationError> {
         let info = match self.inner.server_info(timeout).await {
             Ok(info) => info,
             Err(why) => {
@@ -68,6 +68,6 @@ impl Connection {
                 })
             }
         };
-        Ok(info.into())
+        Ok(info)
     }
 }

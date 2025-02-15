@@ -3,7 +3,7 @@ resolver = "2"
 members = ["rslib", "uniffi-bindgen"]
 
 [workspace.dependencies]
-uniffi = "0.28.3"
+uniffi = "0.29.0"
 
 [profile.release]
 opt-level = "z"
