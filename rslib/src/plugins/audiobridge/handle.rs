@@ -1,13 +1,19 @@
 use super::params::AudioBridgeCreateParams;
+use super::params::AudioBridgeJoinParamsOptional;
+use super::responses::AudioBridgeListParticipantsRsp;
 use super::responses::AudioBridgeRoomCreatedRsp;
 use crate::base_handle;
 use crate::error::JanusGatewayCommunicationError;
+use crate::plugins::common::JanusId;
 use crate::protocol::Candidate;
 use crate::protocol::GenericEvent;
 use crate::protocol::Jsep;
 use jarust::plugins::audio_bridge::events::AudioBridgeEvent;
 use jarust::plugins::audio_bridge::events::PluginEvent;
 use jarust::plugins::audio_bridge::handle::AudioBridgeHandle as JaAudioBridgeHandle;
+use jarust::plugins::audio_bridge::params::AudioBridgeExistsParams;
+use jarust::plugins::audio_bridge::params::AudioBridgeJoinParams;
+use jarust::plugins::audio_bridge::params::AudioBridgeListParticipantsParams;
 use serde_json::Value;
 use std::fmt::Debug;
 use std::sync::Mutex;
@@ -73,6 +79,66 @@ impl AudioBridgeHandle {
         timeout: Duration,
     ) -> Result<AudioBridgeRoomCreatedRsp, JanusGatewayCommunicationError> {
         match self.inner.create_room_with_config(params, timeout).await {
+            Ok(rsp) => Ok(rsp),
+            Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            }),
+        }
+    }
+
+    pub async fn exist(
+        &self,
+        room_id: JanusId,
+        timeout: Duration,
+    ) -> Result<bool, JanusGatewayCommunicationError> {
+        match self
+            .inner
+            .exists(AudioBridgeExistsParams { room: room_id }, timeout)
+            .await
+        {
+            Ok(rsp) => Ok(rsp),
+            Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            }),
+        }
+    }
+
+    pub async fn list_participants(
+        &self,
+        room_id: JanusId,
+        timeout: Duration,
+    ) -> Result<AudioBridgeListParticipantsRsp, JanusGatewayCommunicationError> {
+        match self
+            .inner
+            .list_participants(AudioBridgeListParticipantsParams { room: room_id }, timeout)
+            .await
+        {
+            Ok(rsp) => Ok(rsp),
+            Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            }),
+        }
+    }
+
+    pub async fn join_room(
+        &self,
+        room_id: JanusId,
+        params: AudioBridgeJoinParamsOptional,
+        jsep: Option<Jsep>,
+        timeout: Duration,
+    ) -> Result<(), JanusGatewayCommunicationError> {
+        match self
+            .inner
+            .join_room(
+                AudioBridgeJoinParams {
+                    room: room_id,
+                    optional: params,
+                },
+                jsep,
+                timeout,
+            )
+            .await
+        {
             Ok(rsp) => Ok(rsp),
             Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
                 reason: why.to_string(),

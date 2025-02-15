@@ -400,6 +400,22 @@ fileprivate final class UniffiHandleMap<T>: @unchecked Sendable {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterUInt8: FfiConverterPrimitive {
+    typealias FfiType = UInt8
+    typealias SwiftType = UInt8
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> UInt8 {
+        return try lift(readInt(&buf))
+    }
+
+    public static func write(_ value: UInt8, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(value))
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterUInt16: FfiConverterPrimitive {
     typealias FfiType = UInt16
     typealias SwiftType = UInt16
@@ -583,11 +599,17 @@ public protocol AudioBridgeHandleProtocol: AnyObject {
     
     func detach(timeout: TimeInterval) async throws 
     
+    func exist(roomId: JanusId, timeout: TimeInterval) async throws  -> Bool
+    
     func fireAndForget(data: Data) async throws 
     
     func fireAndForgetWithJsep(data: Data, jsep: Jsep) async throws 
     
     func hangup(timeout: TimeInterval) async throws 
+    
+    func joinRoom(roomId: JanusId, params: AudioBridgeJoinParamsOptional, jsep: Jsep?, timeout: TimeInterval) async throws 
+    
+    func listParticipants(roomId: JanusId, timeout: TimeInterval) async throws  -> AudioBridgeListParticipantsRsp
     
     func sendWaitonAck(data: Data, timeout: TimeInterval) async throws 
     
@@ -700,6 +722,23 @@ open func detach(timeout: TimeInterval)async throws   {
         )
 }
     
+open func exist(roomId: JanusId, timeout: TimeInterval)async throws  -> Bool  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_exist(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeJanusId_lower(roomId),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_i8,
+            completeFunc: ffi_janus_gateway_rust_future_complete_i8,
+            freeFunc: ffi_janus_gateway_rust_future_free_i8,
+            liftFunc: FfiConverterBool.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
 open func fireAndForget(data: Data)async throws   {
     return
         try  await uniffiRustCallAsync(
@@ -747,6 +786,40 @@ open func hangup(timeout: TimeInterval)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func joinRoom(roomId: JanusId, params: AudioBridgeJoinParamsOptional, jsep: Jsep?, timeout: TimeInterval)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_join_room(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeJanusId_lower(roomId),FfiConverterTypeAudioBridgeJoinParamsOptional_lower(params),FfiConverterOptionTypeJsep.lower(jsep),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func listParticipants(roomId: JanusId, timeout: TimeInterval)async throws  -> AudioBridgeListParticipantsRsp  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_list_participants(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeJanusId_lower(roomId),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterTypeAudioBridgeListParticipantsRsp_lift,
             errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
         )
 }
@@ -2089,6 +2162,626 @@ public func FfiConverterTypeAudioBridgeCreateParams_lower(_ value: AudioBridgeCr
 }
 
 
+public struct AudioBridgeJoinParamsOptional {
+    public let id: JanusId?
+    public let group: String?
+    public let pin: String?
+    public let display: String?
+    public let token: String?
+    public let muted: Bool?
+    public let suspended: Bool?
+    public let pauseEvents: Bool?
+    public let codec: AudioBridgeCodec?
+    public let bitrate: UInt64?
+    public let quality: UInt8?
+    public let expectedLoss: UInt8?
+    public let volume: UInt64?
+    public let spatialPosition: UInt8?
+    public let secret: String?
+    public let audioLevelAverage: UInt64?
+    public let audioActivePackets: UInt64?
+    public let record: Bool?
+    public let filename: String?
+    public let generateOffer: Bool?
+    public let rtp: AudioBridgeRtp?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(id: JanusId?, group: String?, pin: String?, display: String?, token: String?, muted: Bool?, suspended: Bool?, pauseEvents: Bool?, codec: AudioBridgeCodec?, bitrate: UInt64?, quality: UInt8?, expectedLoss: UInt8?, volume: UInt64?, spatialPosition: UInt8?, secret: String?, audioLevelAverage: UInt64?, audioActivePackets: UInt64?, record: Bool?, filename: String?, generateOffer: Bool?, rtp: AudioBridgeRtp?) {
+        self.id = id
+        self.group = group
+        self.pin = pin
+        self.display = display
+        self.token = token
+        self.muted = muted
+        self.suspended = suspended
+        self.pauseEvents = pauseEvents
+        self.codec = codec
+        self.bitrate = bitrate
+        self.quality = quality
+        self.expectedLoss = expectedLoss
+        self.volume = volume
+        self.spatialPosition = spatialPosition
+        self.secret = secret
+        self.audioLevelAverage = audioLevelAverage
+        self.audioActivePackets = audioActivePackets
+        self.record = record
+        self.filename = filename
+        self.generateOffer = generateOffer
+        self.rtp = rtp
+    }
+}
+
+#if compiler(>=6)
+extension AudioBridgeJoinParamsOptional: Sendable {}
+#endif
+
+
+extension AudioBridgeJoinParamsOptional: Equatable, Hashable {
+    public static func ==(lhs: AudioBridgeJoinParamsOptional, rhs: AudioBridgeJoinParamsOptional) -> Bool {
+        if lhs.id != rhs.id {
+            return false
+        }
+        if lhs.group != rhs.group {
+            return false
+        }
+        if lhs.pin != rhs.pin {
+            return false
+        }
+        if lhs.display != rhs.display {
+            return false
+        }
+        if lhs.token != rhs.token {
+            return false
+        }
+        if lhs.muted != rhs.muted {
+            return false
+        }
+        if lhs.suspended != rhs.suspended {
+            return false
+        }
+        if lhs.pauseEvents != rhs.pauseEvents {
+            return false
+        }
+        if lhs.codec != rhs.codec {
+            return false
+        }
+        if lhs.bitrate != rhs.bitrate {
+            return false
+        }
+        if lhs.quality != rhs.quality {
+            return false
+        }
+        if lhs.expectedLoss != rhs.expectedLoss {
+            return false
+        }
+        if lhs.volume != rhs.volume {
+            return false
+        }
+        if lhs.spatialPosition != rhs.spatialPosition {
+            return false
+        }
+        if lhs.secret != rhs.secret {
+            return false
+        }
+        if lhs.audioLevelAverage != rhs.audioLevelAverage {
+            return false
+        }
+        if lhs.audioActivePackets != rhs.audioActivePackets {
+            return false
+        }
+        if lhs.record != rhs.record {
+            return false
+        }
+        if lhs.filename != rhs.filename {
+            return false
+        }
+        if lhs.generateOffer != rhs.generateOffer {
+            return false
+        }
+        if lhs.rtp != rhs.rtp {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(group)
+        hasher.combine(pin)
+        hasher.combine(display)
+        hasher.combine(token)
+        hasher.combine(muted)
+        hasher.combine(suspended)
+        hasher.combine(pauseEvents)
+        hasher.combine(codec)
+        hasher.combine(bitrate)
+        hasher.combine(quality)
+        hasher.combine(expectedLoss)
+        hasher.combine(volume)
+        hasher.combine(spatialPosition)
+        hasher.combine(secret)
+        hasher.combine(audioLevelAverage)
+        hasher.combine(audioActivePackets)
+        hasher.combine(record)
+        hasher.combine(filename)
+        hasher.combine(generateOffer)
+        hasher.combine(rtp)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeAudioBridgeJoinParamsOptional: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AudioBridgeJoinParamsOptional {
+        return
+            try AudioBridgeJoinParamsOptional(
+                id: FfiConverterOptionTypeJanusId.read(from: &buf), 
+                group: FfiConverterOptionString.read(from: &buf), 
+                pin: FfiConverterOptionString.read(from: &buf), 
+                display: FfiConverterOptionString.read(from: &buf), 
+                token: FfiConverterOptionString.read(from: &buf), 
+                muted: FfiConverterOptionBool.read(from: &buf), 
+                suspended: FfiConverterOptionBool.read(from: &buf), 
+                pauseEvents: FfiConverterOptionBool.read(from: &buf), 
+                codec: FfiConverterOptionTypeAudioBridgeCodec.read(from: &buf), 
+                bitrate: FfiConverterOptionUInt64.read(from: &buf), 
+                quality: FfiConverterOptionUInt8.read(from: &buf), 
+                expectedLoss: FfiConverterOptionUInt8.read(from: &buf), 
+                volume: FfiConverterOptionUInt64.read(from: &buf), 
+                spatialPosition: FfiConverterOptionUInt8.read(from: &buf), 
+                secret: FfiConverterOptionString.read(from: &buf), 
+                audioLevelAverage: FfiConverterOptionUInt64.read(from: &buf), 
+                audioActivePackets: FfiConverterOptionUInt64.read(from: &buf), 
+                record: FfiConverterOptionBool.read(from: &buf), 
+                filename: FfiConverterOptionString.read(from: &buf), 
+                generateOffer: FfiConverterOptionBool.read(from: &buf), 
+                rtp: FfiConverterOptionTypeAudioBridgeRTP.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: AudioBridgeJoinParamsOptional, into buf: inout [UInt8]) {
+        FfiConverterOptionTypeJanusId.write(value.id, into: &buf)
+        FfiConverterOptionString.write(value.group, into: &buf)
+        FfiConverterOptionString.write(value.pin, into: &buf)
+        FfiConverterOptionString.write(value.display, into: &buf)
+        FfiConverterOptionString.write(value.token, into: &buf)
+        FfiConverterOptionBool.write(value.muted, into: &buf)
+        FfiConverterOptionBool.write(value.suspended, into: &buf)
+        FfiConverterOptionBool.write(value.pauseEvents, into: &buf)
+        FfiConverterOptionTypeAudioBridgeCodec.write(value.codec, into: &buf)
+        FfiConverterOptionUInt64.write(value.bitrate, into: &buf)
+        FfiConverterOptionUInt8.write(value.quality, into: &buf)
+        FfiConverterOptionUInt8.write(value.expectedLoss, into: &buf)
+        FfiConverterOptionUInt64.write(value.volume, into: &buf)
+        FfiConverterOptionUInt8.write(value.spatialPosition, into: &buf)
+        FfiConverterOptionString.write(value.secret, into: &buf)
+        FfiConverterOptionUInt64.write(value.audioLevelAverage, into: &buf)
+        FfiConverterOptionUInt64.write(value.audioActivePackets, into: &buf)
+        FfiConverterOptionBool.write(value.record, into: &buf)
+        FfiConverterOptionString.write(value.filename, into: &buf)
+        FfiConverterOptionBool.write(value.generateOffer, into: &buf)
+        FfiConverterOptionTypeAudioBridgeRTP.write(value.rtp, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeJoinParamsOptional_lift(_ buf: RustBuffer) throws -> AudioBridgeJoinParamsOptional {
+    return try FfiConverterTypeAudioBridgeJoinParamsOptional.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeJoinParamsOptional_lower(_ value: AudioBridgeJoinParamsOptional) -> RustBuffer {
+    return FfiConverterTypeAudioBridgeJoinParamsOptional.lower(value)
+}
+
+
+public struct AudioBridgeListParticipantsRsp {
+    public let room: JanusId
+    public let participants: [AudioBridgeParticipant]
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(room: JanusId, participants: [AudioBridgeParticipant]) {
+        self.room = room
+        self.participants = participants
+    }
+}
+
+#if compiler(>=6)
+extension AudioBridgeListParticipantsRsp: Sendable {}
+#endif
+
+
+extension AudioBridgeListParticipantsRsp: Equatable, Hashable {
+    public static func ==(lhs: AudioBridgeListParticipantsRsp, rhs: AudioBridgeListParticipantsRsp) -> Bool {
+        if lhs.room != rhs.room {
+            return false
+        }
+        if lhs.participants != rhs.participants {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(room)
+        hasher.combine(participants)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeAudioBridgeListParticipantsRsp: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AudioBridgeListParticipantsRsp {
+        return
+            try AudioBridgeListParticipantsRsp(
+                room: FfiConverterTypeJanusId.read(from: &buf), 
+                participants: FfiConverterSequenceTypeAudioBridgeParticipant.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: AudioBridgeListParticipantsRsp, into buf: inout [UInt8]) {
+        FfiConverterTypeJanusId.write(value.room, into: &buf)
+        FfiConverterSequenceTypeAudioBridgeParticipant.write(value.participants, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeListParticipantsRsp_lift(_ buf: RustBuffer) throws -> AudioBridgeListParticipantsRsp {
+    return try FfiConverterTypeAudioBridgeListParticipantsRsp.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeListParticipantsRsp_lower(_ value: AudioBridgeListParticipantsRsp) -> RustBuffer {
+    return FfiConverterTypeAudioBridgeListParticipantsRsp.lower(value)
+}
+
+
+public struct AudioBridgeParticipant {
+    public let id: JanusId
+    public let display: String?
+    public let setup: Bool
+    public let muted: Bool
+    public let suspended: Bool?
+    public let talking: Bool?
+    public let spatialPosition: UInt64?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(id: JanusId, display: String?, setup: Bool, muted: Bool, suspended: Bool?, talking: Bool?, spatialPosition: UInt64?) {
+        self.id = id
+        self.display = display
+        self.setup = setup
+        self.muted = muted
+        self.suspended = suspended
+        self.talking = talking
+        self.spatialPosition = spatialPosition
+    }
+}
+
+#if compiler(>=6)
+extension AudioBridgeParticipant: Sendable {}
+#endif
+
+
+extension AudioBridgeParticipant: Equatable, Hashable {
+    public static func ==(lhs: AudioBridgeParticipant, rhs: AudioBridgeParticipant) -> Bool {
+        if lhs.id != rhs.id {
+            return false
+        }
+        if lhs.display != rhs.display {
+            return false
+        }
+        if lhs.setup != rhs.setup {
+            return false
+        }
+        if lhs.muted != rhs.muted {
+            return false
+        }
+        if lhs.suspended != rhs.suspended {
+            return false
+        }
+        if lhs.talking != rhs.talking {
+            return false
+        }
+        if lhs.spatialPosition != rhs.spatialPosition {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(display)
+        hasher.combine(setup)
+        hasher.combine(muted)
+        hasher.combine(suspended)
+        hasher.combine(talking)
+        hasher.combine(spatialPosition)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeAudioBridgeParticipant: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AudioBridgeParticipant {
+        return
+            try AudioBridgeParticipant(
+                id: FfiConverterTypeJanusId.read(from: &buf), 
+                display: FfiConverterOptionString.read(from: &buf), 
+                setup: FfiConverterBool.read(from: &buf), 
+                muted: FfiConverterBool.read(from: &buf), 
+                suspended: FfiConverterOptionBool.read(from: &buf), 
+                talking: FfiConverterOptionBool.read(from: &buf), 
+                spatialPosition: FfiConverterOptionUInt64.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: AudioBridgeParticipant, into buf: inout [UInt8]) {
+        FfiConverterTypeJanusId.write(value.id, into: &buf)
+        FfiConverterOptionString.write(value.display, into: &buf)
+        FfiConverterBool.write(value.setup, into: &buf)
+        FfiConverterBool.write(value.muted, into: &buf)
+        FfiConverterOptionBool.write(value.suspended, into: &buf)
+        FfiConverterOptionBool.write(value.talking, into: &buf)
+        FfiConverterOptionUInt64.write(value.spatialPosition, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeParticipant_lift(_ buf: RustBuffer) throws -> AudioBridgeParticipant {
+    return try FfiConverterTypeAudioBridgeParticipant.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeParticipant_lower(_ value: AudioBridgeParticipant) -> RustBuffer {
+    return FfiConverterTypeAudioBridgeParticipant.lower(value)
+}
+
+
+public struct AudioBridgeRtp {
+    public let required: AudioBridgeRtpRequired
+    public let optional: AudioBridgeRtpOptional
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(required: AudioBridgeRtpRequired, optional: AudioBridgeRtpOptional) {
+        self.required = required
+        self.optional = optional
+    }
+}
+
+#if compiler(>=6)
+extension AudioBridgeRtp: Sendable {}
+#endif
+
+
+extension AudioBridgeRtp: Equatable, Hashable {
+    public static func ==(lhs: AudioBridgeRtp, rhs: AudioBridgeRtp) -> Bool {
+        if lhs.required != rhs.required {
+            return false
+        }
+        if lhs.optional != rhs.optional {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(required)
+        hasher.combine(optional)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeAudioBridgeRTP: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AudioBridgeRtp {
+        return
+            try AudioBridgeRtp(
+                required: FfiConverterTypeAudioBridgeRTPRequired.read(from: &buf), 
+                optional: FfiConverterTypeAudioBridgeRTPOptional.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: AudioBridgeRtp, into buf: inout [UInt8]) {
+        FfiConverterTypeAudioBridgeRTPRequired.write(value.required, into: &buf)
+        FfiConverterTypeAudioBridgeRTPOptional.write(value.optional, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeRTP_lift(_ buf: RustBuffer) throws -> AudioBridgeRtp {
+    return try FfiConverterTypeAudioBridgeRTP.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeRTP_lower(_ value: AudioBridgeRtp) -> RustBuffer {
+    return FfiConverterTypeAudioBridgeRTP.lower(value)
+}
+
+
+public struct AudioBridgeRtpOptional {
+    public let payloadType: String?
+    public let audiolevelExt: String?
+    public let fec: Bool?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(payloadType: String?, audiolevelExt: String?, fec: Bool?) {
+        self.payloadType = payloadType
+        self.audiolevelExt = audiolevelExt
+        self.fec = fec
+    }
+}
+
+#if compiler(>=6)
+extension AudioBridgeRtpOptional: Sendable {}
+#endif
+
+
+extension AudioBridgeRtpOptional: Equatable, Hashable {
+    public static func ==(lhs: AudioBridgeRtpOptional, rhs: AudioBridgeRtpOptional) -> Bool {
+        if lhs.payloadType != rhs.payloadType {
+            return false
+        }
+        if lhs.audiolevelExt != rhs.audiolevelExt {
+            return false
+        }
+        if lhs.fec != rhs.fec {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(payloadType)
+        hasher.combine(audiolevelExt)
+        hasher.combine(fec)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeAudioBridgeRTPOptional: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AudioBridgeRtpOptional {
+        return
+            try AudioBridgeRtpOptional(
+                payloadType: FfiConverterOptionString.read(from: &buf), 
+                audiolevelExt: FfiConverterOptionString.read(from: &buf), 
+                fec: FfiConverterOptionBool.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: AudioBridgeRtpOptional, into buf: inout [UInt8]) {
+        FfiConverterOptionString.write(value.payloadType, into: &buf)
+        FfiConverterOptionString.write(value.audiolevelExt, into: &buf)
+        FfiConverterOptionBool.write(value.fec, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeRTPOptional_lift(_ buf: RustBuffer) throws -> AudioBridgeRtpOptional {
+    return try FfiConverterTypeAudioBridgeRTPOptional.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeRTPOptional_lower(_ value: AudioBridgeRtpOptional) -> RustBuffer {
+    return FfiConverterTypeAudioBridgeRTPOptional.lower(value)
+}
+
+
+public struct AudioBridgeRtpRequired {
+    public let ip: String
+    public let port: UInt16
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(ip: String, port: UInt16) {
+        self.ip = ip
+        self.port = port
+    }
+}
+
+#if compiler(>=6)
+extension AudioBridgeRtpRequired: Sendable {}
+#endif
+
+
+extension AudioBridgeRtpRequired: Equatable, Hashable {
+    public static func ==(lhs: AudioBridgeRtpRequired, rhs: AudioBridgeRtpRequired) -> Bool {
+        if lhs.ip != rhs.ip {
+            return false
+        }
+        if lhs.port != rhs.port {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(ip)
+        hasher.combine(port)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeAudioBridgeRTPRequired: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AudioBridgeRtpRequired {
+        return
+            try AudioBridgeRtpRequired(
+                ip: FfiConverterString.read(from: &buf), 
+                port: FfiConverterUInt16.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: AudioBridgeRtpRequired, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.ip, into: &buf)
+        FfiConverterUInt16.write(value.port, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeRTPRequired_lift(_ buf: RustBuffer) throws -> AudioBridgeRtpRequired {
+    return try FfiConverterTypeAudioBridgeRTPRequired.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeRTPRequired_lower(_ value: AudioBridgeRtpRequired) -> RustBuffer {
+    return FfiConverterTypeAudioBridgeRTPRequired.lower(value)
+}
+
+
 public struct AudioBridgeRoomCreatedRsp {
     public let room: JanusId
     public let permanent: Bool
@@ -3063,6 +3756,86 @@ public func FfiConverterTypeU63_lift(_ buf: RustBuffer) throws -> U63 {
 public func FfiConverterTypeU63_lower(_ value: U63) -> RustBuffer {
     return FfiConverterTypeU63.lower(value)
 }
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+
+public enum AudioBridgeCodec {
+    
+    case opus
+    /**
+     * A-Law
+     */
+    case pcma
+    /**
+     * mu-Law
+     */
+    case pcmu
+}
+
+
+#if compiler(>=6)
+extension AudioBridgeCodec: Sendable {}
+#endif
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeAudioBridgeCodec: FfiConverterRustBuffer {
+    typealias SwiftType = AudioBridgeCodec
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AudioBridgeCodec {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .opus
+        
+        case 2: return .pcma
+        
+        case 3: return .pcmu
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: AudioBridgeCodec, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .opus:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .pcma:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .pcmu:
+            writeInt(&buf, Int32(3))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeCodec_lift(_ buf: RustBuffer) throws -> AudioBridgeCodec {
+    return try FfiConverterTypeAudioBridgeCodec.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeCodec_lower(_ value: AudioBridgeCodec) -> RustBuffer {
+    return FfiConverterTypeAudioBridgeCodec.lower(value)
+}
+
+
+extension AudioBridgeCodec: Equatable, Hashable {}
+
+
 
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
@@ -4171,6 +4944,30 @@ public func FfiConverterCallbackInterfaceHandleCallback_lower(_ v: HandleCallbac
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterOptionUInt8: FfiConverterRustBuffer {
+    typealias SwiftType = UInt8?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterUInt8.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterUInt8.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterOptionUInt32: FfiConverterRustBuffer {
     typealias SwiftType = UInt32?
 
@@ -4291,6 +5088,78 @@ fileprivate struct FfiConverterOptionString: FfiConverterRustBuffer {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterOptionTypeAudioBridgeRTP: FfiConverterRustBuffer {
+    typealias SwiftType = AudioBridgeRtp?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeAudioBridgeRTP.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeAudioBridgeRTP.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionTypeJsep: FfiConverterRustBuffer {
+    typealias SwiftType = Jsep?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeJsep.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeJsep.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionTypeAudioBridgeCodec: FfiConverterRustBuffer {
+    typealias SwiftType = AudioBridgeCodec?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeAudioBridgeCodec.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeAudioBridgeCodec.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterOptionTypeJanusId: FfiConverterRustBuffer {
     typealias SwiftType = JanusId?
 
@@ -4356,6 +5225,31 @@ fileprivate struct FfiConverterSequenceString: FfiConverterRustBuffer {
         seq.reserveCapacity(Int(len))
         for _ in 0 ..< len {
             seq.append(try FfiConverterString.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceTypeAudioBridgeParticipant: FfiConverterRustBuffer {
+    typealias SwiftType = [AudioBridgeParticipant]
+
+    public static func write(_ value: [AudioBridgeParticipant], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeAudioBridgeParticipant.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [AudioBridgeParticipant] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [AudioBridgeParticipant]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeAudioBridgeParticipant.read(from: &buf))
         }
         return seq
     }
@@ -4533,6 +5427,9 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_detach() != 50253) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_exist() != 55415) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_fire_and_forget() != 33585) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -4540,6 +5437,12 @@ private let initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_hangup() != 1409) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_join_room() != 4666) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_list_participants() != 7752) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_send_waiton_ack() != 44496) {

@@ -63,7 +63,7 @@ impl Session {
             Ok(handle) => handle,
             Err(why) => {
                 return Err(JanusGatewayHandleError::HandleCreationFailure {
-                    plugin: "echotest".to_string(),
+                    plugin: "audiobridge".to_string(),
                     reason: why.to_string(),
                 })
             }

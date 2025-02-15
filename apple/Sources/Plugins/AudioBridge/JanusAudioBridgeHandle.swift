@@ -15,6 +15,31 @@ public final class JanusAudioBridgeHandle {
         try await handle.createRoom(params: params, timeout: timeout)
     }
 
+    public func exist(roomId: JanusId, timeout: TimeInterval) async throws -> Bool {
+        try await handle.exist(roomId: roomId, timeout: timeout)
+    }
+
+    public func listParticipants(
+        roomId: JanusId, timeout: TimeInterval
+    ) async throws -> AudioBridgeListParticipantsRsp {
+        try await handle.listParticipants(roomId: roomId, timeout: timeout)
+    }
+
+    public func joinRoom(
+        roomId: JanusId,
+        params: AudioBridgeJoinParamsOptional,
+        jsep: Jsep?,
+        timeout: TimeInterval
+    ) async throws {
+        try await handle
+            .joinRoom(
+                roomId: roomId,
+                params: params,
+                jsep: jsep,
+                timeout: timeout
+            )
+    }
+
     /// Sends a message without waiting for any response or acknowledgment
     ///
     /// - Parameters:
