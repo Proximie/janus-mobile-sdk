@@ -139,15 +139,12 @@ extension JanusAudioBridgeHandle: AudioBridgeHandleCallback {
         participants: [AudioBridgeParticipant],
         jsep: Jsep
     ) {
-        subject
-            .send(
-                .roomJoinedWithJsep(
-                    id: id,
-                    room: room,
-                    participants: participants,
-                    jsep: jsep
-                )
-            )
+        subject.send(.roomJoinedWithJsep(
+            id: id,
+            room: room,
+            participants: participants,
+            jsep: jsep
+        ))
     }
 
     public func onRoomJoined(

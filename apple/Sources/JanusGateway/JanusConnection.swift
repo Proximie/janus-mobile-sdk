@@ -16,9 +16,6 @@ public struct JanusConnection {
     /// - Returns: A connection with janus server
     public static func connect(config: JanusConfig) async throws -> Self {
         let connection = try await rawJanusConnect(config: config.lower)
-        if CommandLine.arguments.contains("-JanusGatewayLogs") {
-            JanusLogger.initLogger()
-        }
         return JanusConnection(connection: connection)
     }
 

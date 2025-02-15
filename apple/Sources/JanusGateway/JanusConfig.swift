@@ -1,15 +1,16 @@
+import Foundation
 import JanusGatewayBindings
 
 /// A struct describing a janus server (e.g. url, secret).
 public struct JanusConfig {
-    let url: String
+    let url: URL
     let capacity: UInt16
     let serverRoot: String
     let apisecret: String?
 
     var lower: Config {
         Config(
-            url: url,
+            url: url.absoluteString,
             capacity: capacity,
             apisecret: apisecret,
             serverRoot: serverRoot
@@ -22,7 +23,7 @@ public struct JanusConfig {
     ///     - serverRoot: The connection server root, default ot "janus"
     ///     - apisecret: The API secret for this server
     public init(
-        url: String,
+        url: URL,
         capacity: UInt16,
         serverRoot: String = "janus",
         apisecret: String? = nil
