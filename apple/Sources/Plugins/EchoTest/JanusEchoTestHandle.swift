@@ -1,3 +1,4 @@
+@preconcurrency import Combine
 import Foundation
 import JanusGatewayBindings
 
@@ -6,25 +7,30 @@ import JanusGatewayBindings
 /// The purpose of this plugin is for testing. A peer attaching to this plugin will receive the same packets he
 /// sends.
 public final class JanusEchoTestHandle {
-    let handle: EchotestHandle
-    public var delegate: JanusEchoTestHandleDelegate?
-    private var continuation: AsyncStream<JanusEchoTestEvent>.Continuation?
+    private let sharedPublisher: AnyPublisher<JanusEchoTestEvent, Never>
+    private nonisolated let subject = PassthroughSubject<JanusEchoTestEvent, Never>()
+    private var cancellables = Set<AnyCancellable>()
+    private let handle: EchotestHandle
+
+    init(handle: EchotestHandle) {
+        self.handle = handle
+        self.sharedPublisher = subject
+            .share()
+            .eraseToAnyPublisher()
+    }
 
     /// Get an async stream of incoming Janus echotest events, check ``JanusEchoTestEvent``
     ///
     /// - Returns: An async stream of incoming events as ``JanusEchoTestEvent``
-    public var events: AsyncStream<JanusEchoTestEvent> {
-        get async {
-            await handle.startEventLoop(cb: self)
+    public func events() async -> AsyncStream<JanusEchoTestEvent> {
+        await handle.startEventLoop(cb: self)
+        let stream = AsyncStream<JanusEchoTestEvent>.makeStream()
 
-            return AsyncStream { continuation in
-                self.continuation = continuation
-            }
-        }
-    }
+        sharedPublisher
+            .sink { stream.continuation.yield($0) }
+            .store(in: &cancellables)
 
-    init(handle: EchotestHandle) {
-        self.handle = handle
+        return stream.stream
     }
 
     /// Start the testing
@@ -134,28 +140,21 @@ public final class JanusEchoTestHandle {
 }
 
 extension JanusEchoTestHandle: EchotestHandleCallback {
-    public func onResult(echotest: String, result: String) {
-        delegate?.didReceiveEchoTestEvent(echotest: echotest, result: result)
-        continuation?.yield(.result(echotest: echotest, result: result))
+    nonisolated public func onResult(echotest: String, result: String) {
+        subject.send(.result(echotest: echotest, result: result))
     }
 
-    public func onResultWithJsep(echotest: String, result: String, jsep: Jsep) {
-        delegate?.didReceiveEchoTestEvent(
-            echotest: echotest, result: result, jsep: jsep
-        )
-        continuation?.yield(
-            .resultWithJsep(echotest: echotest, result: result, jsep: jsep)
-        )
+    nonisolated public func onResultWithJsep(echotest: String, result: String, jsep: Jsep) {
+        subject.send(.resultWithJsep(echotest: echotest, result: result, jsep: jsep))
     }
 
-    public func onEchoTestError(errorCode: UInt16, error: String) {
-        delegate?.didReceiveEchoTestError(errorCode: errorCode, error: error)
-        continuation?.yield(.error(errorCode: errorCode, error: error))
+    nonisolated public func onEchoTestError(errorCode: UInt16, error: String) {
+        subject.send(.error(errorCode: errorCode, error: error))
     }
 
-    public func onHandleEvent(event: GenericEvent) {
-        continuation?.yield(.generic(event))
+    nonisolated public func onHandleEvent(event: GenericEvent) {
+        subject.send(.generic(event))
     }
 
-    public func onOther(data: Data) { }
+    nonisolated public func onOther(data: Data) { }
 }

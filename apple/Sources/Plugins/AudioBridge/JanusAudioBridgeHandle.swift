@@ -6,7 +6,7 @@ public actor JanusAudioBridgeHandle {
     private let sharedPublisher: AnyPublisher<JanusAudioBridgeEvent, Never>
     private nonisolated let subject = PassthroughSubject<JanusAudioBridgeEvent, Never>()
     private var cancellables = Set<AnyCancellable>()
-    let handle: AudioBridgeHandle
+    private let handle: AudioBridgeHandle
 
     init(handle: AudioBridgeHandle) {
         self.handle = handle
@@ -16,6 +16,7 @@ public actor JanusAudioBridgeHandle {
     }
 
     public func events() async -> AsyncStream<JanusAudioBridgeEvent> {
+        await handle.startEventLoop(cb: self)
         let stream = AsyncStream<JanusAudioBridgeEvent>.makeStream()
 
         sharedPublisher

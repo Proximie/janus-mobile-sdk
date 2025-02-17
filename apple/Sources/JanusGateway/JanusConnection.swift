@@ -2,7 +2,7 @@ import Foundation
 import JanusGatewayBindings
 
 /// Connection with a Janus server
-public struct JanusConnection {
+public actor JanusConnection {
     let connection: Connection
 
     private init(connection: Connection) {
@@ -14,7 +14,7 @@ public struct JanusConnection {
     /// - Parameters:
     ///     - config: Janus connection configuration
     /// - Returns: A connection with janus server
-    public static func connect(config: JanusConfig) async throws -> Self {
+    public static func connect(config: JanusConfig) async throws -> JanusConnection {
         let connection = try await rawJanusConnect(config: config.lower)
         return JanusConnection(connection: connection)
     }

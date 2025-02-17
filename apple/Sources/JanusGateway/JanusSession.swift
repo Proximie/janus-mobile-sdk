@@ -2,10 +2,14 @@ import Foundation
 import JanusGatewayBindings
 
 /// Client-Server Session with Janus
-public struct JanusSession {
+public actor JanusSession {
     let session: Session
 
     public var lower: Session { session }
+
+    public init(session: Session) {
+        self.session = session
+    }
 
     /// Attach plugin to a janus session
     ///

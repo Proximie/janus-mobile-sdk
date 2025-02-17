@@ -1,27 +1,33 @@
+@preconcurrency import Combine
 import Foundation
 import JanusGatewayBindings
 
 /// General purpose plugin handle
-public final class JanusHandle {
-    let handle: Handle
-    public var delegate: JanusHandleDelegate?
-    private var continuation: AsyncStream<JanusHandleEvent>.Continuation?
+public actor JanusHandle {
+    private let sharedPublisher: AnyPublisher<JanusHandleEvent, Never>
+    private nonisolated let subject = PassthroughSubject<JanusHandleEvent, Never>()
+    private var cancellables = Set<AnyCancellable>()
+    private let handle: Handle
+
+    init(handle: Handle) {
+        self.handle = handle
+        self.sharedPublisher = subject
+            .share()
+            .eraseToAnyPublisher()
+    }
 
     /// Get an async stream of incoming Janus events for this handle
     ///
     /// - Returns: An async stream of incoming events
-    public var events: AsyncStream<JanusHandleEvent> {
-        get async {
-            await handle.startEventLoop(cb: self)
+    public func events() async -> AsyncStream<JanusHandleEvent> {
+        await handle.startEventLoop(cb: self)
+        let stream = AsyncStream<JanusHandleEvent>.makeStream()
 
-            return AsyncStream { continuation in
-                self.continuation = continuation
-            }
-        }
-    }
+        sharedPublisher
+            .sink { stream.continuation.yield($0) }
+            .store(in: &cancellables)
 
-    init(handle: Handle) {
-        self.handle = handle
+        return stream.stream
     }
 
     /// Sends a message without waiting for any response or acknowledgment
@@ -100,13 +106,11 @@ public final class JanusHandle {
 }
 
 extension JanusHandle: HandleCallback {
-    public func onPluginEvent(event: Data) {
-        delegate?.didReceiveHandleEvent(event: .plugin(event))
-        continuation?.yield(.plugin(event))
+    nonisolated public func onPluginEvent(event: Data) {
+        subject.send(.plugin(event))
     }
 
-    public func onHandleEvent(event: GenericEvent) {
-        delegate?.didReceiveHandleEvent(event: .handle(event))
-        continuation?.yield(.handle(event))
+    nonisolated public func onHandleEvent(event: GenericEvent) {
+        subject.send(.handle(event))
     }
 }
