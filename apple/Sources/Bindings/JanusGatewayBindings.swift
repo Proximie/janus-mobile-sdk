@@ -2187,7 +2187,7 @@ public struct AudioBridgeJoinParamsOptional {
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(id: JanusId?, group: String?, pin: String?, display: String?, token: String?, muted: Bool?, suspended: Bool?, pauseEvents: Bool?, codec: AudioBridgeCodec?, bitrate: UInt64?, quality: UInt8?, expectedLoss: UInt8?, volume: UInt64?, spatialPosition: UInt8?, secret: String?, audioLevelAverage: UInt64?, audioActivePackets: UInt64?, record: Bool?, filename: String?, generateOffer: Bool?, rtp: AudioBridgeRtp?) {
+    public init(id: JanusId? = nil, group: String? = nil, pin: String? = nil, display: String? = nil, token: String? = nil, muted: Bool? = nil, suspended: Bool? = nil, pauseEvents: Bool? = nil, codec: AudioBridgeCodec? = nil, bitrate: UInt64? = nil, quality: UInt8? = nil, expectedLoss: UInt8? = nil, volume: UInt64? = nil, spatialPosition: UInt8? = nil, secret: String? = nil, audioLevelAverage: UInt64? = nil, audioActivePackets: UInt64? = nil, record: Bool? = nil, filename: String? = nil, generateOffer: Bool? = nil, rtp: AudioBridgeRtp? = nil) {
         self.id = id
         self.group = group
         self.pin = pin
@@ -2641,7 +2641,7 @@ public struct AudioBridgeRtpOptional {
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(payloadType: String?, audiolevelExt: String?, fec: Bool?) {
+    public init(payloadType: String? = nil, audiolevelExt: String? = nil, fec: Bool? = nil) {
         self.payloadType = payloadType
         self.audiolevelExt = audiolevelExt
         self.fec = fec
