@@ -15,6 +15,7 @@ use jarust::plugins::audio_bridge::handle::AudioBridgeHandle as JaAudioBridgeHan
 use jarust::plugins::audio_bridge::params::AudioBridgeExistsParams;
 use jarust::plugins::audio_bridge::params::AudioBridgeJoinParams;
 use jarust::plugins::audio_bridge::params::AudioBridgeListParticipantsParams;
+use jarust::plugins::audio_bridge::params::AudioBridgeMuteParams;
 use serde_json::Value;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicBool;
@@ -170,6 +171,48 @@ impl AudioBridgeHandle {
                 jsep,
                 timeout,
             )
+            .await
+        {
+            Ok(rsp) => Ok(rsp),
+            Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            }),
+        }
+    }
+
+    pub async fn mute(
+        &self,
+        room_id: JanusId,
+        participant_id: JanusId,
+    ) -> Result<(), JanusGatewayCommunicationError> {
+        match self
+            .inner
+            .mute(AudioBridgeMuteParams {
+                id: participant_id,
+                room: room_id,
+                secret: None,
+            })
+            .await
+        {
+            Ok(rsp) => Ok(rsp),
+            Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            }),
+        }
+    }
+
+    pub async fn unmute(
+        &self,
+        room_id: JanusId,
+        participant_id: JanusId,
+    ) -> Result<(), JanusGatewayCommunicationError> {
+        match self
+            .inner
+            .unmute(AudioBridgeMuteParams {
+                id: participant_id,
+                room: room_id,
+                secret: None,
+            })
             .await
         {
             Ok(rsp) => Ok(rsp),

@@ -611,6 +611,8 @@ public protocol AudioBridgeHandleProtocol: AnyObject {
     
     func listParticipants(roomId: JanusId, timeout: TimeInterval) async throws  -> AudioBridgeListParticipantsRsp
     
+    func mute(roomId: JanusId, participantId: JanusId) async throws 
+    
     func sendWaitonAck(data: Data, timeout: TimeInterval) async throws 
     
     func sendWaitonResult(data: Data, timeout: TimeInterval) async throws  -> Data
@@ -620,6 +622,8 @@ public protocol AudioBridgeHandleProtocol: AnyObject {
     func trickleCandidates(candidates: [Candidate], timeout: TimeInterval) async throws 
     
     func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval) async throws 
+    
+    func unmute(roomId: JanusId, participantId: JanusId) async throws 
     
 }
 open class AudioBridgeHandle: AudioBridgeHandleProtocol, @unchecked Sendable {
@@ -824,6 +828,23 @@ open func listParticipants(roomId: JanusId, timeout: TimeInterval)async throws  
         )
 }
     
+open func mute(roomId: JanusId, participantId: JanusId)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_mute(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeJanusId_lower(roomId),FfiConverterTypeJanusId_lower(participantId)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
 open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws   {
     return
         try  await uniffiRustCallAsync(
@@ -900,6 +921,23 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
                 uniffi_janus_gateway_fn_method_audiobridgehandle_trickle_single_candidate(
                     self.uniffiClonePointer(),
                     FfiConverterTypeCandidate_lower(candidate),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func unmute(roomId: JanusId, participantId: JanusId)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_unmute(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeJanusId_lower(roomId),FfiConverterTypeJanusId_lower(participantId)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_void,
@@ -5591,6 +5629,9 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_list_participants() != 7752) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_mute() != 48931) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_send_waiton_ack() != 44496) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -5604,6 +5645,9 @@ private let initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_trickle_single_candidate() != 56691) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_unmute() != 7093) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_connection_create_session() != 39238) {

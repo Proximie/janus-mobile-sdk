@@ -58,6 +58,14 @@ public actor JanusAudioBridgeHandle {
             )
     }
 
+    public func mute(roomId: JanusId, participantId: JanusId) async throws {
+        try await handle.mute(roomId: roomId, participantId: participantId)
+    }
+
+    public func unmute(roomId: JanusId, participantId: JanusId) async throws {
+        try await handle.unmute(roomId: roomId, participantId: participantId)
+    }
+
     /// Sends a message without waiting for any response or acknowledgment
     ///
     /// - Parameters:
