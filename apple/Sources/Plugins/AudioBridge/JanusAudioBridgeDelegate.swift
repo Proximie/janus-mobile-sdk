@@ -1,3 +1,3 @@
-public protocol JanusAudioBridgeDelegate: Sendable {
+public protocol JanusAudioBridgeDelegate: AnyObject, Sendable {
     func didReceive(audioBridgeEvent: JanusAudioBridgeEvent)
 }

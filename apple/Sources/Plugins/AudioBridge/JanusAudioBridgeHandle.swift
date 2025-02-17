@@ -7,7 +7,7 @@ public actor JanusAudioBridgeHandle {
     private nonisolated let subject = PassthroughSubject<JanusAudioBridgeEvent, Never>()
     private var cancellables = Set<AnyCancellable>()
     private let handle: AudioBridgeHandle
-    private nonisolated let delegate: JanusAudioBridgeDelegate?
+    private nonisolated(unsafe) weak var delegate: JanusAudioBridgeDelegate?
 
     init(
         handle: AudioBridgeHandle,
