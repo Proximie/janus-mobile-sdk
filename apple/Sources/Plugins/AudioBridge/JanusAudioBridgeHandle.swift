@@ -71,6 +71,10 @@ public actor JanusAudioBridgeHandle {
         try await handle.unmute(roomId: roomId, participantId: participantId)
     }
 
+    public func startEventLoop() async {
+        await handle.startEventLoop(cb: self)
+    }
+
     /// Sends a message without waiting for any response or acknowledgment
     ///
     /// - Parameters:
