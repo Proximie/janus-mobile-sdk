@@ -1,6 +1,6 @@
 import JanusGatewayBindings
 
-public enum JanusAudioBridgeEvent {
+public enum JanusAudioBridgeEvent: Sendable {
     case roomJoinedWithJsep(
         id: JanusId,
         room: JanusId,

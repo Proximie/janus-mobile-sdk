@@ -1,10 +1,10 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 // Never push to remote with this flag set to true
-let useLocalFramework = false
+let useLocalFramework = true
 let releaseTag = "0.5.0"
 let releaseChecksum = "2223a0034723ffccc1f53232a672e855d52e79c24f9cf8f5c385e714ee55780e"
 

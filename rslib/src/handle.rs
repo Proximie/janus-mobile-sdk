@@ -9,6 +9,8 @@ use jarust::interface::japrotocol::JaResponse;
 use jarust::interface::japrotocol::ResponseType;
 use serde_json::Value;
 use std::fmt::Debug;
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::Ordering;
 use std::sync::Mutex;
 use std::time::Duration;
 use tokio::sync::mpsc;
@@ -19,6 +21,7 @@ pub struct Handle {
     inner: JaHandle,
     receiver: Mutex<Option<mpsc::UnboundedReceiver<JaResponse>>>,
     abort_handle: Mutex<Option<AbortHandle>>,
+    is_event_loop_running: AtomicBool,
 }
 
 impl Handle {
@@ -27,6 +30,7 @@ impl Handle {
             inner: handle,
             receiver: Mutex::new(Some(receiver)),
             abort_handle: Mutex::new(None),
+            is_event_loop_running: AtomicBool::new(false),
         }
     }
 }
@@ -34,6 +38,10 @@ impl Handle {
 #[uniffi::export(async_runtime = "tokio")]
 impl Handle {
     pub async fn start_event_loop(&self, cb: Box<dyn HandleCallback>) {
+        if self.is_event_loop_running.load(Ordering::Relaxed) {
+            return;
+        }
+
         let Ok(Some(mut receiver)) = self.receiver.lock().map(|mut x| x.take()) else {
             return;
         };
@@ -58,6 +66,7 @@ impl Handle {
         if let Ok(mut abort_handle) = self.abort_handle.lock() {
             *abort_handle = Some(join_handle.abort_handle());
         }
+        self.is_event_loop_running.store(true, Ordering::Relaxed);
     }
 }
 

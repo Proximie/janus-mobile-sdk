@@ -56,26 +56,47 @@ pub struct AudioBridgeCreateParams {
 
 #[uniffi::remote(Record)]
 pub struct AudioBridgeJoinParamsOptional {
+    #[uniffi(default = None)]
     id: Option<JanusId>,
+    #[uniffi(default = None)]
     group: Option<String>,
+    #[uniffi(default = None)]
     pin: Option<String>,
+    #[uniffi(default = None)]
     display: Option<String>,
+    #[uniffi(default = None)]
     token: Option<String>,
+    #[uniffi(default = None)]
     muted: Option<bool>,
+    #[uniffi(default = None)]
     suspended: Option<bool>,
+    #[uniffi(default = None)]
     pause_events: Option<bool>,
+    #[uniffi(default = None)]
     codec: Option<AudioBridgeCodec>,
+    #[uniffi(default = None)]
     bitrate: Option<u64>,
+    #[uniffi(default = None)]
     quality: Option<u8>,
+    #[uniffi(default = None)]
     expected_loss: Option<u8>,
+    #[uniffi(default = None)]
     volume: Option<u64>,
+    #[uniffi(default = None)]
     spatial_position: Option<u8>,
+    #[uniffi(default = None)]
     secret: Option<String>,
+    #[uniffi(default = None)]
     audio_level_average: Option<u64>,
+    #[uniffi(default = None)]
     audio_active_packets: Option<u64>,
+    #[uniffi(default = None)]
     record: Option<bool>,
+    #[uniffi(default = None)]
     filename: Option<String>,
+    #[uniffi(default = None)]
     generate_offer: Option<bool>,
+    #[uniffi(default = None)]
     rtp: Option<AudioBridgeRTP>,
 }
 
@@ -102,7 +123,10 @@ pub struct AudioBridgeRTPRequired {
 
 #[uniffi::remote(Record)]
 pub struct AudioBridgeRTPOptional {
+    #[uniffi(default = None)]
     payload_type: Option<String>,
+    #[uniffi(default = None)]
     audiolevel_ext: Option<String>,
+    #[uniffi(default = None)]
     fec: Option<bool>,
 }
