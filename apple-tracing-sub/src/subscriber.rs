@@ -1,6 +1,7 @@
 use crate::apple_log::AppleLog;
 use core::fmt;
 use tracing_core::field::Visit;
+use tracing_core::span;
 use tracing_core::Event;
 use tracing_core::Field;
 use tracing_core::Subscriber;
@@ -24,12 +25,22 @@ impl<S> Layer<S> for AppleTracingSubscriber
 where
     S: Subscriber + for<'a> LookupSpan<'a>,
 {
-    fn on_event(&self, event: &Event<'_>, _ctx: Context<'_, S>) {
+    fn on_event(&self, event: &Event<'_>, ctx: Context<'_, S>) {
         let mut visitor = EventVisitor::default();
         event.record(&mut visitor);
-        self.logger
-            .log(&format!("{:#?}", visitor), *event.metadata().level());
+        let message = match ctx.lookup_current() {
+            Some(span) => format!(
+                "{}: {} {:#?}",
+                span.metadata().name(),
+                event.metadata().target(),
+                visitor
+            ),
+            None => format!("{} {:#?}", event.metadata().target(), visitor),
+        };
+        self.logger.log(&message, *event.metadata().level());
     }
+
+    fn on_enter(&self, _id: &span::Id, _ctx: Context<'_, S>) {}
 }
 
 #[derive(Default)]
@@ -48,7 +59,7 @@ impl Visit for EventVisitor {
         if field.name() == "message" {
             self.fields.push(format!("{value:?}"));
         } else {
-            self.fields.push(format!("{}= {:?}", field.name(), value));
+            self.fields.push(format!("[{}={:?}]", field.name(), value));
         }
     }
 }
