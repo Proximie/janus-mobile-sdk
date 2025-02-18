@@ -27,6 +27,7 @@ let package = Package(
     products: [
         .library(name: "JanusGateway", targets: ["JanusGateway"]),
         .library(name: "JanusGatewayPlugins", targets: ["JanusGatewayPlugins"]),
+        .library(name: "JanusGatewayBindings", targets: ["JanusGatewayBindings"])
     ],
     targets: [
         binaryTarget,

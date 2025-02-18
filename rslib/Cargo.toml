@@ -21,7 +21,7 @@ tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 uniffi = { workspace = true, features = ["tokio"] }
 
 [target.'cfg(target_os = "ios")'.dependencies]
-oslog = "0.2.0"
+apple-tracing-sub = { version = "*", path = "../apple-tracing-sub" }
 
 [target.'cfg(target_os = "android")'.dependencies]
 android_logger = "0.14.1"
