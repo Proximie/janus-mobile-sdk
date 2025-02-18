@@ -5579,6 +5579,13 @@ fileprivate func uniffiFutureContinuationCallback(handle: UInt64, pollResult: In
         print("uniffiFutureContinuationCallback invalid handle")
     }
 }
+public func initJanusLogger(subsystem: String, category: String)  {try! rustCall() {
+    uniffi_janus_gateway_fn_func_init_janus_logger(
+        FfiConverterString.lower(subsystem),
+        FfiConverterString.lower(category),$0
+    )
+}
+}
 public func janusConnect(config: Config)async throws  -> Connection  {
     return
         try  await uniffiRustCallAsync(
@@ -5592,13 +5599,6 @@ public func janusConnect(config: Config)async throws  -> Connection  {
             liftFunc: FfiConverterTypeConnection_lift,
             errorHandler: FfiConverterTypeJanusGatewayConnectionError.lift
         )
-}
-public func rawInitLogger(subsystem: String, category: String)  {try! rustCall() {
-    uniffi_janus_gateway_fn_func_raw_init_logger(
-        FfiConverterString.lower(subsystem),
-        FfiConverterString.lower(category),$0
-    )
-}
 }
 
 private enum InitializationResult {
@@ -5616,10 +5616,10 @@ private let initializationResult: InitializationResult = {
     if bindings_contract_version != scaffolding_contract_version {
         return InitializationResult.contractVersionMismatch
     }
-    if (uniffi_janus_gateway_checksum_func_janus_connect() != 27438) {
+    if (uniffi_janus_gateway_checksum_func_init_janus_logger() != 56827) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_func_raw_init_logger() != 46223) {
+    if (uniffi_janus_gateway_checksum_func_janus_connect() != 27438) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_complete_trickle() != 64327) {

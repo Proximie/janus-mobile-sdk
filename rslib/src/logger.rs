@@ -1,5 +1,5 @@
 #[uniffi::export]
-pub fn raw_init_logger(subsystem: &str, category: &str) {
+pub fn init_janus_logger(subsystem: &str, category: &str) {
     #[cfg(target_os = "android")]
     {
         tracing_subscriber::fmt()
