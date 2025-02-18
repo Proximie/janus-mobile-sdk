@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["rslib", "uniffi-bindgen"]
+members = ["apple-tracing-sub", "rslib", "uniffi-bindgen"]
 
 [workspace.dependencies]
 uniffi = "0.29.0"
