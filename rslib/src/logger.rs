@@ -17,7 +17,7 @@ pub fn raw_init_logger(subsystem: &str, category: &str) {
         );
     }
 
-    #[cfg(target_os = "ios")]
+    #[cfg(any(target_os = "ios", target_os = "macos"))]
     {
         use apple_tracing_sub::subscriber::AppleTracingSubscriber;
         use tracing_subscriber::layer::SubscriberExt;
