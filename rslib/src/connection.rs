@@ -17,7 +17,7 @@ pub struct Connection {
 }
 
 #[uniffi::export(async_runtime = "tokio")]
-pub async fn raw_janus_connect(config: Config) -> Result<Connection, JanusGatewayConnectionError> {
+pub async fn janus_connect(config: Config) -> Result<Connection, JanusGatewayConnectionError> {
     let config = JaConfig {
         url: config.url,
         capacity: config.capacity.into(),
@@ -41,11 +41,14 @@ pub async fn raw_janus_connect(config: Config) -> Result<Connection, JanusGatewa
 impl Connection {
     pub async fn create_session(
         &self,
-        ka_interval: u32,
+        keep_alive_interval_in_secs: u32,
         timeout: Duration,
     ) -> Result<Session, JanusGatewaySessionError> {
         let mut connection = self.inner.clone();
-        let session = match connection.create_session(ka_interval, timeout).await {
+        let session = match connection
+            .create_session(keep_alive_interval_in_secs, timeout)
+            .await
+        {
             Ok(session) => session,
             Err(why) => {
                 return Err(JanusGatewaySessionError::SessionCreationFailure {

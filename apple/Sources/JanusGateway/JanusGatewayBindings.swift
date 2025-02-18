@@ -1008,7 +1008,7 @@ public func FfiConverterTypeAudioBridgeHandle_lower(_ value: AudioBridgeHandle) 
 
 public protocol ConnectionProtocol: AnyObject {
     
-    func createSession(kaInterval: UInt32, timeout: TimeInterval) async throws  -> Session
+    func createSession(keepAliveIntervalInSecs: UInt32, timeout: TimeInterval) async throws  -> Session
     
     func serverInfo(timeout: TimeInterval) async throws  -> ServerInfoRsp
     
@@ -1062,13 +1062,13 @@ open class Connection: ConnectionProtocol, @unchecked Sendable {
     
 
     
-open func createSession(kaInterval: UInt32, timeout: TimeInterval)async throws  -> Session  {
+open func createSession(keepAliveIntervalInSecs: UInt32, timeout: TimeInterval)async throws  -> Session  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_connection_create_session(
                     self.uniffiClonePointer(),
-                    FfiConverterUInt32.lower(kaInterval),FfiConverterDuration.lower(timeout)
+                    FfiConverterUInt32.lower(keepAliveIntervalInSecs),FfiConverterDuration.lower(timeout)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_pointer,
@@ -2969,14 +2969,32 @@ public func FfiConverterTypeCandidate_lower(_ value: Candidate) -> RustBuffer {
 
 
 public struct Config {
+    /**
+     * Server URL
+     */
     public let url: String
+    /**
+     * Buffer capacity
+     */
     public let capacity: UInt16
+    /**
+     * API secret
+     */
     public let apisecret: String?
     public let serverRoot: String
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(url: String, capacity: UInt16, apisecret: String?, serverRoot: String = "janus") {
+    public init(
+        /**
+         * Server URL
+         */url: String, 
+        /**
+         * Buffer capacity
+         */capacity: UInt16, 
+        /**
+         * API secret
+         */apisecret: String? = nil, serverRoot: String = "janus") {
         self.url = url
         self.capacity = capacity
         self.apisecret = apisecret
@@ -5561,16 +5579,11 @@ fileprivate func uniffiFutureContinuationCallback(handle: UInt64, pollResult: In
         print("uniffiFutureContinuationCallback invalid handle")
     }
 }
-public func rawInitLogger()  {try! rustCall() {
-    uniffi_janus_gateway_fn_func_raw_init_logger($0
-    )
-}
-}
-public func rawJanusConnect(config: Config)async throws  -> Connection  {
+public func janusConnect(config: Config)async throws  -> Connection  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
-                uniffi_janus_gateway_fn_func_raw_janus_connect(FfiConverterTypeConfig_lower(config)
+                uniffi_janus_gateway_fn_func_janus_connect(FfiConverterTypeConfig_lower(config)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_pointer,
@@ -5579,6 +5592,13 @@ public func rawJanusConnect(config: Config)async throws  -> Connection  {
             liftFunc: FfiConverterTypeConnection_lift,
             errorHandler: FfiConverterTypeJanusGatewayConnectionError.lift
         )
+}
+public func rawInitLogger(subsystem: String, category: String)  {try! rustCall() {
+    uniffi_janus_gateway_fn_func_raw_init_logger(
+        FfiConverterString.lower(subsystem),
+        FfiConverterString.lower(category),$0
+    )
+}
 }
 
 private enum InitializationResult {
@@ -5596,10 +5616,10 @@ private let initializationResult: InitializationResult = {
     if bindings_contract_version != scaffolding_contract_version {
         return InitializationResult.contractVersionMismatch
     }
-    if (uniffi_janus_gateway_checksum_func_raw_init_logger() != 47317) {
+    if (uniffi_janus_gateway_checksum_func_janus_connect() != 27438) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_func_raw_janus_connect() != 39620) {
+    if (uniffi_janus_gateway_checksum_func_raw_init_logger() != 46223) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_complete_trickle() != 64327) {
@@ -5650,7 +5670,7 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_unmute() != 7093) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_connection_create_session() != 39238) {
+    if (uniffi_janus_gateway_checksum_method_connection_create_session() != 38721) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_connection_server_info() != 18308) {

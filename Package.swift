@@ -26,34 +26,16 @@ let package = Package(
     platforms: [.iOS(.v13)],
     products: [
         .library(name: "JanusGateway", targets: ["JanusGateway"]),
-        .library(name: "JanusGatewayPlugins", targets: ["JanusGatewayPlugins"]),
-        .library(name: "JanusGatewayBindings", targets: ["JanusGatewayBindings"])
     ],
     targets: [
         binaryTarget,
         .target(
             name: "JanusGateway",
-            dependencies: [.target(name: "JanusGatewayBindings")],
+            dependencies: [.target(name: "JanusGatewayFFI")],
             path: "apple/Sources/JanusGateway",
             resources: [
                 .process("Resources/PrivacyInfo.xcprivacy")
             ]
-        ),
-        .target(
-            name: "JanusGatewayPlugins",
-            dependencies: [
-                .target(name: "JanusGatewayBindings"),
-                .target(name: "JanusGateway")
-            ],
-            path: "apple/Sources/Plugins",
-            resources: [
-                .process("Resources/PrivacyInfo.xcprivacy")
-            ]
-        ),
-        .target(
-            name: "JanusGatewayBindings",
-            dependencies: [.target(name: "JanusGatewayFFI")],
-            path: "apple/Sources/Bindings"
         ),
         .testTarget(
             name: "JanusGatewayTests",

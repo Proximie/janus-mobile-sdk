@@ -42,8 +42,8 @@ apple_generate_ffi:
 		--library target/aarch64-apple-ios/release/lib$(LIBNAME).dylib \
 		--language swift \
 		--out-dir target/uniffi-xcframework-staging
-	@mkdir -p ./apple/Sources/Bindings/
-	@mv target/uniffi-xcframework-staging/*.swift ./apple/Sources/Bindings/
+	@mkdir -p ./apple/Sources/JanusGateway/
+	@mv target/uniffi-xcframework-staging/*.swift ./apple/Sources/JanusGateway/
 	@mv target/uniffi-xcframework-staging/$(MODULENAME)FFI.modulemap target/uniffi-xcframework-staging/module.modulemap
 
 apple_create_fat_simulator_lib:
