@@ -1,7 +1,6 @@
 use crate::apple_log::AppleLog;
 use core::fmt;
 use tracing_core::field::Visit;
-use tracing_core::span;
 use tracing_core::Event;
 use tracing_core::Field;
 use tracing_core::Subscriber;
@@ -30,17 +29,15 @@ where
         event.record(&mut visitor);
         let message = match ctx.lookup_current() {
             Some(span) => format!(
-                "{}: {} {:#?}",
-                span.metadata().name(),
+                "{}::{} {:#?}",
                 event.metadata().target(),
+                span.metadata().name(),
                 visitor
             ),
             None => format!("{} {:#?}", event.metadata().target(), visitor),
         };
         self.logger.log(&message, *event.metadata().level());
     }
-
-    fn on_enter(&self, _id: &span::Id, _ctx: Context<'_, S>) {}
 }
 
 #[derive(Default)]
@@ -50,7 +47,7 @@ struct EventVisitor {
 
 impl fmt::Debug for EventVisitor {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.fields.join(", "))
+        write!(f, "{}", self.fields.join(" "))
     }
 }
 
