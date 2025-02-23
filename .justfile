@@ -10,12 +10,8 @@ help:
 	@just -l
 
 # Build library for apple platforms
-apple release="-d": apple-clean \
-	apple-build-rslib \
-	apple-generate-ffi \
-	apple-create-fat-simulator-lib \
-	(apple-build-xcframework release) \
-	(apple-gh-release release)
+apple release="": \
+	apple-clean apple-build apple-generate-ffi (apple-build-xcframework release) (apple-gh-release release)
 
 # Build the Rust library for apple platforms
 apple-build: apple-build-rslib apple-create-fat-simulator-lib
@@ -47,7 +43,7 @@ apple-generate-ffi:
 	@mv target/uniffi-xcframework-staging/{{MODULENAME}}FFI.modulemap target/uniffi-xcframework-staging/module.modulemap
 
 # Generate XCFramework that includes the static libs for apple platforms
-apple-build-xcframework release="-d":
+apple-build-xcframework release="":
 	@echo "Generating XCFramework"
 	@rm -rf target/ios
 	@xcodebuild -create-xcframework \
@@ -63,7 +59,7 @@ apple-build-xcframework release="-d":
 	fi
 
 # Create a github release
-apple-gh-release release="-d":
+apple-gh-release release="":
 	@if [ "{{release}}" = "-r" ]; then \
 		echo "Committing changes to Package.swift and tagging the release"; \
 		sed -i "" -E "s/(let useLocalFramework = )true/\1false/g" ./Package.swift; \
@@ -82,3 +78,19 @@ apple-clean:
 	@rm -rf target/ios
 	@rm -rf target/uniffi-xcframework-staging
 	@rm -rf {{FAT_SIMULATOR_LIB_DIR}}
+
+# Build library for android
+android: android-clean android-build
+
+# Clean up the build artifacts
+android-clean:
+	@cd android && ./gradlew clean
+
+android-build release="":
+	@if [ "{{release}}" = "-d" ]; then \
+		echo "Release build for android"; \
+		cd android && ./gradlew assembleRelease; \
+	else \
+		echo "Debug build for android"; \
+		cd android && ./gradlew assembleDebug; \
+	fi
