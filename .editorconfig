@@ -7,3 +7,6 @@ trim_trailing_whitespace = true
 
 [Makefile]
 indent_style = tab
+
+[.justfile]
+indent_style = tab
