@@ -1,18 +1,18 @@
 use jarust::interface::japrotocol;
 use std::collections::HashMap;
 
-pub type Jsep = japrotocol::Jsep;
-pub type JsepType = japrotocol::JsepType;
 pub type Candidate = japrotocol::Candidate;
 pub type GenericEvent = japrotocol::GenericEvent;
-pub type ServerInfoRsp = japrotocol::ServerInfoRsp;
+pub type Jsep = japrotocol::Jsep;
+pub type JsepType = japrotocol::JsepType;
 pub type MetaData = japrotocol::MetaData;
+pub type ServerInfoRsp = japrotocol::ServerInfoRsp;
 
 #[uniffi::remote(Record)]
 pub struct Candidate {
     pub candidate: String,
     pub sdp_mid: String,
-    pub sdp_mline_index: String,
+    pub sdp_mline_index: u32,
 }
 
 #[uniffi::remote(Enum)]

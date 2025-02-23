@@ -12,6 +12,7 @@ use crate::protocol::Jsep;
 use jarust::plugins::audio_bridge::events::AudioBridgeEvent;
 use jarust::plugins::audio_bridge::events::PluginEvent;
 use jarust::plugins::audio_bridge::handle::AudioBridgeHandle as JaAudioBridgeHandle;
+use jarust::plugins::audio_bridge::params::AudioBridgeConfigureParams;
 use jarust::plugins::audio_bridge::params::AudioBridgeExistsParams;
 use jarust::plugins::audio_bridge::params::AudioBridgeJoinParams;
 use jarust::plugins::audio_bridge::params::AudioBridgeListParticipantsParams;
@@ -215,6 +216,20 @@ impl AudioBridgeHandle {
             })
             .await
         {
+            Ok(rsp) => Ok(rsp),
+            Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            }),
+        }
+    }
+
+    pub async fn configure(
+        &self,
+        params: AudioBridgeConfigureParams,
+        jsep: Option<Jsep>,
+        timeout: Duration,
+    ) -> Result<(), JanusGatewayCommunicationError> {
+        match self.inner.configure(params, jsep, timeout).await {
             Ok(rsp) => Ok(rsp),
             Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
                 reason: why.to_string(),

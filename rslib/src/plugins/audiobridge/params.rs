@@ -2,6 +2,7 @@ use crate::plugins::common::JanusId;
 use jarust::plugins::audio_bridge::params;
 
 pub type AudioBridgeCreateParams = params::AudioBridgeCreateParams;
+pub type AudioBridgeConfigureParams = params::AudioBridgeConfigureParams;
 pub type AudioBridgeJoinParamsOptional = params::AudioBridgeJoinParamsOptional;
 pub type AudioBridgeCodec = params::AudioBridgeCodec;
 pub type AudioBridgeRTP = params::AudioBridgeRTP;
@@ -129,4 +130,30 @@ pub struct AudioBridgeRTPOptional {
     audiolevel_ext: Option<String>,
     #[uniffi(default = None)]
     fec: Option<bool>,
+}
+
+#[uniffi::remote(Record)]
+pub struct AudioBridgeConfigureParams {
+    #[uniffi(default = None)]
+    muted: Option<bool>,
+    #[uniffi(default = None)]
+    display: Option<String>,
+    #[uniffi(default = None)]
+    bitrate: Option<u64>,
+    #[uniffi(default = None)]
+    quality: Option<u8>,
+    #[uniffi(default = None)]
+    expected_loss: Option<u8>,
+    #[uniffi(default = None)]
+    volume: Option<u64>,
+    #[uniffi(default = None)]
+    spatial_position: Option<u8>,
+    #[uniffi(default = None)]
+    denoise: Option<bool>,
+    #[uniffi(default = None)]
+    record: Option<bool>,
+    #[uniffi(default = None)]
+    filename: Option<String>,
+    #[uniffi(default = None)]
+    group: Option<String>,
 }

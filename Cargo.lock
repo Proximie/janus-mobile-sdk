@@ -731,9 +731,9 @@ checksum = "49f1f14873335454500d59611f1cf4a4b0f786f9ac11f4312a78e4cf2566695b"
 
 [[package]]
 name = "jarust"
-version = "1.1.5"
+version = "1.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8985cded01e8fd3bd4f44065c1c8133a16d98f20dc91edb6fc87e3d16a104340"
+checksum = "4016e7f195581114f99ee005b450dba0fdb59619b01a376df9c2a7719e9a3a8d"
 dependencies = [
  "jarust_core",
  "jarust_interface",
@@ -742,9 +742,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_core"
-version = "1.1.5"
+version = "1.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "27bf2b98fa1350a398af0e4d4066d26b7cc612bfd949250b1564d58f0cebafc1"
+checksum = "41d8e22638b8ac45a1db0623ec2fcabb658ed22d0f3aafcafe1c65be7e7fb6a0"
 dependencies = [
  "async-trait",
  "jarust_interface",
@@ -757,9 +757,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_interface"
-version = "1.1.5"
+version = "1.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cd403b8dda4994c9a642b9cd003df46f8dfea0713daa4eecd9e636745d0dd670"
+checksum = "5e37fd8d18d5e592046e6cd839a6977c7cabba15d1152c64265c7ad132b2772d"
 dependencies = [
  "async-trait",
  "bytes",
@@ -780,9 +780,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_plugins"
-version = "1.1.5"
+version = "1.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9185663b168342a550d076de19b1790f3f53f1072541f1c34add77feab8f78d2"
+checksum = "6cd626b5751acaa72d920feb36fae94d82b677166d4e6f08a69eb1a0de650474"
 dependencies = [
  "async-trait",
  "jarust_core",
@@ -797,9 +797,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_rt"
-version = "1.1.5"
+version = "1.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2f828f30e26f1922c633f0568b2536770cdb1540864464ec5e488c18213bd7b"
+checksum = "af7993de74a75a28b90bdd2ecd6f72f235ea27ccdd4318c1d4d9327b6ed3c11c"
 dependencies = [
  "futures-util",
  "tokio",
@@ -1405,18 +1405,18 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.217"
+version = "1.0.218"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "02fc4265df13d6fa1d00ecff087228cc0a2b5f3c0e87e258d8b94a156e984c70"
+checksum = "e8dfc9d19bdbf6d17e22319da49161d5d0108e4188e8b680aef6299eed22df60"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.217"
+version = "1.0.218"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a9bf7cf98d04a2b28aead066b7496853d4779c9cc183c440dbac457641e19a0"
+checksum = "f09503e191f4e797cb8aac08e9a4a4695c5edf6a2e70e376d961ddd5c969f82b"
 dependencies = [
  "proc-macro2",
  "quote",

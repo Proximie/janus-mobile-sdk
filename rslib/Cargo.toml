@@ -29,7 +29,7 @@ android_logger = "0.14.1"
 openssl-sys = { version = "=0.9.87", features = ["vendored"] }
 
 [dependencies.jarust]
-version = "1.1.5"
+version = "1.1.6"
 features = [
     "echo-test-plugin",
     "audio-bridge-plugin",
