@@ -1,13 +1,15 @@
 use crate::plugins::common::JanusId;
 use jarust::plugins::audio_bridge::params;
 
-pub type AudioBridgeCreateParams = params::AudioBridgeCreateParams;
-pub type AudioBridgeConfigureParams = params::AudioBridgeConfigureParams;
-pub type AudioBridgeJoinParamsOptional = params::AudioBridgeJoinParamsOptional;
 pub type AudioBridgeCodec = params::AudioBridgeCodec;
+pub type AudioBridgeConfigureParams = params::AudioBridgeConfigureParams;
+pub type AudioBridgeCreateParams = params::AudioBridgeCreateParams;
+pub type AudioBridgeJoinParams = params::AudioBridgeJoinParams;
+pub type AudioBridgeJoinParamsOptional = params::AudioBridgeJoinParamsOptional;
+pub type AudioBridgeMuteParams = params::AudioBridgeMuteParams;
 pub type AudioBridgeRTP = params::AudioBridgeRTP;
-pub type AudioBridgeRTPRequired = params::AudioBridgeRTPRequired;
 pub type AudioBridgeRTPOptional = params::AudioBridgeRTPOptional;
+pub type AudioBridgeRTPRequired = params::AudioBridgeRTPRequired;
 
 #[uniffi::remote(Record)]
 pub struct AudioBridgeCreateParams {
@@ -53,6 +55,12 @@ pub struct AudioBridgeCreateParams {
     allow_rtp_participants: Option<bool>,
     #[uniffi(default = None)]
     groups: Option<Vec<String>>,
+}
+
+#[uniffi::remote(Record)]
+pub struct AudioBridgeJoinParams {
+    room: JanusId,
+    optional: AudioBridgeJoinParamsOptional,
 }
 
 #[uniffi::remote(Record)]
@@ -156,4 +164,12 @@ pub struct AudioBridgeConfigureParams {
     filename: Option<String>,
     #[uniffi(default = None)]
     group: Option<String>,
+}
+
+#[uniffi::remote(Record)]
+pub struct AudioBridgeMuteParams {
+    id: JanusId,
+    room: JanusId,
+    #[uniffi(default = None)]
+    secret: Option<String>,
 }

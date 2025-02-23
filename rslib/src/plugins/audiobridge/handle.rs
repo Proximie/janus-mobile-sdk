@@ -1,5 +1,3 @@
-use super::params::AudioBridgeCreateParams;
-use super::params::AudioBridgeJoinParamsOptional;
 use super::responses::AudioBridgeListParticipantsRsp;
 use super::responses::AudioBridgeParticipant;
 use super::responses::AudioBridgeRoomCreatedRsp;
@@ -13,6 +11,7 @@ use jarust::plugins::audio_bridge::events::AudioBridgeEvent;
 use jarust::plugins::audio_bridge::events::PluginEvent;
 use jarust::plugins::audio_bridge::handle::AudioBridgeHandle as JaAudioBridgeHandle;
 use jarust::plugins::audio_bridge::params::AudioBridgeConfigureParams;
+use jarust::plugins::audio_bridge::params::AudioBridgeCreateParams;
 use jarust::plugins::audio_bridge::params::AudioBridgeExistsParams;
 use jarust::plugins::audio_bridge::params::AudioBridgeJoinParams;
 use jarust::plugins::audio_bridge::params::AudioBridgeListParticipantsParams;
@@ -157,23 +156,11 @@ impl AudioBridgeHandle {
 
     pub async fn join_room(
         &self,
-        room_id: JanusId,
-        params: AudioBridgeJoinParamsOptional,
+        params: AudioBridgeJoinParams,
         jsep: Option<Jsep>,
         timeout: Duration,
     ) -> Result<(), JanusGatewayCommunicationError> {
-        match self
-            .inner
-            .join_room(
-                AudioBridgeJoinParams {
-                    room: room_id,
-                    optional: params,
-                },
-                jsep,
-                timeout,
-            )
-            .await
-        {
+        match self.inner.join_room(params, jsep, timeout).await {
             Ok(rsp) => Ok(rsp),
             Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
                 reason: why.to_string(),
@@ -183,18 +170,9 @@ impl AudioBridgeHandle {
 
     pub async fn mute(
         &self,
-        room_id: JanusId,
-        participant_id: JanusId,
+        params: AudioBridgeMuteParams,
     ) -> Result<(), JanusGatewayCommunicationError> {
-        match self
-            .inner
-            .mute(AudioBridgeMuteParams {
-                id: participant_id,
-                room: room_id,
-                secret: None,
-            })
-            .await
-        {
+        match self.inner.mute(params).await {
             Ok(rsp) => Ok(rsp),
             Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
                 reason: why.to_string(),
@@ -204,18 +182,9 @@ impl AudioBridgeHandle {
 
     pub async fn unmute(
         &self,
-        room_id: JanusId,
-        participant_id: JanusId,
+        params: AudioBridgeMuteParams,
     ) -> Result<(), JanusGatewayCommunicationError> {
-        match self
-            .inner
-            .unmute(AudioBridgeMuteParams {
-                id: participant_id,
-                room: room_id,
-                secret: None,
-            })
-            .await
-        {
+        match self.inner.unmute(params).await {
             Ok(rsp) => Ok(rsp),
             Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
                 reason: why.to_string(),
