@@ -64,6 +64,15 @@ impl AudioBridgeHandle {
                     PluginEvent::GenericEvent(generic_event) => {
                         cb.on_handle_event(generic_event);
                     }
+                    PluginEvent::AudioBridgeEvent(AudioBridgeEvent::Result {
+                        transaction,
+                        result,
+                    }) => cb.on_result(transaction, result),
+                    PluginEvent::AudioBridgeEvent(AudioBridgeEvent::ResultWithJsep {
+                        transaction,
+                        result,
+                        jsep,
+                    }) => cb.on_result_with_jsep(transaction, result, jsep),
                     PluginEvent::AudioBridgeEvent(AudioBridgeEvent::Error {
                         error_code,
                         error,
@@ -159,7 +168,7 @@ impl AudioBridgeHandle {
         params: AudioBridgeJoinParams,
         jsep: Option<Jsep>,
         timeout: Duration,
-    ) -> Result<(), JanusGatewayCommunicationError> {
+    ) -> Result<String, JanusGatewayCommunicationError> {
         match self.inner.join_room(params, jsep, timeout).await {
             Ok(rsp) => Ok(rsp),
             Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
@@ -171,7 +180,7 @@ impl AudioBridgeHandle {
     pub async fn mute(
         &self,
         params: AudioBridgeMuteParams,
-    ) -> Result<(), JanusGatewayCommunicationError> {
+    ) -> Result<String, JanusGatewayCommunicationError> {
         match self.inner.mute(params).await {
             Ok(rsp) => Ok(rsp),
             Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
@@ -183,7 +192,7 @@ impl AudioBridgeHandle {
     pub async fn unmute(
         &self,
         params: AudioBridgeMuteParams,
-    ) -> Result<(), JanusGatewayCommunicationError> {
+    ) -> Result<String, JanusGatewayCommunicationError> {
         match self.inner.unmute(params).await {
             Ok(rsp) => Ok(rsp),
             Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
@@ -197,7 +206,7 @@ impl AudioBridgeHandle {
         params: AudioBridgeConfigureParams,
         jsep: Option<Jsep>,
         timeout: Duration,
-    ) -> Result<(), JanusGatewayCommunicationError> {
+    ) -> Result<String, JanusGatewayCommunicationError> {
         match self.inner.configure(params, jsep, timeout).await {
             Ok(rsp) => Ok(rsp),
             Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
@@ -211,6 +220,8 @@ base_handle!(AudioBridgeHandle);
 
 #[uniffi::export(callback_interface)]
 pub trait AudioBridgeHandleCallback: Send + Sync + Debug {
+    fn on_result(&self, transaction: String, result: String);
+    fn on_result_with_jsep(&self, transaction: String, result: String, jsep: Jsep);
     fn on_room_joined_with_jsep(
         &self,
         id: JanusId,
