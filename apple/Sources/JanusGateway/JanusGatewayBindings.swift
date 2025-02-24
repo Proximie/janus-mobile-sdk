@@ -595,6 +595,8 @@ public protocol AudioBridgeHandleProtocol: AnyObject {
     
     func completeTrickle(timeout: TimeInterval) async throws 
     
+    func configure(params: AudioBridgeConfigureParams, jsep: Jsep?, timeout: TimeInterval) async throws  -> String
+    
     func createRoom(params: AudioBridgeCreateParams, timeout: TimeInterval) async throws  -> AudioBridgeRoomCreatedRsp
     
     func detach(timeout: TimeInterval) async throws 
@@ -607,11 +609,11 @@ public protocol AudioBridgeHandleProtocol: AnyObject {
     
     func hangup(timeout: TimeInterval) async throws 
     
-    func joinRoom(roomId: JanusId, params: AudioBridgeJoinParamsOptional, jsep: Jsep?, timeout: TimeInterval) async throws 
+    func joinRoom(params: AudioBridgeJoinParams, jsep: Jsep?, timeout: TimeInterval) async throws  -> String
     
     func listParticipants(roomId: JanusId, timeout: TimeInterval) async throws  -> AudioBridgeListParticipantsRsp
     
-    func mute(roomId: JanusId, participantId: JanusId) async throws 
+    func mute(params: AudioBridgeMuteParams) async throws  -> String
     
     func sendWaitonAck(data: Data, timeout: TimeInterval) async throws 
     
@@ -623,7 +625,7 @@ public protocol AudioBridgeHandleProtocol: AnyObject {
     
     func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval) async throws 
     
-    func unmute(roomId: JanusId, participantId: JanusId) async throws 
+    func unmute(params: AudioBridgeMuteParams) async throws  -> String
     
 }
 open class AudioBridgeHandle: AudioBridgeHandleProtocol, @unchecked Sendable {
@@ -688,6 +690,23 @@ open func completeTrickle(timeout: TimeInterval)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func configure(params: AudioBridgeConfigureParams, jsep: Jsep?, timeout: TimeInterval)async throws  -> String  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_configure(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeAudioBridgeConfigureParams_lower(params),FfiConverterOptionTypeJsep.lower(jsep),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
             errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
         )
 }
@@ -794,19 +813,19 @@ open func hangup(timeout: TimeInterval)async throws   {
         )
 }
     
-open func joinRoom(roomId: JanusId, params: AudioBridgeJoinParamsOptional, jsep: Jsep?, timeout: TimeInterval)async throws   {
+open func joinRoom(params: AudioBridgeJoinParams, jsep: Jsep?, timeout: TimeInterval)async throws  -> String  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_join_room(
                     self.uniffiClonePointer(),
-                    FfiConverterTypeJanusId_lower(roomId),FfiConverterTypeAudioBridgeJoinParamsOptional_lower(params),FfiConverterOptionTypeJsep.lower(jsep),FfiConverterDuration.lower(timeout)
+                    FfiConverterTypeAudioBridgeJoinParams_lower(params),FfiConverterOptionTypeJsep.lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
-            pollFunc: ffi_janus_gateway_rust_future_poll_void,
-            completeFunc: ffi_janus_gateway_rust_future_complete_void,
-            freeFunc: ffi_janus_gateway_rust_future_free_void,
-            liftFunc: { $0 },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
             errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
         )
 }
@@ -828,19 +847,19 @@ open func listParticipants(roomId: JanusId, timeout: TimeInterval)async throws  
         )
 }
     
-open func mute(roomId: JanusId, participantId: JanusId)async throws   {
+open func mute(params: AudioBridgeMuteParams)async throws  -> String  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_mute(
                     self.uniffiClonePointer(),
-                    FfiConverterTypeJanusId_lower(roomId),FfiConverterTypeJanusId_lower(participantId)
+                    FfiConverterTypeAudioBridgeMuteParams_lower(params)
                 )
             },
-            pollFunc: ffi_janus_gateway_rust_future_poll_void,
-            completeFunc: ffi_janus_gateway_rust_future_complete_void,
-            freeFunc: ffi_janus_gateway_rust_future_free_void,
-            liftFunc: { $0 },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
             errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
         )
 }
@@ -931,19 +950,19 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
         )
 }
     
-open func unmute(roomId: JanusId, participantId: JanusId)async throws   {
+open func unmute(params: AudioBridgeMuteParams)async throws  -> String  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_unmute(
                     self.uniffiClonePointer(),
-                    FfiConverterTypeJanusId_lower(roomId),FfiConverterTypeJanusId_lower(participantId)
+                    FfiConverterTypeAudioBridgeMuteParams_lower(params)
                 )
             },
-            pollFunc: ffi_janus_gateway_rust_future_poll_void,
-            completeFunc: ffi_janus_gateway_rust_future_complete_void,
-            freeFunc: ffi_janus_gateway_rust_future_free_void,
-            liftFunc: { $0 },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
             errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
         )
 }
@@ -1978,6 +1997,148 @@ public func FfiConverterTypeSession_lower(_ value: Session) -> UnsafeMutableRawP
 
 
 
+public struct AudioBridgeConfigureParams {
+    public let muted: Bool?
+    public let display: String?
+    public let bitrate: UInt64?
+    public let quality: UInt8?
+    public let expectedLoss: UInt8?
+    public let volume: UInt64?
+    public let spatialPosition: UInt8?
+    public let denoise: Bool?
+    public let record: Bool?
+    public let filename: String?
+    public let group: String?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(muted: Bool? = nil, display: String? = nil, bitrate: UInt64? = nil, quality: UInt8? = nil, expectedLoss: UInt8? = nil, volume: UInt64? = nil, spatialPosition: UInt8? = nil, denoise: Bool? = nil, record: Bool? = nil, filename: String? = nil, group: String? = nil) {
+        self.muted = muted
+        self.display = display
+        self.bitrate = bitrate
+        self.quality = quality
+        self.expectedLoss = expectedLoss
+        self.volume = volume
+        self.spatialPosition = spatialPosition
+        self.denoise = denoise
+        self.record = record
+        self.filename = filename
+        self.group = group
+    }
+}
+
+#if compiler(>=6)
+extension AudioBridgeConfigureParams: Sendable {}
+#endif
+
+
+extension AudioBridgeConfigureParams: Equatable, Hashable {
+    public static func ==(lhs: AudioBridgeConfigureParams, rhs: AudioBridgeConfigureParams) -> Bool {
+        if lhs.muted != rhs.muted {
+            return false
+        }
+        if lhs.display != rhs.display {
+            return false
+        }
+        if lhs.bitrate != rhs.bitrate {
+            return false
+        }
+        if lhs.quality != rhs.quality {
+            return false
+        }
+        if lhs.expectedLoss != rhs.expectedLoss {
+            return false
+        }
+        if lhs.volume != rhs.volume {
+            return false
+        }
+        if lhs.spatialPosition != rhs.spatialPosition {
+            return false
+        }
+        if lhs.denoise != rhs.denoise {
+            return false
+        }
+        if lhs.record != rhs.record {
+            return false
+        }
+        if lhs.filename != rhs.filename {
+            return false
+        }
+        if lhs.group != rhs.group {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(muted)
+        hasher.combine(display)
+        hasher.combine(bitrate)
+        hasher.combine(quality)
+        hasher.combine(expectedLoss)
+        hasher.combine(volume)
+        hasher.combine(spatialPosition)
+        hasher.combine(denoise)
+        hasher.combine(record)
+        hasher.combine(filename)
+        hasher.combine(group)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeAudioBridgeConfigureParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AudioBridgeConfigureParams {
+        return
+            try AudioBridgeConfigureParams(
+                muted: FfiConverterOptionBool.read(from: &buf), 
+                display: FfiConverterOptionString.read(from: &buf), 
+                bitrate: FfiConverterOptionUInt64.read(from: &buf), 
+                quality: FfiConverterOptionUInt8.read(from: &buf), 
+                expectedLoss: FfiConverterOptionUInt8.read(from: &buf), 
+                volume: FfiConverterOptionUInt64.read(from: &buf), 
+                spatialPosition: FfiConverterOptionUInt8.read(from: &buf), 
+                denoise: FfiConverterOptionBool.read(from: &buf), 
+                record: FfiConverterOptionBool.read(from: &buf), 
+                filename: FfiConverterOptionString.read(from: &buf), 
+                group: FfiConverterOptionString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: AudioBridgeConfigureParams, into buf: inout [UInt8]) {
+        FfiConverterOptionBool.write(value.muted, into: &buf)
+        FfiConverterOptionString.write(value.display, into: &buf)
+        FfiConverterOptionUInt64.write(value.bitrate, into: &buf)
+        FfiConverterOptionUInt8.write(value.quality, into: &buf)
+        FfiConverterOptionUInt8.write(value.expectedLoss, into: &buf)
+        FfiConverterOptionUInt64.write(value.volume, into: &buf)
+        FfiConverterOptionUInt8.write(value.spatialPosition, into: &buf)
+        FfiConverterOptionBool.write(value.denoise, into: &buf)
+        FfiConverterOptionBool.write(value.record, into: &buf)
+        FfiConverterOptionString.write(value.filename, into: &buf)
+        FfiConverterOptionString.write(value.group, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeConfigureParams_lift(_ buf: RustBuffer) throws -> AudioBridgeConfigureParams {
+    return try FfiConverterTypeAudioBridgeConfigureParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeConfigureParams_lower(_ value: AudioBridgeConfigureParams) -> RustBuffer {
+    return FfiConverterTypeAudioBridgeConfigureParams.lower(value)
+}
+
+
 public struct AudioBridgeCreateParams {
     public let room: JanusId?
     public let permanent: Bool?
@@ -2197,6 +2358,76 @@ public func FfiConverterTypeAudioBridgeCreateParams_lift(_ buf: RustBuffer) thro
 #endif
 public func FfiConverterTypeAudioBridgeCreateParams_lower(_ value: AudioBridgeCreateParams) -> RustBuffer {
     return FfiConverterTypeAudioBridgeCreateParams.lower(value)
+}
+
+
+public struct AudioBridgeJoinParams {
+    public let room: JanusId
+    public let optional: AudioBridgeJoinParamsOptional
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(room: JanusId, optional: AudioBridgeJoinParamsOptional) {
+        self.room = room
+        self.optional = optional
+    }
+}
+
+#if compiler(>=6)
+extension AudioBridgeJoinParams: Sendable {}
+#endif
+
+
+extension AudioBridgeJoinParams: Equatable, Hashable {
+    public static func ==(lhs: AudioBridgeJoinParams, rhs: AudioBridgeJoinParams) -> Bool {
+        if lhs.room != rhs.room {
+            return false
+        }
+        if lhs.optional != rhs.optional {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(room)
+        hasher.combine(optional)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeAudioBridgeJoinParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AudioBridgeJoinParams {
+        return
+            try AudioBridgeJoinParams(
+                room: FfiConverterTypeJanusId.read(from: &buf), 
+                optional: FfiConverterTypeAudioBridgeJoinParamsOptional.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: AudioBridgeJoinParams, into buf: inout [UInt8]) {
+        FfiConverterTypeJanusId.write(value.room, into: &buf)
+        FfiConverterTypeAudioBridgeJoinParamsOptional.write(value.optional, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeJoinParams_lift(_ buf: RustBuffer) throws -> AudioBridgeJoinParams {
+    return try FfiConverterTypeAudioBridgeJoinParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeJoinParams_lower(_ value: AudioBridgeJoinParams) -> RustBuffer {
+    return FfiConverterTypeAudioBridgeJoinParams.lower(value)
 }
 
 
@@ -2489,6 +2720,84 @@ public func FfiConverterTypeAudioBridgeListParticipantsRsp_lift(_ buf: RustBuffe
 #endif
 public func FfiConverterTypeAudioBridgeListParticipantsRsp_lower(_ value: AudioBridgeListParticipantsRsp) -> RustBuffer {
     return FfiConverterTypeAudioBridgeListParticipantsRsp.lower(value)
+}
+
+
+public struct AudioBridgeMuteParams {
+    public let id: JanusId
+    public let room: JanusId
+    public let secret: String?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(id: JanusId, room: JanusId, secret: String? = nil) {
+        self.id = id
+        self.room = room
+        self.secret = secret
+    }
+}
+
+#if compiler(>=6)
+extension AudioBridgeMuteParams: Sendable {}
+#endif
+
+
+extension AudioBridgeMuteParams: Equatable, Hashable {
+    public static func ==(lhs: AudioBridgeMuteParams, rhs: AudioBridgeMuteParams) -> Bool {
+        if lhs.id != rhs.id {
+            return false
+        }
+        if lhs.room != rhs.room {
+            return false
+        }
+        if lhs.secret != rhs.secret {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(room)
+        hasher.combine(secret)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeAudioBridgeMuteParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AudioBridgeMuteParams {
+        return
+            try AudioBridgeMuteParams(
+                id: FfiConverterTypeJanusId.read(from: &buf), 
+                room: FfiConverterTypeJanusId.read(from: &buf), 
+                secret: FfiConverterOptionString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: AudioBridgeMuteParams, into buf: inout [UInt8]) {
+        FfiConverterTypeJanusId.write(value.id, into: &buf)
+        FfiConverterTypeJanusId.write(value.room, into: &buf)
+        FfiConverterOptionString.write(value.secret, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeMuteParams_lift(_ buf: RustBuffer) throws -> AudioBridgeMuteParams {
+    return try FfiConverterTypeAudioBridgeMuteParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeAudioBridgeMuteParams_lower(_ value: AudioBridgeMuteParams) -> RustBuffer {
+    return FfiConverterTypeAudioBridgeMuteParams.lower(value)
 }
 
 
@@ -2893,11 +3202,11 @@ public func FfiConverterTypeAudioBridgeRoomCreatedRsp_lower(_ value: AudioBridge
 public struct Candidate {
     public let candidate: String
     public let sdpMid: String
-    public let sdpMlineIndex: String
+    public let sdpMlineIndex: UInt32
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(candidate: String, sdpMid: String, sdpMlineIndex: String) {
+    public init(candidate: String, sdpMid: String, sdpMlineIndex: UInt32) {
         self.candidate = candidate
         self.sdpMid = sdpMid
         self.sdpMlineIndex = sdpMlineIndex
@@ -2941,14 +3250,14 @@ public struct FfiConverterTypeCandidate: FfiConverterRustBuffer {
             try Candidate(
                 candidate: FfiConverterString.read(from: &buf), 
                 sdpMid: FfiConverterString.read(from: &buf), 
-                sdpMlineIndex: FfiConverterString.read(from: &buf)
+                sdpMlineIndex: FfiConverterUInt32.read(from: &buf)
         )
     }
 
     public static func write(_ value: Candidate, into buf: inout [UInt8]) {
         FfiConverterString.write(value.candidate, into: &buf)
         FfiConverterString.write(value.sdpMid, into: &buf)
-        FfiConverterString.write(value.sdpMlineIndex, into: &buf)
+        FfiConverterUInt32.write(value.sdpMlineIndex, into: &buf)
     }
 }
 
@@ -4456,6 +4765,10 @@ extension JsepType: Equatable, Hashable {}
 
 public protocol AudioBridgeHandleCallback: AnyObject {
     
+    func onResult(transaction: String, result: String) 
+    
+    func onResultWithJsep(transaction: String, result: String, jsep: Jsep) 
+    
     func onRoomJoinedWithJsep(id: JanusId, room: JanusId, participants: [AudioBridgeParticipant], jsep: Jsep) 
     
     func onRoomJoined(id: JanusId, room: JanusId, participants: [AudioBridgeParticipant]) 
@@ -4490,6 +4803,60 @@ fileprivate struct UniffiCallbackInterfaceAudioBridgeHandleCallback {
     // This creates 1-element array, since this seems to be the only way to construct a const
     // pointer that we can pass to the Rust code.
     static let vtable: [UniffiVTableCallbackInterfaceAudioBridgeHandleCallback] = [UniffiVTableCallbackInterfaceAudioBridgeHandleCallback(
+        onResult: { (
+            uniffiHandle: UInt64,
+            transaction: RustBuffer,
+            result: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceAudioBridgeHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onResult(
+                     transaction: try FfiConverterString.lift(transaction),
+                     result: try FfiConverterString.lift(result)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onResultWithJsep: { (
+            uniffiHandle: UInt64,
+            transaction: RustBuffer,
+            result: RustBuffer,
+            jsep: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceAudioBridgeHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onResultWithJsep(
+                     transaction: try FfiConverterString.lift(transaction),
+                     result: try FfiConverterString.lift(result),
+                     jsep: try FfiConverterTypeJsep_lift(jsep)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
         onRoomJoinedWithJsep: { (
             uniffiHandle: UInt64,
             id: RustBuffer,
@@ -5625,6 +5992,9 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_complete_trickle() != 64327) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_configure() != 39928) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_create_room() != 56852) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -5643,13 +6013,13 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_hangup() != 1409) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_join_room() != 4666) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_join_room() != 62884) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_list_participants() != 7752) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_mute() != 48931) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_mute() != 55698) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_send_waiton_ack() != 44496) {
@@ -5667,7 +6037,7 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_trickle_single_candidate() != 56691) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_unmute() != 7093) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_unmute() != 10529) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_connection_create_session() != 38721) {
@@ -5754,28 +6124,34 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_session_destory() != 62073) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_room_joined_with_jsep() != 4510) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_result() != 50231) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_room_joined() != 30462) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_result_with_jsep() != 23251) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_participants_joined() != 24256) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_room_joined_with_jsep() != 60229) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_participants_updated() != 45805) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_room_joined() != 39663) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_participant_left() != 59172) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_participants_joined() != 41973) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_handle_event() != 30804) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_participants_updated() != 13991) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_audio_bridge_error() != 32404) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_participant_left() != 5069) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_other() != 48333) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_handle_event() != 6243) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_audio_bridge_error() != 45190) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_other() != 2276) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_result() != 12927) {
