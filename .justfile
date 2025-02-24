@@ -9,11 +9,13 @@ SHORTCOMMIT := `git rev-parse --short HEAD`
 help:
 	@just -l
 
-# Build library for apple platforms
+# Build library for apple platforms. Pass '-r` to build release version
+[group: 'apple']
 apple release="": \
 	apple-clean apple-build apple-generate-ffi (apple-build-xcframework release) (apple-gh-release release)
 
 # Build the Rust library for apple platforms
+[group: 'apple']
 apple-build: apple-build-rslib apple-create-fat-simulator-lib
 
 [private]
@@ -32,6 +34,7 @@ apple-create-fat-simulator-lib:
 
 
 # Generate Swift ffi
+[group: 'apple']
 apple-generate-ffi:
 	@echo "Generating framework module mapping and FFI bindings"
 	@cargo run -p uniffi-bindgen generate \
@@ -42,7 +45,8 @@ apple-generate-ffi:
 	@mv target/uniffi-xcframework-staging/*.swift ./apple/Sources/JanusGateway/
 	@mv target/uniffi-xcframework-staging/{{MODULENAME}}FFI.modulemap target/uniffi-xcframework-staging/module.modulemap
 
-# Generate XCFramework that includes the static libs for apple platforms
+# Generate XCFramework that includes the static libs for apple platforms. When passing '-r' it will compute the zip checksum and modify the Package.swift accordingly
+[group: 'apple']
 apple-build-xcframework release="":
 	@echo "Generating XCFramework"
 	@rm -rf target/ios
@@ -58,7 +62,8 @@ apple-build-xcframework release="":
 		sed -i "" -E "s/(let releaseChecksum = \")[^\"]+(\")/\1$$checksum\2/g" ./Package.swift; \
 	fi
 
-# Create a github release
+# Create a github release. Only works when '-r' is passed.
+[group: 'apple']
 apple-gh-release release="":
 	@if [ "{{release}}" = "-r" ]; then \
 		echo "Committing changes to Package.swift and tagging the release"; \
@@ -73,24 +78,31 @@ apple-gh-release release="":
 	fi
 
 # Clean up the build artifacts
+[group: 'apple']
 apple-clean:
 	@echo "Cleaning up"
 	@rm -rf target/ios
 	@rm -rf target/uniffi-xcframework-staging
 	@rm -rf {{FAT_SIMULATOR_LIB_DIR}}
 
-# Build library for android
-android: android-clean android-build
+# Build library for android. Pass '-r` to build release version
+[group: 'android']
+android release="": android-clean (android-build release)
 
 # Clean up the build artifacts
+[working-directory: 'android']
+[group: 'android']
 android-clean:
-	@cd android && ./gradlew clean
+	./gradlew clean
 
+# Build the Rust lib, generate kotlin bindings, then bundle them inside aar. Pass '-r` to build release version
+[working-directory: 'android']
+[group: 'android']
 android-build release="":
-	@if [ "{{release}}" = "-d" ]; then \
+	@if [ "{{release}}" = "-r" ]; then \
 		echo "Release build for android"; \
-		cd android && ./gradlew assembleRelease; \
+		./gradlew assembleRelease; \
 	else \
 		echo "Debug build for android"; \
-		cd android && ./gradlew assembleDebug; \
+		./gradlew assembleDebug; \
 	fi
