@@ -48,18 +48,18 @@ macro_rules! base_handle {
                 &self,
                 data: Vec<u8>,
                 timeout: Duration,
-            ) -> Result<(), JanusGatewayCommunicationError> {
+            ) -> Result<String, JanusGatewayCommunicationError> {
                 let Ok(body) = serde_json::from_slice(&data) else {
                     return Err(JanusGatewayCommunicationError::Serialize {
                         body: String::from_utf8_lossy(&data).to_string(),
                     });
                 };
-                if let Err(why) = self.inner.send_waiton_ack(body, timeout).await {
-                    return Err(JanusGatewayCommunicationError::SendFailure {
-                        reason: why.to_string(),
-                    });
-                };
-                Ok(())
+                self.inner
+                    .send_waiton_ack(body, timeout)
+                    .await
+                    .map_err(|err| JanusGatewayCommunicationError::SendFailure {
+                        reason: err.to_string(),
+                    })
             }
 
             pub async fn send_waiton_result(
@@ -77,7 +77,7 @@ macro_rules! base_handle {
                     Err(why) => {
                         return Err(JanusGatewayCommunicationError::SendFailure {
                             reason: why.to_string(),
-                        })
+                        });
                     }
                 };
                 let Ok(result) = serde_json::from_value(result) else {
@@ -88,22 +88,16 @@ macro_rules! base_handle {
                 Ok(result)
             }
 
-            pub async fn hangup(
-                &self,
-                timeout: Duration,
-            ) -> Result<(), JanusGatewayCommunicationError> {
-                self.inner.hangup(timeout).await.map_err(|err| {
+            pub async fn hangup(&self) -> Result<(), JanusGatewayCommunicationError> {
+                self.inner.hangup().await.map_err(|err| {
                     JanusGatewayCommunicationError::SendFailure {
                         reason: err.to_string(),
                     }
                 })
             }
 
-            pub async fn detach(
-                &self,
-                timeout: Duration,
-            ) -> Result<(), JanusGatewayCommunicationError> {
-                self.inner.detach(timeout).await.map_err(|err| {
+            pub async fn detach(&self) -> Result<(), JanusGatewayCommunicationError> {
+                self.inner.detach().await.map_err(|err| {
                     JanusGatewayCommunicationError::SendFailure {
                         reason: err.to_string(),
                     }
