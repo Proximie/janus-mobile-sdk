@@ -1,7 +1,7 @@
 [package]
 name = "rslib"
 version = "0.9.1"
-edition = "2021"
+edition = "2024"
 publish = false
 repository = "https://github.com/Ghamza-Jd/janus-mobile-sdk"
 

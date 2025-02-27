@@ -20,14 +20,14 @@ pub const OS_LOG_TYPE_ERROR: os_log_type_t = 0x10;
 pub const OS_LOG_TYPE_FAULT: os_log_type_t = 0x11;
 
 // Provided by the OS.
-extern "C" {
+unsafe extern "C" {
     pub fn os_log_create(subsystem: *const c_char, category: *const c_char) -> os_log_t;
     pub fn os_release(object: *mut c_void);
     pub fn os_log_type_enabled(log: os_log_t, level: os_log_type_t) -> bool;
 }
 
 // Defined in ats_oslog.c because most of the os_log_* APIs are macros.
-extern "C" {
+unsafe extern "C" {
     pub fn ats_get_default_log() -> os_log_t;
     pub fn ats_os_log_with_type(log: os_log_t, log_type: os_log_type_t, message: *const c_char);
     pub fn ats_os_log_debug(log: os_log_t, message: *const c_char);
