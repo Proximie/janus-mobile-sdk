@@ -1,7 +1,6 @@
-/// This macro is used to add the default handle functions to a plugin handle.
-/// And adds a drop implementation.
+/// Adds the usual handle implementation for a plugin handle with a drop implementation.
 #[macro_export]
-macro_rules! base_handle {
+macro_rules! base_handle_with_drop_impl {
     ($handle_name:ident) => {
         #[uniffi::export(async_runtime = "tokio")]
         impl $handle_name {
@@ -56,6 +55,25 @@ macro_rules! base_handle {
                 };
                 self.inner
                     .send_waiton_ack(body, timeout)
+                    .await
+                    .map_err(|err| JanusGatewayCommunicationError::SendFailure {
+                        reason: err.to_string(),
+                    })
+            }
+
+            pub async fn send_waiton_ack_with_jsep(
+                &self,
+                data: Vec<u8>,
+                jsep: Jsep,
+                timeout: Duration,
+            ) -> Result<String, JanusGatewayCommunicationError> {
+                let Ok(body) = serde_json::from_slice(&data) else {
+                    return Err(JanusGatewayCommunicationError::Serialize {
+                        body: String::from_utf8_lossy(&data).to_string(),
+                    });
+                };
+                self.inner
+                    .send_waiton_ack_with_jsep(body, jsep.into(), timeout)
                     .await
                     .map_err(|err| JanusGatewayCommunicationError::SendFailure {
                         reason: err.to_string(),

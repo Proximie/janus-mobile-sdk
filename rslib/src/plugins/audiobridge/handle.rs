@@ -1,7 +1,7 @@
 use super::responses::AudioBridgeListParticipantsRsp;
 use super::responses::AudioBridgeParticipant;
 use super::responses::AudioBridgeRoomCreatedRsp;
-use crate::base_handle;
+use crate::base_handle_with_drop_impl;
 use crate::error::JanusGatewayCommunicationError;
 use crate::plugins::common::JanusId;
 use crate::protocol::Candidate;
@@ -18,9 +18,9 @@ use jarust::plugins::audio_bridge::params::AudioBridgeListParticipantsParams;
 use jarust::plugins::audio_bridge::params::AudioBridgeMuteParams;
 use serde_json::Value;
 use std::fmt::Debug;
+use std::sync::Mutex;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
-use std::sync::Mutex;
 use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio::task::AbortHandle;
@@ -216,7 +216,7 @@ impl AudioBridgeHandle {
     }
 }
 
-base_handle!(AudioBridgeHandle);
+base_handle_with_drop_impl!(AudioBridgeHandle);
 
 #[uniffi::export(callback_interface)]
 pub trait AudioBridgeHandleCallback: Send + Sync + Debug {

@@ -1,4 +1,4 @@
-use crate::base_handle;
+use crate::base_handle_with_drop_impl;
 use crate::error::JanusGatewayCommunicationError;
 use crate::protocol::Candidate;
 use crate::protocol::GenericEvent;
@@ -9,9 +9,9 @@ use jarust::interface::japrotocol::JaResponse;
 use jarust::interface::japrotocol::ResponseType;
 use serde_json::Value;
 use std::fmt::Debug;
+use std::sync::Mutex;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
-use std::sync::Mutex;
 use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio::task::AbortHandle;
@@ -70,7 +70,7 @@ impl Handle {
     }
 }
 
-base_handle!(Handle);
+base_handle_with_drop_impl!(Handle);
 
 #[uniffi::export(callback_interface)]
 pub trait HandleCallback: Send + Sync + Debug {
