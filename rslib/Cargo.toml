@@ -9,6 +9,14 @@ repository = "https://github.com/Ghamza-Jd/janus-mobile-sdk"
 name = "janus_gateway"
 crate-type = ["cdylib", "staticlib", "lib"]
 
+# Cargo will log a warn on this, its fine to ignore since the suggested solution (moving it to the root Cargo.toml)
+# didn't work. https://github.com/rust-lang/cargo/issues/15262
+[profile.release]
+opt-level = "z"
+lto = "thin"
+panic = "abort"
+strip = "symbols"
+
 [dependencies]
 log = "0.4.22"
 log-panics = "2.1.0"
