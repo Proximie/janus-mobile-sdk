@@ -1878,6 +1878,8 @@ public protocol SessionProtocol: AnyObject {
     
     func attachEchoTest(timeout: TimeInterval) async throws  -> EchotestHandle
     
+    func attachVideoRoom(timeout: TimeInterval) async throws  -> VideoRoomHandle
+    
     func destory(timeout: TimeInterval) async throws 
     
 }
@@ -1977,6 +1979,23 @@ open func attachEchoTest(timeout: TimeInterval)async throws  -> EchotestHandle  
             completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
             freeFunc: ffi_janus_gateway_rust_future_free_pointer,
             liftFunc: FfiConverterTypeEchotestHandle_lift,
+            errorHandler: FfiConverterTypeJanusGatewayHandleError.lift
+        )
+}
+    
+open func attachVideoRoom(timeout: TimeInterval)async throws  -> VideoRoomHandle  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_session_attach_video_room(
+                    self.uniffiClonePointer(),
+                    FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_pointer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
+            freeFunc: ffi_janus_gateway_rust_future_free_pointer,
+            liftFunc: FfiConverterTypeVideoRoomHandle_lift,
             errorHandler: FfiConverterTypeJanusGatewayHandleError.lift
         )
 }
@@ -7514,6 +7533,9 @@ private let initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_session_attach_echo_test() != 28942) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_session_attach_video_room() != 2521) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_session_destory() != 62073) {
