@@ -33,6 +33,7 @@ version = "1.3.0"
 features = [
     "echo-test-plugin",
     "audio-bridge-plugin",
+    "video-room-plugin",
     "ffi-compatible",
     "__plugin-expiremental",
 ]
