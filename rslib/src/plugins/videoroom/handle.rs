@@ -4,7 +4,7 @@ use crate::plugins::common::JanusId;
 use crate::protocol::Candidate;
 use crate::protocol::GenericEvent;
 use crate::protocol::Jsep;
-use jarust::plugins::audio_bridge::events::PluginEvent;
+use jarust::plugins::video_room::events::PluginEvent;
 use jarust::plugins::video_room::handle::VideoRoomHandle as JaVideoRoomHandle;
 use jarust::plugins::video_room::params::VideoRoomCreateParams;
 use jarust::plugins::video_room::params::VideoRoomExistsParams;
