@@ -1,4 +1,4 @@
-use crate::base_handle;
+use crate::base_handle_with_drop_impl;
 use crate::error::JanusGatewayCommunicationError;
 use crate::protocol::Candidate;
 use crate::protocol::GenericEvent;
@@ -105,7 +105,7 @@ impl EchotestHandle {
     }
 }
 
-base_handle!(EchotestHandle);
+base_handle_with_drop_impl!(EchotestHandle);
 
 #[uniffi::export(callback_interface)]
 pub trait EchotestHandleCallback: Send + Sync + Debug {

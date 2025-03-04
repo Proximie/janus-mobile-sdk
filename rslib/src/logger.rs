@@ -24,11 +24,7 @@ pub fn init_janus_logger(subsystem: &str, category: &str) {
 
         let subscriber =
             tracing_subscriber::registry().with(AppleTracingSubscriber::new(subsystem, category));
-        let logger = tracing::subscriber::set_global_default(subscriber);
-        match logger {
-            Ok(()) => {}
-            Err(why) => tracing::error!("{why}"),
-        };
+        _ = tracing::subscriber::set_global_default(subscriber);
     }
 
     tracing::info!("JanusGateway started logging");
