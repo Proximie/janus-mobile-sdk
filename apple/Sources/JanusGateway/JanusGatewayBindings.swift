@@ -617,6 +617,8 @@ public protocol AudioBridgeHandleProtocol: AnyObject {
     
     func sendWaitonAck(data: Data, timeout: TimeInterval) async throws  -> String
     
+    func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval) async throws  -> String
+    
     func sendWaitonResult(data: Data, timeout: TimeInterval) async throws  -> Data
     
     func startEventLoop(cb: AudioBridgeHandleCallback) async 
@@ -871,6 +873,23 @@ open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  -> Strin
                 uniffi_janus_gateway_fn_method_audiobridgehandle_send_waiton_ack(
                     self.uniffiClonePointer(),
                     FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval)async throws  -> String  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_audiobridgehandle_send_waiton_ack_with_jsep(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
@@ -1187,6 +1206,8 @@ public protocol EchotestHandleProtocol: AnyObject {
     
     func sendWaitonAck(data: Data, timeout: TimeInterval) async throws  -> String
     
+    func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval) async throws  -> String
+    
     func sendWaitonResult(data: Data, timeout: TimeInterval) async throws  -> Data
     
     func start(params: EchoTestStartParams) async throws 
@@ -1341,6 +1362,23 @@ open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  -> Strin
                 uniffi_janus_gateway_fn_method_echotesthandle_send_waiton_ack(
                     self.uniffiClonePointer(),
                     FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval)async throws  -> String  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_echotesthandle_send_waiton_ack_with_jsep(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
@@ -1526,6 +1564,8 @@ public protocol HandleProtocol: AnyObject {
     
     func sendWaitonAck(data: Data, timeout: TimeInterval) async throws  -> String
     
+    func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval) async throws  -> String
+    
     func sendWaitonResult(data: Data, timeout: TimeInterval) async throws  -> Data
     
     func startEventLoop(cb: HandleCallback) async 
@@ -1676,6 +1716,23 @@ open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  -> Strin
                 uniffi_janus_gateway_fn_method_handle_send_waiton_ack(
                     self.uniffiClonePointer(),
                     FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval)async throws  -> String  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_handle_send_waiton_ack_with_jsep(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
@@ -1992,6 +2049,345 @@ public func FfiConverterTypeSession_lift(_ pointer: UnsafeMutableRawPointer) thr
 #endif
 public func FfiConverterTypeSession_lower(_ value: Session) -> UnsafeMutableRawPointer {
     return FfiConverterTypeSession.lower(value)
+}
+
+
+
+
+
+
+public protocol VideoRoomHandleProtocol: AnyObject {
+    
+    func completeTrickle(timeout: TimeInterval) async throws 
+    
+    func detach() async throws 
+    
+    func exist(roomId: JanusId, timeout: TimeInterval) async throws  -> Bool
+    
+    func fireAndForget(data: Data) async throws 
+    
+    func fireAndForgetWithJsep(data: Data, jsep: Jsep) async throws 
+    
+    func hangup() async throws 
+    
+    func sendWaitonAck(data: Data, timeout: TimeInterval) async throws  -> String
+    
+    func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval) async throws  -> String
+    
+    func sendWaitonResult(data: Data, timeout: TimeInterval) async throws  -> Data
+    
+    func startEventLoop(cb: VideoRoomHandleCallback) async 
+    
+    func trickleCandidates(candidates: [Candidate], timeout: TimeInterval) async throws 
+    
+    func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval) async throws 
+    
+}
+open class VideoRoomHandle: VideoRoomHandleProtocol, @unchecked Sendable {
+    fileprivate let pointer: UnsafeMutableRawPointer!
+
+    /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public struct NoPointer {
+        public init() {}
+    }
+
+    // TODO: We'd like this to be `private` but for Swifty reasons,
+    // we can't implement `FfiConverter` without making this `required` and we can't
+    // make it `required` without making it `public`.
+    required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
+        self.pointer = pointer
+    }
+
+    // This constructor can be used to instantiate a fake object.
+    // - Parameter noPointer: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    //
+    // - Warning:
+    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing [Pointer] the FFI lower functions will crash.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public init(noPointer: NoPointer) {
+        self.pointer = nil
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public func uniffiClonePointer() -> UnsafeMutableRawPointer {
+        return try! rustCall { uniffi_janus_gateway_fn_clone_videoroomhandle(self.pointer, $0) }
+    }
+    // No primary constructor declared for this class.
+
+    deinit {
+        guard let pointer = pointer else {
+            return
+        }
+
+        try! rustCall { uniffi_janus_gateway_fn_free_videoroomhandle(pointer, $0) }
+    }
+
+    
+
+    
+open func completeTrickle(timeout: TimeInterval)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_videoroomhandle_complete_trickle(
+                    self.uniffiClonePointer(),
+                    FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func detach()async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_videoroomhandle_detach(
+                    self.uniffiClonePointer()
+                    
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func exist(roomId: JanusId, timeout: TimeInterval)async throws  -> Bool  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_videoroomhandle_exist(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeJanusId_lower(roomId),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_i8,
+            completeFunc: ffi_janus_gateway_rust_future_complete_i8,
+            freeFunc: ffi_janus_gateway_rust_future_free_i8,
+            liftFunc: FfiConverterBool.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func fireAndForget(data: Data)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_videoroomhandle_fire_and_forget(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_videoroomhandle_fire_and_forget_with_jsep(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func hangup()async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_videoroomhandle_hangup(
+                    self.uniffiClonePointer()
+                    
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  -> String  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_videoroomhandle_send_waiton_ack(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval)async throws  -> String  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_videoroomhandle_send_waiton_ack_with_jsep(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Data  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_videoroomhandle_send_waiton_result(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterData.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func startEventLoop(cb: VideoRoomHandleCallback)async   {
+    return
+        try!  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_videoroomhandle_start_event_loop(
+                    self.uniffiClonePointer(),
+                    FfiConverterCallbackInterfaceVideoRoomHandleCallback_lower(cb)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: nil
+            
+        )
+}
+    
+open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_videoroomhandle_trickle_candidates(
+                    self.uniffiClonePointer(),
+                    FfiConverterSequenceTypeCandidate.lower(candidates),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_videoroomhandle_trickle_single_candidate(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeCandidate_lower(candidate),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeVideoRoomHandle: FfiConverter {
+
+    typealias FfiType = UnsafeMutableRawPointer
+    typealias SwiftType = VideoRoomHandle
+
+    public static func lift(_ pointer: UnsafeMutableRawPointer) throws -> VideoRoomHandle {
+        return VideoRoomHandle(unsafeFromRawPointer: pointer)
+    }
+
+    public static func lower(_ value: VideoRoomHandle) -> UnsafeMutableRawPointer {
+        return value.uniffiClonePointer()
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> VideoRoomHandle {
+        let v: UInt64 = try readInt(&buf)
+        // The Rust code won't compile if a pointer won't fit in a UInt64.
+        // We have to go via `UInt` because that's the thing that's the size of a pointer.
+        let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: v))
+        if (ptr == nil) {
+            throw UniffiInternalError.unexpectedNullPointer
+        }
+        return try lift(ptr!)
+    }
+
+    public static func write(_ value: VideoRoomHandle, into buf: inout [UInt8]) {
+        // This fiddling is because `Int` is the thing that's the same size as a pointer.
+        // The Rust code won't compile if a pointer won't fit in a `UInt64`.
+        writeInt(&buf, UInt64(bitPattern: Int64(Int(bitPattern: lower(value)))))
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomHandle_lift(_ pointer: UnsafeMutableRawPointer) throws -> VideoRoomHandle {
+    return try FfiConverterTypeVideoRoomHandle.lift(pointer)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomHandle_lower(_ value: VideoRoomHandle) -> UnsafeMutableRawPointer {
+    return FfiConverterTypeVideoRoomHandle.lower(value)
 }
 
 
@@ -5510,6 +5906,176 @@ public func FfiConverterCallbackInterfaceHandleCallback_lower(_ v: HandleCallbac
     return FfiConverterCallbackInterfaceHandleCallback.lower(v)
 }
 
+
+
+
+public protocol VideoRoomHandleCallback: AnyObject {
+    
+    func onHandleEvent(event: GenericEvent) 
+    
+    func onVideoRoomError(errorCode: UInt16, error: String) 
+    
+    func onOther(data: Data) 
+    
+}
+
+
+// Put the implementation in a struct so we don't pollute the top-level namespace
+fileprivate struct UniffiCallbackInterfaceVideoRoomHandleCallback {
+
+    // Create the VTable using a series of closures.
+    // Swift automatically converts these into C callback functions.
+    //
+    // This creates 1-element array, since this seems to be the only way to construct a const
+    // pointer that we can pass to the Rust code.
+    static let vtable: [UniffiVTableCallbackInterfaceVideoRoomHandleCallback] = [UniffiVTableCallbackInterfaceVideoRoomHandleCallback(
+        onHandleEvent: { (
+            uniffiHandle: UInt64,
+            event: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onHandleEvent(
+                     event: try FfiConverterTypeGenericEvent_lift(event)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onVideoRoomError: { (
+            uniffiHandle: UInt64,
+            errorCode: UInt16,
+            error: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onVideoRoomError(
+                     errorCode: try FfiConverterUInt16.lift(errorCode),
+                     error: try FfiConverterString.lift(error)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onOther: { (
+            uniffiHandle: UInt64,
+            data: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onOther(
+                     data: try FfiConverterData.lift(data)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        uniffiFree: { (uniffiHandle: UInt64) -> () in
+            let result = try? FfiConverterCallbackInterfaceVideoRoomHandleCallback.handleMap.remove(handle: uniffiHandle)
+            if result == nil {
+                print("Uniffi callback interface VideoRoomHandleCallback: handle missing in uniffiFree")
+            }
+        }
+    )]
+}
+
+private func uniffiCallbackInitVideoRoomHandleCallback() {
+    uniffi_janus_gateway_fn_init_callback_vtable_videoroomhandlecallback(UniffiCallbackInterfaceVideoRoomHandleCallback.vtable)
+}
+
+// FfiConverter protocol for callback interfaces
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterCallbackInterfaceVideoRoomHandleCallback {
+    fileprivate static let handleMap = UniffiHandleMap<VideoRoomHandleCallback>()
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+extension FfiConverterCallbackInterfaceVideoRoomHandleCallback : FfiConverter {
+    typealias SwiftType = VideoRoomHandleCallback
+    typealias FfiType = UInt64
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func lift(_ handle: UInt64) throws -> SwiftType {
+        try handleMap.get(handle: handle)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func lower(_ v: SwiftType) -> UInt64 {
+        return handleMap.insert(obj: v)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func write(_ v: SwiftType, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(v))
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterCallbackInterfaceVideoRoomHandleCallback_lift(_ handle: UInt64) throws -> VideoRoomHandleCallback {
+    return try FfiConverterCallbackInterfaceVideoRoomHandleCallback.lift(handle)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterCallbackInterfaceVideoRoomHandleCallback_lower(_ v: VideoRoomHandleCallback) -> UInt64 {
+    return FfiConverterCallbackInterfaceVideoRoomHandleCallback.lower(v)
+}
+
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
@@ -6025,6 +6591,9 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_send_waiton_ack() != 34307) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_send_waiton_ack_with_jsep() != 25960) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_audiobridgehandle_send_waiton_result() != 47125) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -6064,6 +6633,9 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_echotesthandle_send_waiton_ack() != 9815) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_send_waiton_ack_with_jsep() != 40255) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_echotesthandle_send_waiton_result() != 15964) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -6100,6 +6672,9 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_handle_send_waiton_ack() != 21432) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_handle_send_waiton_ack_with_jsep() != 24357) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_handle_send_waiton_result() != 24292) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -6122,6 +6697,42 @@ private let initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_session_destory() != 62073) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_complete_trickle() != 33029) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_detach() != 19085) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_exist() != 35301) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_fire_and_forget() != 22601) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_fire_and_forget_with_jsep() != 54355) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_hangup() != 22972) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_send_waiton_ack() != 5152) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_send_waiton_ack_with_jsep() != 47447) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_send_waiton_result() != 26883) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_start_event_loop() != 36856) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_trickle_candidates() != 32955) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_trickle_single_candidate() != 42668) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_result() != 50231) {
@@ -6175,10 +6786,20 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_handlecallback_on_handle_event() != 1626) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_handle_event() != 12084) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_video_room_error() != 25079) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_other() != 28224) {
+        return InitializationResult.apiChecksumMismatch
+    }
 
     uniffiCallbackInitAudioBridgeHandleCallback()
     uniffiCallbackInitEchotestHandleCallback()
     uniffiCallbackInitHandleCallback()
+    uniffiCallbackInitVideoRoomHandleCallback()
     return InitializationResult.ok
 }()
 
