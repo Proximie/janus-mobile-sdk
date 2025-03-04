@@ -2060,6 +2060,8 @@ public protocol VideoRoomHandleProtocol: AnyObject {
     
     func completeTrickle(timeout: TimeInterval) async throws 
     
+    func createRoom(params: VideoRoomCreateParams, timeout: TimeInterval) async throws  -> VideoRoomCreatedRsp
+    
     func detach() async throws 
     
     func exist(roomId: JanusId, timeout: TimeInterval) async throws  -> Bool
@@ -2145,6 +2147,23 @@ open func completeTrickle(timeout: TimeInterval)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+        )
+}
+    
+open func createRoom(params: VideoRoomCreateParams, timeout: TimeInterval)async throws  -> VideoRoomCreatedRsp  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_videoroomhandle_create_room(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeVideoRoomCreateParams_lower(params),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterTypeVideoRoomCreatedRsp_lift,
             errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
         )
 }
@@ -4518,6 +4537,526 @@ public func FfiConverterTypeU63_lower(_ value: U63) -> RustBuffer {
     return FfiConverterTypeU63.lower(value)
 }
 
+
+public struct VideoRoomAudioCodecList {
+    public let codecs: [VideoRoomAudioCodec]
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(codecs: [VideoRoomAudioCodec]) {
+        self.codecs = codecs
+    }
+}
+
+#if compiler(>=6)
+extension VideoRoomAudioCodecList: Sendable {}
+#endif
+
+
+extension VideoRoomAudioCodecList: Equatable, Hashable {
+    public static func ==(lhs: VideoRoomAudioCodecList, rhs: VideoRoomAudioCodecList) -> Bool {
+        if lhs.codecs != rhs.codecs {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(codecs)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeVideoRoomAudioCodecList: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> VideoRoomAudioCodecList {
+        return
+            try VideoRoomAudioCodecList(
+                codecs: FfiConverterSequenceTypeVideoRoomAudioCodec.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: VideoRoomAudioCodecList, into buf: inout [UInt8]) {
+        FfiConverterSequenceTypeVideoRoomAudioCodec.write(value.codecs, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomAudioCodecList_lift(_ buf: RustBuffer) throws -> VideoRoomAudioCodecList {
+    return try FfiConverterTypeVideoRoomAudioCodecList.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomAudioCodecList_lower(_ value: VideoRoomAudioCodecList) -> RustBuffer {
+    return FfiConverterTypeVideoRoomAudioCodecList.lower(value)
+}
+
+
+public struct VideoRoomCreateParams {
+    public let adminKey: String?
+    public let room: JanusId?
+    public let description: String?
+    public let isPrivate: Bool?
+    public let allowed: [String]?
+    public let secret: String?
+    public let pin: String?
+    public let requirePvtid: Bool?
+    public let signedTokens: Bool?
+    public let bitrate: UInt64?
+    public let bitrateCap: Bool?
+    public let firFreq: UInt64?
+    public let publishers: UInt64?
+    public let audiocodec: VideoRoomAudioCodecList?
+    public let videocodec: VideoRoomVideoCodecList?
+    public let vp9Profile: String?
+    public let h264Profile: String?
+    public let opusFec: Bool?
+    public let opusDtx: Bool?
+    public let audiolevelExt: Bool?
+    public let audiolevelEvent: Bool?
+    public let audioActivePackets: UInt64?
+    public let audioLevelAverage: UInt64?
+    public let videoorientExt: Bool?
+    public let playoutdelayExt: Bool?
+    public let transportWideCcExt: Bool?
+    public let record: Bool?
+    public let recordDir: String?
+    public let lockRecord: Bool?
+    public let permanent: Bool?
+    public let notifyJoining: Bool?
+    public let requireE2ee: Bool?
+    public let dummyPublisher: Bool?
+    public let dummyStreams: Bool?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(adminKey: String?, room: JanusId?, description: String?, isPrivate: Bool?, allowed: [String]?, secret: String?, pin: String?, requirePvtid: Bool?, signedTokens: Bool?, bitrate: UInt64?, bitrateCap: Bool?, firFreq: UInt64?, publishers: UInt64?, audiocodec: VideoRoomAudioCodecList?, videocodec: VideoRoomVideoCodecList?, vp9Profile: String?, h264Profile: String?, opusFec: Bool?, opusDtx: Bool?, audiolevelExt: Bool?, audiolevelEvent: Bool?, audioActivePackets: UInt64?, audioLevelAverage: UInt64?, videoorientExt: Bool?, playoutdelayExt: Bool?, transportWideCcExt: Bool?, record: Bool?, recordDir: String?, lockRecord: Bool?, permanent: Bool?, notifyJoining: Bool?, requireE2ee: Bool?, dummyPublisher: Bool?, dummyStreams: Bool?) {
+        self.adminKey = adminKey
+        self.room = room
+        self.description = description
+        self.isPrivate = isPrivate
+        self.allowed = allowed
+        self.secret = secret
+        self.pin = pin
+        self.requirePvtid = requirePvtid
+        self.signedTokens = signedTokens
+        self.bitrate = bitrate
+        self.bitrateCap = bitrateCap
+        self.firFreq = firFreq
+        self.publishers = publishers
+        self.audiocodec = audiocodec
+        self.videocodec = videocodec
+        self.vp9Profile = vp9Profile
+        self.h264Profile = h264Profile
+        self.opusFec = opusFec
+        self.opusDtx = opusDtx
+        self.audiolevelExt = audiolevelExt
+        self.audiolevelEvent = audiolevelEvent
+        self.audioActivePackets = audioActivePackets
+        self.audioLevelAverage = audioLevelAverage
+        self.videoorientExt = videoorientExt
+        self.playoutdelayExt = playoutdelayExt
+        self.transportWideCcExt = transportWideCcExt
+        self.record = record
+        self.recordDir = recordDir
+        self.lockRecord = lockRecord
+        self.permanent = permanent
+        self.notifyJoining = notifyJoining
+        self.requireE2ee = requireE2ee
+        self.dummyPublisher = dummyPublisher
+        self.dummyStreams = dummyStreams
+    }
+}
+
+#if compiler(>=6)
+extension VideoRoomCreateParams: Sendable {}
+#endif
+
+
+extension VideoRoomCreateParams: Equatable, Hashable {
+    public static func ==(lhs: VideoRoomCreateParams, rhs: VideoRoomCreateParams) -> Bool {
+        if lhs.adminKey != rhs.adminKey {
+            return false
+        }
+        if lhs.room != rhs.room {
+            return false
+        }
+        if lhs.description != rhs.description {
+            return false
+        }
+        if lhs.isPrivate != rhs.isPrivate {
+            return false
+        }
+        if lhs.allowed != rhs.allowed {
+            return false
+        }
+        if lhs.secret != rhs.secret {
+            return false
+        }
+        if lhs.pin != rhs.pin {
+            return false
+        }
+        if lhs.requirePvtid != rhs.requirePvtid {
+            return false
+        }
+        if lhs.signedTokens != rhs.signedTokens {
+            return false
+        }
+        if lhs.bitrate != rhs.bitrate {
+            return false
+        }
+        if lhs.bitrateCap != rhs.bitrateCap {
+            return false
+        }
+        if lhs.firFreq != rhs.firFreq {
+            return false
+        }
+        if lhs.publishers != rhs.publishers {
+            return false
+        }
+        if lhs.audiocodec != rhs.audiocodec {
+            return false
+        }
+        if lhs.videocodec != rhs.videocodec {
+            return false
+        }
+        if lhs.vp9Profile != rhs.vp9Profile {
+            return false
+        }
+        if lhs.h264Profile != rhs.h264Profile {
+            return false
+        }
+        if lhs.opusFec != rhs.opusFec {
+            return false
+        }
+        if lhs.opusDtx != rhs.opusDtx {
+            return false
+        }
+        if lhs.audiolevelExt != rhs.audiolevelExt {
+            return false
+        }
+        if lhs.audiolevelEvent != rhs.audiolevelEvent {
+            return false
+        }
+        if lhs.audioActivePackets != rhs.audioActivePackets {
+            return false
+        }
+        if lhs.audioLevelAverage != rhs.audioLevelAverage {
+            return false
+        }
+        if lhs.videoorientExt != rhs.videoorientExt {
+            return false
+        }
+        if lhs.playoutdelayExt != rhs.playoutdelayExt {
+            return false
+        }
+        if lhs.transportWideCcExt != rhs.transportWideCcExt {
+            return false
+        }
+        if lhs.record != rhs.record {
+            return false
+        }
+        if lhs.recordDir != rhs.recordDir {
+            return false
+        }
+        if lhs.lockRecord != rhs.lockRecord {
+            return false
+        }
+        if lhs.permanent != rhs.permanent {
+            return false
+        }
+        if lhs.notifyJoining != rhs.notifyJoining {
+            return false
+        }
+        if lhs.requireE2ee != rhs.requireE2ee {
+            return false
+        }
+        if lhs.dummyPublisher != rhs.dummyPublisher {
+            return false
+        }
+        if lhs.dummyStreams != rhs.dummyStreams {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(adminKey)
+        hasher.combine(room)
+        hasher.combine(description)
+        hasher.combine(isPrivate)
+        hasher.combine(allowed)
+        hasher.combine(secret)
+        hasher.combine(pin)
+        hasher.combine(requirePvtid)
+        hasher.combine(signedTokens)
+        hasher.combine(bitrate)
+        hasher.combine(bitrateCap)
+        hasher.combine(firFreq)
+        hasher.combine(publishers)
+        hasher.combine(audiocodec)
+        hasher.combine(videocodec)
+        hasher.combine(vp9Profile)
+        hasher.combine(h264Profile)
+        hasher.combine(opusFec)
+        hasher.combine(opusDtx)
+        hasher.combine(audiolevelExt)
+        hasher.combine(audiolevelEvent)
+        hasher.combine(audioActivePackets)
+        hasher.combine(audioLevelAverage)
+        hasher.combine(videoorientExt)
+        hasher.combine(playoutdelayExt)
+        hasher.combine(transportWideCcExt)
+        hasher.combine(record)
+        hasher.combine(recordDir)
+        hasher.combine(lockRecord)
+        hasher.combine(permanent)
+        hasher.combine(notifyJoining)
+        hasher.combine(requireE2ee)
+        hasher.combine(dummyPublisher)
+        hasher.combine(dummyStreams)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeVideoRoomCreateParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> VideoRoomCreateParams {
+        return
+            try VideoRoomCreateParams(
+                adminKey: FfiConverterOptionString.read(from: &buf), 
+                room: FfiConverterOptionTypeJanusId.read(from: &buf), 
+                description: FfiConverterOptionString.read(from: &buf), 
+                isPrivate: FfiConverterOptionBool.read(from: &buf), 
+                allowed: FfiConverterOptionSequenceString.read(from: &buf), 
+                secret: FfiConverterOptionString.read(from: &buf), 
+                pin: FfiConverterOptionString.read(from: &buf), 
+                requirePvtid: FfiConverterOptionBool.read(from: &buf), 
+                signedTokens: FfiConverterOptionBool.read(from: &buf), 
+                bitrate: FfiConverterOptionUInt64.read(from: &buf), 
+                bitrateCap: FfiConverterOptionBool.read(from: &buf), 
+                firFreq: FfiConverterOptionUInt64.read(from: &buf), 
+                publishers: FfiConverterOptionUInt64.read(from: &buf), 
+                audiocodec: FfiConverterOptionTypeVideoRoomAudioCodecList.read(from: &buf), 
+                videocodec: FfiConverterOptionTypeVideoRoomVideoCodecList.read(from: &buf), 
+                vp9Profile: FfiConverterOptionString.read(from: &buf), 
+                h264Profile: FfiConverterOptionString.read(from: &buf), 
+                opusFec: FfiConverterOptionBool.read(from: &buf), 
+                opusDtx: FfiConverterOptionBool.read(from: &buf), 
+                audiolevelExt: FfiConverterOptionBool.read(from: &buf), 
+                audiolevelEvent: FfiConverterOptionBool.read(from: &buf), 
+                audioActivePackets: FfiConverterOptionUInt64.read(from: &buf), 
+                audioLevelAverage: FfiConverterOptionUInt64.read(from: &buf), 
+                videoorientExt: FfiConverterOptionBool.read(from: &buf), 
+                playoutdelayExt: FfiConverterOptionBool.read(from: &buf), 
+                transportWideCcExt: FfiConverterOptionBool.read(from: &buf), 
+                record: FfiConverterOptionBool.read(from: &buf), 
+                recordDir: FfiConverterOptionString.read(from: &buf), 
+                lockRecord: FfiConverterOptionBool.read(from: &buf), 
+                permanent: FfiConverterOptionBool.read(from: &buf), 
+                notifyJoining: FfiConverterOptionBool.read(from: &buf), 
+                requireE2ee: FfiConverterOptionBool.read(from: &buf), 
+                dummyPublisher: FfiConverterOptionBool.read(from: &buf), 
+                dummyStreams: FfiConverterOptionBool.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: VideoRoomCreateParams, into buf: inout [UInt8]) {
+        FfiConverterOptionString.write(value.adminKey, into: &buf)
+        FfiConverterOptionTypeJanusId.write(value.room, into: &buf)
+        FfiConverterOptionString.write(value.description, into: &buf)
+        FfiConverterOptionBool.write(value.isPrivate, into: &buf)
+        FfiConverterOptionSequenceString.write(value.allowed, into: &buf)
+        FfiConverterOptionString.write(value.secret, into: &buf)
+        FfiConverterOptionString.write(value.pin, into: &buf)
+        FfiConverterOptionBool.write(value.requirePvtid, into: &buf)
+        FfiConverterOptionBool.write(value.signedTokens, into: &buf)
+        FfiConverterOptionUInt64.write(value.bitrate, into: &buf)
+        FfiConverterOptionBool.write(value.bitrateCap, into: &buf)
+        FfiConverterOptionUInt64.write(value.firFreq, into: &buf)
+        FfiConverterOptionUInt64.write(value.publishers, into: &buf)
+        FfiConverterOptionTypeVideoRoomAudioCodecList.write(value.audiocodec, into: &buf)
+        FfiConverterOptionTypeVideoRoomVideoCodecList.write(value.videocodec, into: &buf)
+        FfiConverterOptionString.write(value.vp9Profile, into: &buf)
+        FfiConverterOptionString.write(value.h264Profile, into: &buf)
+        FfiConverterOptionBool.write(value.opusFec, into: &buf)
+        FfiConverterOptionBool.write(value.opusDtx, into: &buf)
+        FfiConverterOptionBool.write(value.audiolevelExt, into: &buf)
+        FfiConverterOptionBool.write(value.audiolevelEvent, into: &buf)
+        FfiConverterOptionUInt64.write(value.audioActivePackets, into: &buf)
+        FfiConverterOptionUInt64.write(value.audioLevelAverage, into: &buf)
+        FfiConverterOptionBool.write(value.videoorientExt, into: &buf)
+        FfiConverterOptionBool.write(value.playoutdelayExt, into: &buf)
+        FfiConverterOptionBool.write(value.transportWideCcExt, into: &buf)
+        FfiConverterOptionBool.write(value.record, into: &buf)
+        FfiConverterOptionString.write(value.recordDir, into: &buf)
+        FfiConverterOptionBool.write(value.lockRecord, into: &buf)
+        FfiConverterOptionBool.write(value.permanent, into: &buf)
+        FfiConverterOptionBool.write(value.notifyJoining, into: &buf)
+        FfiConverterOptionBool.write(value.requireE2ee, into: &buf)
+        FfiConverterOptionBool.write(value.dummyPublisher, into: &buf)
+        FfiConverterOptionBool.write(value.dummyStreams, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomCreateParams_lift(_ buf: RustBuffer) throws -> VideoRoomCreateParams {
+    return try FfiConverterTypeVideoRoomCreateParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomCreateParams_lower(_ value: VideoRoomCreateParams) -> RustBuffer {
+    return FfiConverterTypeVideoRoomCreateParams.lower(value)
+}
+
+
+public struct VideoRoomCreatedRsp {
+    public let room: JanusId
+    public let permanent: Bool
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(room: JanusId, permanent: Bool) {
+        self.room = room
+        self.permanent = permanent
+    }
+}
+
+#if compiler(>=6)
+extension VideoRoomCreatedRsp: Sendable {}
+#endif
+
+
+extension VideoRoomCreatedRsp: Equatable, Hashable {
+    public static func ==(lhs: VideoRoomCreatedRsp, rhs: VideoRoomCreatedRsp) -> Bool {
+        if lhs.room != rhs.room {
+            return false
+        }
+        if lhs.permanent != rhs.permanent {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(room)
+        hasher.combine(permanent)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeVideoRoomCreatedRsp: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> VideoRoomCreatedRsp {
+        return
+            try VideoRoomCreatedRsp(
+                room: FfiConverterTypeJanusId.read(from: &buf), 
+                permanent: FfiConverterBool.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: VideoRoomCreatedRsp, into buf: inout [UInt8]) {
+        FfiConverterTypeJanusId.write(value.room, into: &buf)
+        FfiConverterBool.write(value.permanent, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomCreatedRsp_lift(_ buf: RustBuffer) throws -> VideoRoomCreatedRsp {
+    return try FfiConverterTypeVideoRoomCreatedRsp.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomCreatedRsp_lower(_ value: VideoRoomCreatedRsp) -> RustBuffer {
+    return FfiConverterTypeVideoRoomCreatedRsp.lower(value)
+}
+
+
+public struct VideoRoomVideoCodecList {
+    public let codecs: [VideoRoomVideoCodec]
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(codecs: [VideoRoomVideoCodec]) {
+        self.codecs = codecs
+    }
+}
+
+#if compiler(>=6)
+extension VideoRoomVideoCodecList: Sendable {}
+#endif
+
+
+extension VideoRoomVideoCodecList: Equatable, Hashable {
+    public static func ==(lhs: VideoRoomVideoCodecList, rhs: VideoRoomVideoCodecList) -> Bool {
+        if lhs.codecs != rhs.codecs {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(codecs)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeVideoRoomVideoCodecList: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> VideoRoomVideoCodecList {
+        return
+            try VideoRoomVideoCodecList(
+                codecs: FfiConverterSequenceTypeVideoRoomVideoCodec.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: VideoRoomVideoCodecList, into buf: inout [UInt8]) {
+        FfiConverterSequenceTypeVideoRoomVideoCodec.write(value.codecs, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomVideoCodecList_lift(_ buf: RustBuffer) throws -> VideoRoomVideoCodecList {
+    return try FfiConverterTypeVideoRoomVideoCodecList.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomVideoCodecList_lower(_ value: VideoRoomVideoCodecList) -> RustBuffer {
+    return FfiConverterTypeVideoRoomVideoCodecList.lower(value)
+}
+
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
@@ -5153,6 +5692,189 @@ public func FfiConverterTypeJsepType_lower(_ value: JsepType) -> RustBuffer {
 
 
 extension JsepType: Equatable, Hashable {}
+
+
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+
+public enum VideoRoomAudioCodec {
+    
+    case opus
+    case g722
+    case pcmu
+    case pcma
+    case isac32
+    case isac16
+}
+
+
+#if compiler(>=6)
+extension VideoRoomAudioCodec: Sendable {}
+#endif
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeVideoRoomAudioCodec: FfiConverterRustBuffer {
+    typealias SwiftType = VideoRoomAudioCodec
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> VideoRoomAudioCodec {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .opus
+        
+        case 2: return .g722
+        
+        case 3: return .pcmu
+        
+        case 4: return .pcma
+        
+        case 5: return .isac32
+        
+        case 6: return .isac16
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: VideoRoomAudioCodec, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .opus:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .g722:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .pcmu:
+            writeInt(&buf, Int32(3))
+        
+        
+        case .pcma:
+            writeInt(&buf, Int32(4))
+        
+        
+        case .isac32:
+            writeInt(&buf, Int32(5))
+        
+        
+        case .isac16:
+            writeInt(&buf, Int32(6))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomAudioCodec_lift(_ buf: RustBuffer) throws -> VideoRoomAudioCodec {
+    return try FfiConverterTypeVideoRoomAudioCodec.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomAudioCodec_lower(_ value: VideoRoomAudioCodec) -> RustBuffer {
+    return FfiConverterTypeVideoRoomAudioCodec.lower(value)
+}
+
+
+extension VideoRoomAudioCodec: Equatable, Hashable {}
+
+
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+
+public enum VideoRoomVideoCodec {
+    
+    case vp8
+    case vp9
+    case h264
+    case av1
+    case h265
+}
+
+
+#if compiler(>=6)
+extension VideoRoomVideoCodec: Sendable {}
+#endif
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeVideoRoomVideoCodec: FfiConverterRustBuffer {
+    typealias SwiftType = VideoRoomVideoCodec
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> VideoRoomVideoCodec {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .vp8
+        
+        case 2: return .vp9
+        
+        case 3: return .h264
+        
+        case 4: return .av1
+        
+        case 5: return .h265
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: VideoRoomVideoCodec, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .vp8:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .vp9:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .h264:
+            writeInt(&buf, Int32(3))
+        
+        
+        case .av1:
+            writeInt(&buf, Int32(4))
+        
+        
+        case .h265:
+            writeInt(&buf, Int32(5))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomVideoCodec_lift(_ buf: RustBuffer) throws -> VideoRoomVideoCodec {
+    return try FfiConverterTypeVideoRoomVideoCodec.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomVideoCodec_lower(_ value: VideoRoomVideoCodec) -> RustBuffer {
+    return FfiConverterTypeVideoRoomVideoCodec.lower(value)
+}
+
+
+extension VideoRoomVideoCodec: Equatable, Hashable {}
 
 
 
@@ -6271,6 +6993,54 @@ fileprivate struct FfiConverterOptionTypeJsep: FfiConverterRustBuffer {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterOptionTypeVideoRoomAudioCodecList: FfiConverterRustBuffer {
+    typealias SwiftType = VideoRoomAudioCodecList?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeVideoRoomAudioCodecList.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeVideoRoomAudioCodecList.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionTypeVideoRoomVideoCodecList: FfiConverterRustBuffer {
+    typealias SwiftType = VideoRoomVideoCodecList?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeVideoRoomVideoCodecList.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeVideoRoomVideoCodecList.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterOptionTypeAudioBridgeCodec: FfiConverterRustBuffer {
     typealias SwiftType = AudioBridgeCodec?
 
@@ -6410,6 +7180,56 @@ fileprivate struct FfiConverterSequenceTypeCandidate: FfiConverterRustBuffer {
         seq.reserveCapacity(Int(len))
         for _ in 0 ..< len {
             seq.append(try FfiConverterTypeCandidate.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceTypeVideoRoomAudioCodec: FfiConverterRustBuffer {
+    typealias SwiftType = [VideoRoomAudioCodec]
+
+    public static func write(_ value: [VideoRoomAudioCodec], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeVideoRoomAudioCodec.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [VideoRoomAudioCodec] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [VideoRoomAudioCodec]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeVideoRoomAudioCodec.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceTypeVideoRoomVideoCodec: FfiConverterRustBuffer {
+    typealias SwiftType = [VideoRoomVideoCodec]
+
+    public static func write(_ value: [VideoRoomVideoCodec], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeVideoRoomVideoCodec.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [VideoRoomVideoCodec] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [VideoRoomVideoCodec]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeVideoRoomVideoCodec.read(from: &buf))
         }
         return seq
     }
@@ -6700,6 +7520,9 @@ private let initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_videoroomhandle_complete_trickle() != 33029) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_create_room() != 14249) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_videoroomhandle_detach() != 19085) {
