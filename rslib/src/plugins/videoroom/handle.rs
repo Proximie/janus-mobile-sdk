@@ -6,7 +6,9 @@ use crate::protocol::GenericEvent;
 use crate::protocol::Jsep;
 use jarust::plugins::audio_bridge::events::PluginEvent;
 use jarust::plugins::video_room::handle::VideoRoomHandle as JaVideoRoomHandle;
+use jarust::plugins::video_room::params::VideoRoomCreateParams;
 use jarust::plugins::video_room::params::VideoRoomExistsParams;
+use jarust::plugins::video_room::responses::VideoRoomCreatedRsp;
 use serde_json::Value;
 use std::fmt::Debug;
 use std::sync::Mutex;
@@ -61,6 +63,19 @@ impl VideoRoomHandle {
             *abort_handle = Some(join_handle.abort_handle());
         }
         self.is_event_loop_running.store(true, Ordering::Relaxed);
+    }
+
+    pub async fn create_room(
+        &self,
+        params: VideoRoomCreateParams,
+        timeout: Duration,
+    ) -> Result<VideoRoomCreatedRsp, JanusGatewayCommunicationError> {
+        match self.inner.create_room_with_config(params, timeout).await {
+            Ok(rsp) => Ok(rsp),
+            Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            }),
+        }
     }
 
     pub async fn exist(
