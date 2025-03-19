@@ -5,10 +5,12 @@ use crate::protocol::Candidate;
 use crate::protocol::GenericEvent;
 use crate::protocol::Jsep;
 use jarust::plugins::video_room::events::PluginEvent;
+use jarust::plugins::video_room::events::VideoRoomEvent;
 use jarust::plugins::video_room::handle::VideoRoomHandle as JaVideoRoomHandle;
 use jarust::plugins::video_room::params::VideoRoomCreateParams;
 use jarust::plugins::video_room::params::VideoRoomExistsParams;
 use jarust::plugins::video_room::params::VideoRoomPublisherJoinAndConfigureParams;
+use jarust::plugins::video_room::responses::ConfiguredStream;
 use jarust::plugins::video_room::responses::VideoRoomCreatedRsp;
 use serde_json::Value;
 use std::fmt::Debug;
@@ -54,6 +56,24 @@ impl VideoRoomHandle {
                 match event {
                     PluginEvent::GenericEvent(generic_event) => {
                         cb.on_handle_event(generic_event);
+                    }
+                    PluginEvent::VideoRoomEvent(VideoRoomEvent::Error { error_code, error }) => {
+                        cb.on_video_room_error(error_code, error);
+                    }
+                    PluginEvent::VideoRoomEvent(VideoRoomEvent::ConfiguredWithJsep {
+                        room,
+                        audio_codec,
+                        video_codec,
+                        streams,
+                        jsep,
+                    }) => {
+                        cb.on_configure_with_jsep(room, audio_codec, video_codec, streams, jsep);
+                    }
+                    PluginEvent::VideoRoomEvent(VideoRoomEvent::Kicked { room, participant }) => {
+                        cb.on_kicked(room, participant);
+                    }
+                    PluginEvent::VideoRoomEvent(VideoRoomEvent::Leaving { room, reason }) => {
+                        cb.on_leaving(room, reason);
                     }
                     _ => {}
                 }
@@ -122,4 +142,14 @@ pub trait VideoRoomHandleCallback: Send + Sync + Debug {
     fn on_handle_event(&self, event: GenericEvent);
     fn on_video_room_error(&self, error_code: u16, error: String);
     fn on_other(&self, data: Vec<u8>);
+    fn on_configure_with_jsep(
+        &self,
+        room: JanusId,
+        audio_codec: Option<String>,
+        video_codec: Option<String>,
+        streams: Option<Vec<ConfiguredStream>>,
+        jsep: Jsep,
+    );
+    fn on_kicked(&self, room: JanusId, participant: JanusId);
+    fn on_leaving(&self, room: JanusId, reason: String);
 }
