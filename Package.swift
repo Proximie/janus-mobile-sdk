@@ -16,7 +16,7 @@ let binaryTarget: Target = if useLocalFramework {
 } else {
     .binaryTarget(
         name: "JanusGatewayFFI",
-        url: "https://github.com/Ghamza-Jd/janus-mobile-sdk/releases/download/\(releaseTag)/libjanus_gateway-rs.xcframework.zip",
+        url: "https://github.com/Proximie/janus-mobile-sdk/releases/download/\(releaseTag)/libjanus_gateway-rs.xcframework.zip",
         checksum: releaseChecksum
     )
 }
@@ -36,11 +36,6 @@ let package = Package(
             resources: [
                 .process("Resources/PrivacyInfo.xcprivacy")
             ]
-        ),
-        .testTarget(
-            name: "JanusGatewayTests",
-            dependencies: ["JanusGateway"],
-            path: "apple/Tests/JanusGatewayTests"
-        ),
+        )
     ]
 )

@@ -1,5 +1,5 @@
 [book]
-authors = ["Ghamza-Jd"]
+authors = ["Proximie"]
 language = "en"
 multilingual = false
 src = "src"
@@ -7,7 +7,7 @@ title = "Janus Mobile SDK Documenation"
 description = "Janus mobile sdk documentation that includes the architecture, sdk installation, usage, and examples."
 
 [output.html]
-git-repository-url = "https://github.com/Ghamza-Jd/janus-mobile-sdk"
+git-repository-url = "https://github.com/Proximie/janus-mobile-sdk"
 git-repository-icon = "fa-github"
 
 [output.html.playground]

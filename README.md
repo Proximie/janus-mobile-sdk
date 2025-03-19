@@ -4,4 +4,4 @@ The [Janus Gateway](https://github.com/meetecho/janus-gateway) client SDK for na
 
 ## iOS Docs
 
-- [master](https://swiftpackageindex.com/Ghamza-Jd/janus-mobile-sdk/master/documentation/janusgateway)
+- [master](https://swiftpackageindex.com/Proximie/janus-mobile-sdk/master/documentation/janusgateway)

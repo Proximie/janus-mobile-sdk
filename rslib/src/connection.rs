@@ -30,7 +30,7 @@ pub async fn janus_connect(config: Config) -> Result<Connection, JanusGatewayCon
         Err(why) => {
             return Err(JanusGatewayConnectionError::ConnectionFailure {
                 reason: why.to_string(),
-            })
+            });
         }
     };
 
@@ -53,7 +53,7 @@ impl Connection {
             Err(why) => {
                 return Err(JanusGatewaySessionError::SessionCreationFailure {
                     reason: why.to_string(),
-                })
+                });
             }
         };
         Ok(Session::new(session))
@@ -68,7 +68,7 @@ impl Connection {
             Err(why) => {
                 return Err(JanusGatewayCommunicationError::SendFailure {
                     reason: why.to_string(),
-                })
+                });
             }
         };
         Ok(info)

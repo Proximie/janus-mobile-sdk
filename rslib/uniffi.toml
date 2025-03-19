@@ -2,7 +2,7 @@
 android = true
 cdylib_name = "janus_gateway"
 generate_immutable_records = true
-package_name = "com.ghamza.janus.bindings"
+package_name = "com.proximie.janus"
 
 [bindings.swift]
 ffi_module_name = "JanusGatewayFFI"
