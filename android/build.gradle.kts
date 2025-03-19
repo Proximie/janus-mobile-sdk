@@ -15,7 +15,7 @@ subprojects {
         repositories {
             maven {
                 name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/Ghamza-Jd/janus-mobile-sdk")
+                url = uri("https://maven.pkg.github.com/Proximie/janus-mobile-sdk")
                 credentials {
                     val properties = gradleLocalProperties(rootDir)
                     username = properties.getProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")

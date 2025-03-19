@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = GradleConfigs.subNamespace("bindings")
+    namespace = GradleConfigs.subNamespace("janus")
     compileSdk = GradleConfigs.compileSdk
     ndkVersion = GradleConfigs.ndkVersion
 
@@ -27,6 +27,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -56,7 +57,7 @@ cargoNdk {
 
 afterEvaluate {
     android.libraryVariants.all { variant ->
-        val outDir = "${buildDir}/generated/source/uniffi/${variant.name}/java"
+        val outDir = "${layout.buildDirectory}/generated/source/uniffi/${variant.name}/java"
 
         val generateBindings = tasks.register(
             name = "generate${variant.name.capitalized()}UniFFIBindings",
@@ -65,7 +66,7 @@ afterEvaluate {
             workingDir = file("../..")
             commandLine(
                 "cargo", "run", "-p", "uniffi-bindgen", "generate",
-                "--library", "./android/bindings/src/main/jniLibs/arm64-v8a/libjanus_gateway.so",
+                "--library", "./android/janus/src/main/jniLibs/arm64-v8a/libjanus_gateway.so",
                 "--language", "kotlin",
                 "--out-dir", outDir
             )
@@ -90,7 +91,7 @@ afterEvaluate {
 configure<PublishingExtension> {
     publications {
         create<MavenPublication>("${project.name}-release") {
-            artifactId = "bindings"
+            artifactId = "janus"
 
             afterEvaluate {
                 from(components["release"])
