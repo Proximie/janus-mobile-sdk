@@ -8,6 +8,7 @@ use jarust::plugins::video_room::events::PluginEvent;
 use jarust::plugins::video_room::handle::VideoRoomHandle as JaVideoRoomHandle;
 use jarust::plugins::video_room::params::VideoRoomCreateParams;
 use jarust::plugins::video_room::params::VideoRoomExistsParams;
+use jarust::plugins::video_room::params::VideoRoomPublisherJoinAndConfigureParams;
 use jarust::plugins::video_room::responses::VideoRoomCreatedRsp;
 use serde_json::Value;
 use std::fmt::Debug;
@@ -89,6 +90,24 @@ impl VideoRoomHandle {
             .await
         {
             Ok(rsp) => Ok(rsp),
+            Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            }),
+        }
+    }
+
+    pub async fn publisher_join_and_configure(
+        &self,
+        params: VideoRoomPublisherJoinAndConfigureParams,
+        jsep: Option<Jsep>,
+        timeout: Duration,
+    ) -> Result<String, JanusGatewayCommunicationError> {
+        match self
+            .inner
+            .publisher_join_and_configure(params, jsep, timeout)
+            .await
+        {
+            Ok(transaction) => Ok(transaction),
             Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
                 reason: why.to_string(),
             }),
