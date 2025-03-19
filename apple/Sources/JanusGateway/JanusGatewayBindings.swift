@@ -591,7 +591,7 @@ fileprivate struct FfiConverterDuration: FfiConverterRustBuffer {
 
 
 
-public protocol AudioBridgeHandleProtocol: AnyObject {
+public protocol AudioBridgeHandleProtocol: AnyObject, Sendable {
     
     func completeTrickle(timeout: TimeInterval) async throws 
     
@@ -644,6 +644,9 @@ open class AudioBridgeHandle: AudioBridgeHandleProtocol, @unchecked Sendable {
     // TODO: We'd like this to be `private` but for Swifty reasons,
     // we can't implement `FfiConverter` without making this `required` and we can't
     // make it `required` without making it `public`.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
     required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
         self.pointer = pointer
     }
@@ -692,7 +695,7 @@ open func completeTrickle(timeout: TimeInterval)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -709,7 +712,7 @@ open func configure(params: AudioBridgeConfigureParams, jsep: Jsep?, timeout: Ti
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterString.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -726,7 +729,7 @@ open func createRoom(params: AudioBridgeCreateParams, timeout: TimeInterval)asyn
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterTypeAudioBridgeRoomCreatedRsp_lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -743,7 +746,7 @@ open func detach()async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -760,7 +763,7 @@ open func exist(roomId: JanusId, timeout: TimeInterval)async throws  -> Bool  {
             completeFunc: ffi_janus_gateway_rust_future_complete_i8,
             freeFunc: ffi_janus_gateway_rust_future_free_i8,
             liftFunc: FfiConverterBool.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -777,7 +780,7 @@ open func fireAndForget(data: Data)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -794,7 +797,7 @@ open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -811,7 +814,7 @@ open func hangup()async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -828,7 +831,7 @@ open func joinRoom(params: AudioBridgeJoinParams, jsep: Jsep?, timeout: TimeInte
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterString.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -845,7 +848,7 @@ open func listParticipants(roomId: JanusId, timeout: TimeInterval)async throws  
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterTypeAudioBridgeListParticipantsRsp_lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -862,7 +865,7 @@ open func mute(params: AudioBridgeMuteParams)async throws  -> String  {
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterString.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -879,7 +882,7 @@ open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  -> Strin
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterString.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -896,7 +899,7 @@ open func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval)as
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterString.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -913,7 +916,7 @@ open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Da
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterData.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -948,7 +951,7 @@ open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -965,7 +968,7 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -982,7 +985,7 @@ open func unmute(params: AudioBridgeMuteParams)async throws  -> String  {
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterString.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1044,7 +1047,7 @@ public func FfiConverterTypeAudioBridgeHandle_lower(_ value: AudioBridgeHandle) 
 
 
 
-public protocol ConnectionProtocol: AnyObject {
+public protocol ConnectionProtocol: AnyObject, Sendable {
     
     func createSession(keepAliveIntervalInSecs: UInt32, timeout: TimeInterval) async throws  -> Session
     
@@ -1065,6 +1068,9 @@ open class Connection: ConnectionProtocol, @unchecked Sendable {
     // TODO: We'd like this to be `private` but for Swifty reasons,
     // we can't implement `FfiConverter` without making this `required` and we can't
     // make it `required` without making it `public`.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
     required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
         self.pointer = pointer
     }
@@ -1113,7 +1119,7 @@ open func createSession(keepAliveIntervalInSecs: UInt32, timeout: TimeInterval)a
             completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
             freeFunc: ffi_janus_gateway_rust_future_free_pointer,
             liftFunc: FfiConverterTypeSession_lift,
-            errorHandler: FfiConverterTypeJanusGatewaySessionError.lift
+            errorHandler: FfiConverterTypeJanusGatewaySessionError_lift
         )
 }
     
@@ -1130,7 +1136,7 @@ open func serverInfo(timeout: TimeInterval)async throws  -> ServerInfoRsp  {
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterTypeServerInfoRsp_lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1192,7 +1198,7 @@ public func FfiConverterTypeConnection_lower(_ value: Connection) -> UnsafeMutab
 
 
 
-public protocol EchotestHandleProtocol: AnyObject {
+public protocol EchotestHandleProtocol: AnyObject, Sendable {
     
     func completeTrickle(timeout: TimeInterval) async throws 
     
@@ -1235,6 +1241,9 @@ open class EchotestHandle: EchotestHandleProtocol, @unchecked Sendable {
     // TODO: We'd like this to be `private` but for Swifty reasons,
     // we can't implement `FfiConverter` without making this `required` and we can't
     // make it `required` without making it `public`.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
     required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
         self.pointer = pointer
     }
@@ -1283,7 +1292,7 @@ open func completeTrickle(timeout: TimeInterval)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1300,7 +1309,7 @@ open func detach()async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1317,7 +1326,7 @@ open func fireAndForget(data: Data)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1334,7 +1343,7 @@ open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1351,7 +1360,7 @@ open func hangup()async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1368,7 +1377,7 @@ open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  -> Strin
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterString.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1385,7 +1394,7 @@ open func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval)as
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterString.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1402,7 +1411,7 @@ open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Da
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterData.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1419,7 +1428,7 @@ open func start(params: EchoTestStartParams)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1454,7 +1463,7 @@ open func startWithJsep(params: EchoTestStartParams, jsep: Jsep, timeout: TimeIn
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1471,7 +1480,7 @@ open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1488,7 +1497,7 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1550,7 +1559,7 @@ public func FfiConverterTypeEchotestHandle_lower(_ value: EchotestHandle) -> Uns
 
 
 
-public protocol HandleProtocol: AnyObject {
+public protocol HandleProtocol: AnyObject, Sendable {
     
     func completeTrickle(timeout: TimeInterval) async throws 
     
@@ -1589,6 +1598,9 @@ open class Handle: HandleProtocol, @unchecked Sendable {
     // TODO: We'd like this to be `private` but for Swifty reasons,
     // we can't implement `FfiConverter` without making this `required` and we can't
     // make it `required` without making it `public`.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
     required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
         self.pointer = pointer
     }
@@ -1637,7 +1649,7 @@ open func completeTrickle(timeout: TimeInterval)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1654,7 +1666,7 @@ open func detach()async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1671,7 +1683,7 @@ open func fireAndForget(data: Data)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1688,7 +1700,7 @@ open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1705,7 +1717,7 @@ open func hangup()async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1722,7 +1734,7 @@ open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  -> Strin
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterString.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1739,7 +1751,7 @@ open func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval)as
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterString.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1756,7 +1768,7 @@ open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Da
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterData.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1791,7 +1803,7 @@ open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1808,7 +1820,7 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -1870,7 +1882,7 @@ public func FfiConverterTypeHandle_lower(_ value: Handle) -> UnsafeMutableRawPoi
 
 
 
-public protocol SessionProtocol: AnyObject {
+public protocol SessionProtocol: AnyObject, Sendable {
     
     func attach(pluginId: String, timeout: TimeInterval) async throws  -> Handle
     
@@ -1897,6 +1909,9 @@ open class Session: SessionProtocol, @unchecked Sendable {
     // TODO: We'd like this to be `private` but for Swifty reasons,
     // we can't implement `FfiConverter` without making this `required` and we can't
     // make it `required` without making it `public`.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
     required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
         self.pointer = pointer
     }
@@ -1945,7 +1960,7 @@ open func attach(pluginId: String, timeout: TimeInterval)async throws  -> Handle
             completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
             freeFunc: ffi_janus_gateway_rust_future_free_pointer,
             liftFunc: FfiConverterTypeHandle_lift,
-            errorHandler: FfiConverterTypeJanusGatewayHandleError.lift
+            errorHandler: FfiConverterTypeJanusGatewayHandleError_lift
         )
 }
     
@@ -1962,7 +1977,7 @@ open func attachAudioBridge(timeout: TimeInterval)async throws  -> AudioBridgeHa
             completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
             freeFunc: ffi_janus_gateway_rust_future_free_pointer,
             liftFunc: FfiConverterTypeAudioBridgeHandle_lift,
-            errorHandler: FfiConverterTypeJanusGatewayHandleError.lift
+            errorHandler: FfiConverterTypeJanusGatewayHandleError_lift
         )
 }
     
@@ -1979,7 +1994,7 @@ open func attachEchoTest(timeout: TimeInterval)async throws  -> EchotestHandle  
             completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
             freeFunc: ffi_janus_gateway_rust_future_free_pointer,
             liftFunc: FfiConverterTypeEchotestHandle_lift,
-            errorHandler: FfiConverterTypeJanusGatewayHandleError.lift
+            errorHandler: FfiConverterTypeJanusGatewayHandleError_lift
         )
 }
     
@@ -1996,7 +2011,7 @@ open func attachVideoRoom(timeout: TimeInterval)async throws  -> VideoRoomHandle
             completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
             freeFunc: ffi_janus_gateway_rust_future_free_pointer,
             liftFunc: FfiConverterTypeVideoRoomHandle_lift,
-            errorHandler: FfiConverterTypeJanusGatewayHandleError.lift
+            errorHandler: FfiConverterTypeJanusGatewayHandleError_lift
         )
 }
     
@@ -2013,7 +2028,7 @@ open func destory(timeout: TimeInterval)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -2075,7 +2090,7 @@ public func FfiConverterTypeSession_lower(_ value: Session) -> UnsafeMutableRawP
 
 
 
-public protocol VideoRoomHandleProtocol: AnyObject {
+public protocol VideoRoomHandleProtocol: AnyObject, Sendable {
     
     func completeTrickle(timeout: TimeInterval) async throws 
     
@@ -2090,6 +2105,8 @@ public protocol VideoRoomHandleProtocol: AnyObject {
     func fireAndForgetWithJsep(data: Data, jsep: Jsep) async throws 
     
     func hangup() async throws 
+    
+    func publisherJoinAndConfigure(params: VideoRoomPublisherJoinAndConfigureParams, jsep: Jsep?, timeout: TimeInterval) async throws  -> String
     
     func sendWaitonAck(data: Data, timeout: TimeInterval) async throws  -> String
     
@@ -2118,6 +2135,9 @@ open class VideoRoomHandle: VideoRoomHandleProtocol, @unchecked Sendable {
     // TODO: We'd like this to be `private` but for Swifty reasons,
     // we can't implement `FfiConverter` without making this `required` and we can't
     // make it `required` without making it `public`.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
     required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
         self.pointer = pointer
     }
@@ -2166,7 +2186,7 @@ open func completeTrickle(timeout: TimeInterval)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -2183,7 +2203,7 @@ open func createRoom(params: VideoRoomCreateParams, timeout: TimeInterval)async 
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterTypeVideoRoomCreatedRsp_lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -2200,7 +2220,7 @@ open func detach()async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -2217,7 +2237,7 @@ open func exist(roomId: JanusId, timeout: TimeInterval)async throws  -> Bool  {
             completeFunc: ffi_janus_gateway_rust_future_complete_i8,
             freeFunc: ffi_janus_gateway_rust_future_free_i8,
             liftFunc: FfiConverterBool.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -2234,7 +2254,7 @@ open func fireAndForget(data: Data)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -2251,7 +2271,7 @@ open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -2268,7 +2288,24 @@ open func hangup()async throws   {
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func publisherJoinAndConfigure(params: VideoRoomPublisherJoinAndConfigureParams, jsep: Jsep?, timeout: TimeInterval)async throws  -> String  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_videoroomhandle_publisher_join_and_configure(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeVideoRoomPublisherJoinAndConfigureParams_lower(params),FfiConverterOptionTypeJsep.lower(jsep),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -2285,7 +2322,7 @@ open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  -> Strin
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterString.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -2302,7 +2339,7 @@ open func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval)as
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterString.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -2319,7 +2356,7 @@ open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Da
             completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
             freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
             liftFunc: FfiConverterData.lift,
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -2354,7 +2391,7 @@ open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -2371,7 +2408,7 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
             completeFunc: ffi_janus_gateway_rust_future_complete_void,
             freeFunc: ffi_janus_gateway_rust_future_free_void,
             liftFunc: { $0 },
-            errorHandler: FfiConverterTypeJanusGatewayCommunicationError.lift
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
         )
 }
     
@@ -3815,6 +3852,164 @@ public func FfiConverterTypeConfig_lower(_ value: Config) -> RustBuffer {
 }
 
 
+public struct ConfiguredStream {
+    public let mediaType: String
+    public let mindex: UInt64
+    public let mid: String
+    public let disabled: Bool
+    public let codec: String
+    public let stereo: Bool
+    public let fec: Bool
+    public let dtx: Bool
+    public let h264Profile: String?
+    public let vp9Profile: String?
+    public let moderated: Bool
+    public let simulcast: Bool
+    public let svc: Bool
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(mediaType: String, mindex: UInt64, mid: String, disabled: Bool, codec: String, stereo: Bool, fec: Bool, dtx: Bool, h264Profile: String?, vp9Profile: String?, moderated: Bool, simulcast: Bool, svc: Bool) {
+        self.mediaType = mediaType
+        self.mindex = mindex
+        self.mid = mid
+        self.disabled = disabled
+        self.codec = codec
+        self.stereo = stereo
+        self.fec = fec
+        self.dtx = dtx
+        self.h264Profile = h264Profile
+        self.vp9Profile = vp9Profile
+        self.moderated = moderated
+        self.simulcast = simulcast
+        self.svc = svc
+    }
+}
+
+#if compiler(>=6)
+extension ConfiguredStream: Sendable {}
+#endif
+
+
+extension ConfiguredStream: Equatable, Hashable {
+    public static func ==(lhs: ConfiguredStream, rhs: ConfiguredStream) -> Bool {
+        if lhs.mediaType != rhs.mediaType {
+            return false
+        }
+        if lhs.mindex != rhs.mindex {
+            return false
+        }
+        if lhs.mid != rhs.mid {
+            return false
+        }
+        if lhs.disabled != rhs.disabled {
+            return false
+        }
+        if lhs.codec != rhs.codec {
+            return false
+        }
+        if lhs.stereo != rhs.stereo {
+            return false
+        }
+        if lhs.fec != rhs.fec {
+            return false
+        }
+        if lhs.dtx != rhs.dtx {
+            return false
+        }
+        if lhs.h264Profile != rhs.h264Profile {
+            return false
+        }
+        if lhs.vp9Profile != rhs.vp9Profile {
+            return false
+        }
+        if lhs.moderated != rhs.moderated {
+            return false
+        }
+        if lhs.simulcast != rhs.simulcast {
+            return false
+        }
+        if lhs.svc != rhs.svc {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(mediaType)
+        hasher.combine(mindex)
+        hasher.combine(mid)
+        hasher.combine(disabled)
+        hasher.combine(codec)
+        hasher.combine(stereo)
+        hasher.combine(fec)
+        hasher.combine(dtx)
+        hasher.combine(h264Profile)
+        hasher.combine(vp9Profile)
+        hasher.combine(moderated)
+        hasher.combine(simulcast)
+        hasher.combine(svc)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeConfiguredStream: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> ConfiguredStream {
+        return
+            try ConfiguredStream(
+                mediaType: FfiConverterString.read(from: &buf), 
+                mindex: FfiConverterUInt64.read(from: &buf), 
+                mid: FfiConverterString.read(from: &buf), 
+                disabled: FfiConverterBool.read(from: &buf), 
+                codec: FfiConverterString.read(from: &buf), 
+                stereo: FfiConverterBool.read(from: &buf), 
+                fec: FfiConverterBool.read(from: &buf), 
+                dtx: FfiConverterBool.read(from: &buf), 
+                h264Profile: FfiConverterOptionString.read(from: &buf), 
+                vp9Profile: FfiConverterOptionString.read(from: &buf), 
+                moderated: FfiConverterBool.read(from: &buf), 
+                simulcast: FfiConverterBool.read(from: &buf), 
+                svc: FfiConverterBool.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: ConfiguredStream, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.mediaType, into: &buf)
+        FfiConverterUInt64.write(value.mindex, into: &buf)
+        FfiConverterString.write(value.mid, into: &buf)
+        FfiConverterBool.write(value.disabled, into: &buf)
+        FfiConverterString.write(value.codec, into: &buf)
+        FfiConverterBool.write(value.stereo, into: &buf)
+        FfiConverterBool.write(value.fec, into: &buf)
+        FfiConverterBool.write(value.dtx, into: &buf)
+        FfiConverterOptionString.write(value.h264Profile, into: &buf)
+        FfiConverterOptionString.write(value.vp9Profile, into: &buf)
+        FfiConverterBool.write(value.moderated, into: &buf)
+        FfiConverterBool.write(value.simulcast, into: &buf)
+        FfiConverterBool.write(value.svc, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeConfiguredStream_lift(_ buf: RustBuffer) throws -> ConfiguredStream {
+    return try FfiConverterTypeConfiguredStream.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeConfiguredStream_lower(_ value: ConfiguredStream) -> RustBuffer {
+    return FfiConverterTypeConfiguredStream.lower(value)
+}
+
+
 public struct EchoTestStartParams {
     public let audio: Bool?
     public let video: Bool?
@@ -4619,6 +4814,162 @@ public func FfiConverterTypeVideoRoomAudioCodecList_lower(_ value: VideoRoomAudi
 }
 
 
+public struct VideoRoomConfigurePublisherStream {
+    public let mid: String
+    public let optional: VideoRoomConfigurePublisherStreamOptional
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(mid: String, optional: VideoRoomConfigurePublisherStreamOptional) {
+        self.mid = mid
+        self.optional = optional
+    }
+}
+
+#if compiler(>=6)
+extension VideoRoomConfigurePublisherStream: Sendable {}
+#endif
+
+
+extension VideoRoomConfigurePublisherStream: Equatable, Hashable {
+    public static func ==(lhs: VideoRoomConfigurePublisherStream, rhs: VideoRoomConfigurePublisherStream) -> Bool {
+        if lhs.mid != rhs.mid {
+            return false
+        }
+        if lhs.optional != rhs.optional {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(mid)
+        hasher.combine(optional)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeVideoRoomConfigurePublisherStream: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> VideoRoomConfigurePublisherStream {
+        return
+            try VideoRoomConfigurePublisherStream(
+                mid: FfiConverterString.read(from: &buf), 
+                optional: FfiConverterTypeVideoRoomConfigurePublisherStreamOptional.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: VideoRoomConfigurePublisherStream, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.mid, into: &buf)
+        FfiConverterTypeVideoRoomConfigurePublisherStreamOptional.write(value.optional, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomConfigurePublisherStream_lift(_ buf: RustBuffer) throws -> VideoRoomConfigurePublisherStream {
+    return try FfiConverterTypeVideoRoomConfigurePublisherStream.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomConfigurePublisherStream_lower(_ value: VideoRoomConfigurePublisherStream) -> RustBuffer {
+    return FfiConverterTypeVideoRoomConfigurePublisherStream.lower(value)
+}
+
+
+public struct VideoRoomConfigurePublisherStreamOptional {
+    public let keyframe: Bool?
+    public let send: Bool?
+    public let minDelay: UInt64?
+    public let maxDelay: UInt64?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(keyframe: Bool? = nil, send: Bool? = nil, minDelay: UInt64? = nil, maxDelay: UInt64? = nil) {
+        self.keyframe = keyframe
+        self.send = send
+        self.minDelay = minDelay
+        self.maxDelay = maxDelay
+    }
+}
+
+#if compiler(>=6)
+extension VideoRoomConfigurePublisherStreamOptional: Sendable {}
+#endif
+
+
+extension VideoRoomConfigurePublisherStreamOptional: Equatable, Hashable {
+    public static func ==(lhs: VideoRoomConfigurePublisherStreamOptional, rhs: VideoRoomConfigurePublisherStreamOptional) -> Bool {
+        if lhs.keyframe != rhs.keyframe {
+            return false
+        }
+        if lhs.send != rhs.send {
+            return false
+        }
+        if lhs.minDelay != rhs.minDelay {
+            return false
+        }
+        if lhs.maxDelay != rhs.maxDelay {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(keyframe)
+        hasher.combine(send)
+        hasher.combine(minDelay)
+        hasher.combine(maxDelay)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeVideoRoomConfigurePublisherStreamOptional: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> VideoRoomConfigurePublisherStreamOptional {
+        return
+            try VideoRoomConfigurePublisherStreamOptional(
+                keyframe: FfiConverterOptionBool.read(from: &buf), 
+                send: FfiConverterOptionBool.read(from: &buf), 
+                minDelay: FfiConverterOptionUInt64.read(from: &buf), 
+                maxDelay: FfiConverterOptionUInt64.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: VideoRoomConfigurePublisherStreamOptional, into buf: inout [UInt8]) {
+        FfiConverterOptionBool.write(value.keyframe, into: &buf)
+        FfiConverterOptionBool.write(value.send, into: &buf)
+        FfiConverterOptionUInt64.write(value.minDelay, into: &buf)
+        FfiConverterOptionUInt64.write(value.maxDelay, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomConfigurePublisherStreamOptional_lift(_ buf: RustBuffer) throws -> VideoRoomConfigurePublisherStreamOptional {
+    return try FfiConverterTypeVideoRoomConfigurePublisherStreamOptional.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomConfigurePublisherStreamOptional_lower(_ value: VideoRoomConfigurePublisherStreamOptional) -> RustBuffer {
+    return FfiConverterTypeVideoRoomConfigurePublisherStreamOptional.lower(value)
+}
+
+
 public struct VideoRoomCreateParams {
     public let adminKey: String?
     public let room: JanusId?
@@ -5015,6 +5366,436 @@ public func FfiConverterTypeVideoRoomCreatedRsp_lower(_ value: VideoRoomCreatedR
 }
 
 
+public struct VideoRoomPublishDescriptionParams {
+    public let mid: String
+    public let description: String
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(mid: String, description: String) {
+        self.mid = mid
+        self.description = description
+    }
+}
+
+#if compiler(>=6)
+extension VideoRoomPublishDescriptionParams: Sendable {}
+#endif
+
+
+extension VideoRoomPublishDescriptionParams: Equatable, Hashable {
+    public static func ==(lhs: VideoRoomPublishDescriptionParams, rhs: VideoRoomPublishDescriptionParams) -> Bool {
+        if lhs.mid != rhs.mid {
+            return false
+        }
+        if lhs.description != rhs.description {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(mid)
+        hasher.combine(description)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeVideoRoomPublishDescriptionParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> VideoRoomPublishDescriptionParams {
+        return
+            try VideoRoomPublishDescriptionParams(
+                mid: FfiConverterString.read(from: &buf), 
+                description: FfiConverterString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: VideoRoomPublishDescriptionParams, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.mid, into: &buf)
+        FfiConverterString.write(value.description, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomPublishDescriptionParams_lift(_ buf: RustBuffer) throws -> VideoRoomPublishDescriptionParams {
+    return try FfiConverterTypeVideoRoomPublishDescriptionParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomPublishDescriptionParams_lower(_ value: VideoRoomPublishDescriptionParams) -> RustBuffer {
+    return FfiConverterTypeVideoRoomPublishDescriptionParams.lower(value)
+}
+
+
+public struct VideoRoomPublisherConfigureParams {
+    public let audio: Bool?
+    public let video: Bool?
+    public let bitrate: UInt64?
+    public let keyframe: Bool?
+    public let record: Bool?
+    public let filename: String?
+    public let display: String?
+    public let audioActivePackets: UInt64?
+    public let audioLevelAverage: UInt64?
+    public let streams: [VideoRoomConfigurePublisherStream]?
+    public let descriptions: [VideoRoomPublishDescriptionParams]?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(audio: Bool? = nil, video: Bool? = nil, bitrate: UInt64? = nil, keyframe: Bool? = nil, record: Bool? = nil, filename: String? = nil, display: String? = nil, audioActivePackets: UInt64? = nil, audioLevelAverage: UInt64? = nil, streams: [VideoRoomConfigurePublisherStream]? = nil, descriptions: [VideoRoomPublishDescriptionParams]? = nil) {
+        self.audio = audio
+        self.video = video
+        self.bitrate = bitrate
+        self.keyframe = keyframe
+        self.record = record
+        self.filename = filename
+        self.display = display
+        self.audioActivePackets = audioActivePackets
+        self.audioLevelAverage = audioLevelAverage
+        self.streams = streams
+        self.descriptions = descriptions
+    }
+}
+
+#if compiler(>=6)
+extension VideoRoomPublisherConfigureParams: Sendable {}
+#endif
+
+
+extension VideoRoomPublisherConfigureParams: Equatable, Hashable {
+    public static func ==(lhs: VideoRoomPublisherConfigureParams, rhs: VideoRoomPublisherConfigureParams) -> Bool {
+        if lhs.audio != rhs.audio {
+            return false
+        }
+        if lhs.video != rhs.video {
+            return false
+        }
+        if lhs.bitrate != rhs.bitrate {
+            return false
+        }
+        if lhs.keyframe != rhs.keyframe {
+            return false
+        }
+        if lhs.record != rhs.record {
+            return false
+        }
+        if lhs.filename != rhs.filename {
+            return false
+        }
+        if lhs.display != rhs.display {
+            return false
+        }
+        if lhs.audioActivePackets != rhs.audioActivePackets {
+            return false
+        }
+        if lhs.audioLevelAverage != rhs.audioLevelAverage {
+            return false
+        }
+        if lhs.streams != rhs.streams {
+            return false
+        }
+        if lhs.descriptions != rhs.descriptions {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(audio)
+        hasher.combine(video)
+        hasher.combine(bitrate)
+        hasher.combine(keyframe)
+        hasher.combine(record)
+        hasher.combine(filename)
+        hasher.combine(display)
+        hasher.combine(audioActivePackets)
+        hasher.combine(audioLevelAverage)
+        hasher.combine(streams)
+        hasher.combine(descriptions)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeVideoRoomPublisherConfigureParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> VideoRoomPublisherConfigureParams {
+        return
+            try VideoRoomPublisherConfigureParams(
+                audio: FfiConverterOptionBool.read(from: &buf), 
+                video: FfiConverterOptionBool.read(from: &buf), 
+                bitrate: FfiConverterOptionUInt64.read(from: &buf), 
+                keyframe: FfiConverterOptionBool.read(from: &buf), 
+                record: FfiConverterOptionBool.read(from: &buf), 
+                filename: FfiConverterOptionString.read(from: &buf), 
+                display: FfiConverterOptionString.read(from: &buf), 
+                audioActivePackets: FfiConverterOptionUInt64.read(from: &buf), 
+                audioLevelAverage: FfiConverterOptionUInt64.read(from: &buf), 
+                streams: FfiConverterOptionSequenceTypeVideoRoomConfigurePublisherStream.read(from: &buf), 
+                descriptions: FfiConverterOptionSequenceTypeVideoRoomPublishDescriptionParams.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: VideoRoomPublisherConfigureParams, into buf: inout [UInt8]) {
+        FfiConverterOptionBool.write(value.audio, into: &buf)
+        FfiConverterOptionBool.write(value.video, into: &buf)
+        FfiConverterOptionUInt64.write(value.bitrate, into: &buf)
+        FfiConverterOptionBool.write(value.keyframe, into: &buf)
+        FfiConverterOptionBool.write(value.record, into: &buf)
+        FfiConverterOptionString.write(value.filename, into: &buf)
+        FfiConverterOptionString.write(value.display, into: &buf)
+        FfiConverterOptionUInt64.write(value.audioActivePackets, into: &buf)
+        FfiConverterOptionUInt64.write(value.audioLevelAverage, into: &buf)
+        FfiConverterOptionSequenceTypeVideoRoomConfigurePublisherStream.write(value.streams, into: &buf)
+        FfiConverterOptionSequenceTypeVideoRoomPublishDescriptionParams.write(value.descriptions, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomPublisherConfigureParams_lift(_ buf: RustBuffer) throws -> VideoRoomPublisherConfigureParams {
+    return try FfiConverterTypeVideoRoomPublisherConfigureParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomPublisherConfigureParams_lower(_ value: VideoRoomPublisherConfigureParams) -> RustBuffer {
+    return FfiConverterTypeVideoRoomPublisherConfigureParams.lower(value)
+}
+
+
+public struct VideoRoomPublisherJoinAndConfigureParams {
+    public let joinParams: VideoRoomPublisherJoinParams
+    public let configureParams: VideoRoomPublisherConfigureParams
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(joinParams: VideoRoomPublisherJoinParams, configureParams: VideoRoomPublisherConfigureParams) {
+        self.joinParams = joinParams
+        self.configureParams = configureParams
+    }
+}
+
+#if compiler(>=6)
+extension VideoRoomPublisherJoinAndConfigureParams: Sendable {}
+#endif
+
+
+extension VideoRoomPublisherJoinAndConfigureParams: Equatable, Hashable {
+    public static func ==(lhs: VideoRoomPublisherJoinAndConfigureParams, rhs: VideoRoomPublisherJoinAndConfigureParams) -> Bool {
+        if lhs.joinParams != rhs.joinParams {
+            return false
+        }
+        if lhs.configureParams != rhs.configureParams {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(joinParams)
+        hasher.combine(configureParams)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeVideoRoomPublisherJoinAndConfigureParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> VideoRoomPublisherJoinAndConfigureParams {
+        return
+            try VideoRoomPublisherJoinAndConfigureParams(
+                joinParams: FfiConverterTypeVideoRoomPublisherJoinParams.read(from: &buf), 
+                configureParams: FfiConverterTypeVideoRoomPublisherConfigureParams.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: VideoRoomPublisherJoinAndConfigureParams, into buf: inout [UInt8]) {
+        FfiConverterTypeVideoRoomPublisherJoinParams.write(value.joinParams, into: &buf)
+        FfiConverterTypeVideoRoomPublisherConfigureParams.write(value.configureParams, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomPublisherJoinAndConfigureParams_lift(_ buf: RustBuffer) throws -> VideoRoomPublisherJoinAndConfigureParams {
+    return try FfiConverterTypeVideoRoomPublisherJoinAndConfigureParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomPublisherJoinAndConfigureParams_lower(_ value: VideoRoomPublisherJoinAndConfigureParams) -> RustBuffer {
+    return FfiConverterTypeVideoRoomPublisherJoinAndConfigureParams.lower(value)
+}
+
+
+public struct VideoRoomPublisherJoinParams {
+    public let room: JanusId
+    public let optional: VideoRoomPublisherJoinParamsOptional
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(room: JanusId, optional: VideoRoomPublisherJoinParamsOptional) {
+        self.room = room
+        self.optional = optional
+    }
+}
+
+#if compiler(>=6)
+extension VideoRoomPublisherJoinParams: Sendable {}
+#endif
+
+
+extension VideoRoomPublisherJoinParams: Equatable, Hashable {
+    public static func ==(lhs: VideoRoomPublisherJoinParams, rhs: VideoRoomPublisherJoinParams) -> Bool {
+        if lhs.room != rhs.room {
+            return false
+        }
+        if lhs.optional != rhs.optional {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(room)
+        hasher.combine(optional)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeVideoRoomPublisherJoinParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> VideoRoomPublisherJoinParams {
+        return
+            try VideoRoomPublisherJoinParams(
+                room: FfiConverterTypeJanusId.read(from: &buf), 
+                optional: FfiConverterTypeVideoRoomPublisherJoinParamsOptional.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: VideoRoomPublisherJoinParams, into buf: inout [UInt8]) {
+        FfiConverterTypeJanusId.write(value.room, into: &buf)
+        FfiConverterTypeVideoRoomPublisherJoinParamsOptional.write(value.optional, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomPublisherJoinParams_lift(_ buf: RustBuffer) throws -> VideoRoomPublisherJoinParams {
+    return try FfiConverterTypeVideoRoomPublisherJoinParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomPublisherJoinParams_lower(_ value: VideoRoomPublisherJoinParams) -> RustBuffer {
+    return FfiConverterTypeVideoRoomPublisherJoinParams.lower(value)
+}
+
+
+public struct VideoRoomPublisherJoinParamsOptional {
+    public let id: JanusId?
+    public let display: String?
+    public let token: String?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(id: JanusId? = nil, display: String? = nil, token: String? = nil) {
+        self.id = id
+        self.display = display
+        self.token = token
+    }
+}
+
+#if compiler(>=6)
+extension VideoRoomPublisherJoinParamsOptional: Sendable {}
+#endif
+
+
+extension VideoRoomPublisherJoinParamsOptional: Equatable, Hashable {
+    public static func ==(lhs: VideoRoomPublisherJoinParamsOptional, rhs: VideoRoomPublisherJoinParamsOptional) -> Bool {
+        if lhs.id != rhs.id {
+            return false
+        }
+        if lhs.display != rhs.display {
+            return false
+        }
+        if lhs.token != rhs.token {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(display)
+        hasher.combine(token)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeVideoRoomPublisherJoinParamsOptional: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> VideoRoomPublisherJoinParamsOptional {
+        return
+            try VideoRoomPublisherJoinParamsOptional(
+                id: FfiConverterOptionTypeJanusId.read(from: &buf), 
+                display: FfiConverterOptionString.read(from: &buf), 
+                token: FfiConverterOptionString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: VideoRoomPublisherJoinParamsOptional, into buf: inout [UInt8]) {
+        FfiConverterOptionTypeJanusId.write(value.id, into: &buf)
+        FfiConverterOptionString.write(value.display, into: &buf)
+        FfiConverterOptionString.write(value.token, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomPublisherJoinParamsOptional_lift(_ buf: RustBuffer) throws -> VideoRoomPublisherJoinParamsOptional {
+    return try FfiConverterTypeVideoRoomPublisherJoinParamsOptional.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeVideoRoomPublisherJoinParamsOptional_lower(_ value: VideoRoomPublisherJoinParamsOptional) -> RustBuffer {
+    return FfiConverterTypeVideoRoomPublisherJoinParamsOptional.lower(value)
+}
+
+
 public struct VideoRoomVideoCodecList {
     public let codecs: [VideoRoomVideoCodec]
 
@@ -5271,7 +6052,7 @@ extension GenericEvent: Equatable, Hashable {}
 
 
 
-public enum JanusGatewayCommunicationError {
+public enum JanusGatewayCommunicationError: Swift.Error {
 
     
     
@@ -5354,7 +6135,7 @@ extension JanusGatewayCommunicationError: Foundation.LocalizedError {
 
 
 
-public enum JanusGatewayConnectionError {
+public enum JanusGatewayConnectionError: Swift.Error {
 
     
     
@@ -5427,7 +6208,7 @@ extension JanusGatewayConnectionError: Foundation.LocalizedError {
 
 
 
-public enum JanusGatewayHandleError {
+public enum JanusGatewayHandleError: Swift.Error {
 
     
     
@@ -5502,7 +6283,7 @@ extension JanusGatewayHandleError: Foundation.LocalizedError {
 
 
 
-public enum JanusGatewaySessionError {
+public enum JanusGatewaySessionError: Swift.Error {
 
     
     
@@ -5900,7 +6681,7 @@ extension VideoRoomVideoCodec: Equatable, Hashable {}
 
 
 
-public protocol AudioBridgeHandleCallback: AnyObject {
+public protocol AudioBridgeHandleCallback: AnyObject, Sendable {
     
     func onResult(transaction: String, result: String) 
     
@@ -6280,7 +7061,7 @@ public func FfiConverterCallbackInterfaceAudioBridgeHandleCallback_lower(_ v: Au
 
 
 
-public protocol EchotestHandleCallback: AnyObject {
+public protocol EchotestHandleCallback: AnyObject, Sendable {
     
     func onResult(echotest: String, result: String) 
     
@@ -6508,7 +7289,7 @@ public func FfiConverterCallbackInterfaceEchotestHandleCallback_lower(_ v: Echot
 
 
 
-public protocol HandleCallback: AnyObject {
+public protocol HandleCallback: AnyObject, Sendable {
     
     func onPluginEvent(event: Data) 
     
@@ -6650,13 +7431,19 @@ public func FfiConverterCallbackInterfaceHandleCallback_lower(_ v: HandleCallbac
 
 
 
-public protocol VideoRoomHandleCallback: AnyObject {
+public protocol VideoRoomHandleCallback: AnyObject, Sendable {
     
     func onHandleEvent(event: GenericEvent) 
     
     func onVideoRoomError(errorCode: UInt16, error: String) 
     
     func onOther(data: Data) 
+    
+    func onConfigureWithJsep(room: JanusId, audioCodec: String?, videoCodec: String?, streams: [ConfiguredStream]?, jsep: Jsep) 
+    
+    func onKicked(room: JanusId, participant: JanusId) 
+    
+    func onLeaving(room: JanusId, reason: String) 
     
 }
 
@@ -6733,6 +7520,90 @@ fileprivate struct UniffiCallbackInterfaceVideoRoomHandleCallback {
                 }
                 return uniffiObj.onOther(
                      data: try FfiConverterData.lift(data)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onConfigureWithJsep: { (
+            uniffiHandle: UInt64,
+            room: RustBuffer,
+            audioCodec: RustBuffer,
+            videoCodec: RustBuffer,
+            streams: RustBuffer,
+            jsep: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onConfigureWithJsep(
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     audioCodec: try FfiConverterOptionString.lift(audioCodec),
+                     videoCodec: try FfiConverterOptionString.lift(videoCodec),
+                     streams: try FfiConverterOptionSequenceTypeConfiguredStream.lift(streams),
+                     jsep: try FfiConverterTypeJsep_lift(jsep)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onKicked: { (
+            uniffiHandle: UInt64,
+            room: RustBuffer,
+            participant: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onKicked(
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     participant: try FfiConverterTypeJanusId_lift(participant)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onLeaving: { (
+            uniffiHandle: UInt64,
+            room: RustBuffer,
+            reason: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onLeaving(
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     reason: try FfiConverterString.lift(reason)
                 )
             }
 
@@ -7132,6 +8003,78 @@ fileprivate struct FfiConverterOptionSequenceString: FfiConverterRustBuffer {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterOptionSequenceTypeConfiguredStream: FfiConverterRustBuffer {
+    typealias SwiftType = [ConfiguredStream]?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterSequenceTypeConfiguredStream.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterSequenceTypeConfiguredStream.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionSequenceTypeVideoRoomConfigurePublisherStream: FfiConverterRustBuffer {
+    typealias SwiftType = [VideoRoomConfigurePublisherStream]?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterSequenceTypeVideoRoomConfigurePublisherStream.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterSequenceTypeVideoRoomConfigurePublisherStream.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionSequenceTypeVideoRoomPublishDescriptionParams: FfiConverterRustBuffer {
+    typealias SwiftType = [VideoRoomPublishDescriptionParams]?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterSequenceTypeVideoRoomPublishDescriptionParams.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterSequenceTypeVideoRoomPublishDescriptionParams.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterSequenceString: FfiConverterRustBuffer {
     typealias SwiftType = [String]
 
@@ -7199,6 +8142,81 @@ fileprivate struct FfiConverterSequenceTypeCandidate: FfiConverterRustBuffer {
         seq.reserveCapacity(Int(len))
         for _ in 0 ..< len {
             seq.append(try FfiConverterTypeCandidate.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceTypeConfiguredStream: FfiConverterRustBuffer {
+    typealias SwiftType = [ConfiguredStream]
+
+    public static func write(_ value: [ConfiguredStream], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeConfiguredStream.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [ConfiguredStream] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [ConfiguredStream]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeConfiguredStream.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceTypeVideoRoomConfigurePublisherStream: FfiConverterRustBuffer {
+    typealias SwiftType = [VideoRoomConfigurePublisherStream]
+
+    public static func write(_ value: [VideoRoomConfigurePublisherStream], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeVideoRoomConfigurePublisherStream.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [VideoRoomConfigurePublisherStream] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [VideoRoomConfigurePublisherStream]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeVideoRoomConfigurePublisherStream.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceTypeVideoRoomPublishDescriptionParams: FfiConverterRustBuffer {
+    typealias SwiftType = [VideoRoomPublishDescriptionParams]
+
+    public static func write(_ value: [VideoRoomPublishDescriptionParams], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeVideoRoomPublishDescriptionParams.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [VideoRoomPublishDescriptionParams] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [VideoRoomPublishDescriptionParams]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeVideoRoomPublishDescriptionParams.read(from: &buf))
         }
         return seq
     }
@@ -7369,7 +8387,7 @@ public func janusConnect(config: Config)async throws  -> Connection  {
             completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
             freeFunc: ffi_janus_gateway_rust_future_free_pointer,
             liftFunc: FfiConverterTypeConnection_lift,
-            errorHandler: FfiConverterTypeJanusGatewayConnectionError.lift
+            errorHandler: FfiConverterTypeJanusGatewayConnectionError_lift
         )
 }
 
@@ -7562,6 +8580,9 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_videoroomhandle_hangup() != 22972) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_publisher_join_and_configure() != 39661) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_videoroomhandle_send_waiton_ack() != 5152) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -7638,6 +8659,15 @@ private let initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_other() != 28224) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_configure_with_jsep() != 32059) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_kicked() != 57488) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_leaving() != 6320) {
         return InitializationResult.apiChecksumMismatch
     }
 
