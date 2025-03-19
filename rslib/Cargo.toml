@@ -32,12 +32,12 @@ uniffi = { workspace = true, features = ["tokio"] }
 apple-tracing-sub = { version = "*", path = "../apple-tracing-sub" }
 
 [target.'cfg(target_os = "android")'.dependencies]
-android_logger = "0.14.1"
+android_logger = "0.15.0"
 # Newer versions of openssl-sys have a bug that causes the build to fail
 openssl-sys = { version = "=0.9.87", features = ["vendored"] }
 
 [dependencies.jarust]
-version = "1.3.2"
+version = "1.4.0"
 features = [
     "echo-test-plugin",
     "audio-bridge-plugin",

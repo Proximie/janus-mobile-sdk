@@ -6,6 +6,15 @@ pub type VideoRoomAudioCodecList = params::VideoRoomAudioCodecList;
 pub type VideoRoomCreateParams = params::VideoRoomCreateParams;
 pub type VideoRoomVideoCodec = params::VideoRoomVideoCodec;
 pub type VideoRoomVideoCodecList = params::VideoRoomVideoCodecList;
+pub type VideoRoomPublisherJoinAndConfigureParams =
+    params::VideoRoomPublisherJoinAndConfigureParams;
+pub type VideoRoomPublisherJoinParams = params::VideoRoomPublisherJoinParams;
+pub type VideoRoomPublisherConfigureParams = params::VideoRoomPublisherConfigureParams;
+pub type VideoRoomPublisherJoinParamsOptional = params::VideoRoomPublisherJoinParamsOptional;
+pub type VideoRoomConfigurePublisherStream = params::VideoRoomConfigurePublisherStream;
+pub type VideoRoomPublishDescriptionParams = params::VideoRoomPublishDescriptionParams;
+pub type VideoRoomConfigurePublisherStreamOptional =
+    params::VideoRoomConfigurePublisherStreamOptional;
 
 #[uniffi::remote(Record)]
 pub struct VideoRoomCreateParams {
@@ -106,4 +115,76 @@ pub enum VideoRoomVideoCodec {
 #[uniffi::remote(Record)]
 pub struct VideoRoomVideoCodecList {
     pub codecs: Vec<VideoRoomVideoCodec>,
+}
+
+#[uniffi::remote(Record)]
+pub struct VideoRoomPublisherJoinAndConfigureParams {
+    pub join_params: VideoRoomPublisherJoinParams,
+    pub configure_params: VideoRoomPublisherConfigureParams,
+}
+
+#[uniffi::remote(Record)]
+pub struct VideoRoomPublisherJoinParams {
+    pub room: JanusId,
+    pub optional: VideoRoomPublisherJoinParamsOptional,
+}
+
+#[uniffi::remote(Record)]
+pub struct VideoRoomPublisherJoinParamsOptional {
+    #[uniffi(default = None)]
+    pub id: Option<JanusId>,
+    #[uniffi(default = None)]
+    pub display: Option<String>,
+    #[uniffi(default = None)]
+    pub token: Option<String>,
+}
+
+#[uniffi::remote(Record)]
+pub struct VideoRoomPublisherConfigureParams {
+    #[uniffi(default = None)]
+    pub audio: Option<bool>,
+    #[uniffi(default = None)]
+    pub video: Option<bool>,
+    #[uniffi(default = None)]
+    pub bitrate: Option<u64>,
+    #[uniffi(default = None)]
+    pub keyframe: Option<bool>,
+    #[uniffi(default = None)]
+    pub record: Option<bool>,
+    #[uniffi(default = None)]
+    pub filename: Option<String>,
+    #[uniffi(default = None)]
+    pub display: Option<String>,
+    #[uniffi(default = None)]
+    pub audio_active_packets: Option<u64>,
+    #[uniffi(default = None)]
+    pub audio_level_average: Option<u64>,
+    #[uniffi(default = None)]
+    pub streams: Option<Vec<VideoRoomConfigurePublisherStream>>,
+    #[uniffi(default = None)]
+    pub descriptions: Option<Vec<VideoRoomPublishDescriptionParams>>,
+}
+
+#[uniffi::remote(Record)]
+pub struct VideoRoomConfigurePublisherStream {
+    pub mid: String,
+    pub optional: VideoRoomConfigurePublisherStreamOptional,
+}
+
+#[uniffi::remote(Record)]
+pub struct VideoRoomConfigurePublisherStreamOptional {
+    #[uniffi(default = None)]
+    pub keyframe: Option<bool>,
+    #[uniffi(default = None)]
+    pub send: Option<bool>,
+    #[uniffi(default = None)]
+    pub min_delay: Option<u64>,
+    #[uniffi(default = None)]
+    pub max_delay: Option<u64>,
+}
+
+#[uniffi::remote(Record)]
+pub struct VideoRoomPublishDescriptionParams {
+    pub mid: String,
+    pub description: String,
 }
