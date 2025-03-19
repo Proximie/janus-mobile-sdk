@@ -3,7 +3,7 @@ name = "rslib"
 version = "0.11.0"
 edition = "2024"
 publish = false
-repository = "https://github.com/Ghamza-Jd/janus-mobile-sdk"
+repository = "https://github.com/Proximie/janus-mobile-sdk"
 
 [lib]
 name = "janus_gateway"
