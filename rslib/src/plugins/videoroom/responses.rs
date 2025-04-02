@@ -3,6 +3,7 @@ use jarust::plugins::video_room::responses;
 
 pub type VideoRoomCreatedRsp = responses::VideoRoomCreatedRsp;
 pub type ConfiguredStream = responses::ConfiguredStream;
+pub type Publisher = responses::Publisher;
 
 #[uniffi::remote(Record)]
 pub struct VideoRoomCreatedRsp {
@@ -25,4 +26,10 @@ pub struct ConfiguredStream {
     pub moderated: bool,
     pub simulcast: bool,
     pub svc: bool,
+}
+
+#[uniffi::remote(Record)]
+pub struct Publisher {
+    pub id: JanusId,
+    pub display: Option<String>,
 }
