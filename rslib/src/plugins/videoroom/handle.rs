@@ -150,6 +150,8 @@ pub trait VideoRoomHandleCallback: Send + Sync + Debug {
         streams: Option<Vec<ConfiguredStream>>,
         jsep: Jsep,
     );
+    fn on_room_joined(&self);
+    fn on_room_joined_with_jsep(&self);
     fn on_kicked(&self, room: JanusId, participant: JanusId);
     fn on_leaving(&self, room: JanusId, reason: String);
 }

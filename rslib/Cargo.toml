@@ -28,16 +28,8 @@ tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 uniffi = { workspace = true, features = ["tokio"] }
 
-[target.'cfg(any(target_os = "ios", target_os = "macos"))'.dependencies]
-apple-tracing-sub = { version = "*", path = "../apple-tracing-sub" }
-
-[target.'cfg(target_os = "android")'.dependencies]
-android_logger = "0.15.0"
-# Newer versions of openssl-sys have a bug that causes the build to fail
-openssl-sys = { version = "=0.9.87", features = ["vendored"] }
-
 [dependencies.jarust]
-version = "1.4.0"
+version = "1.5.0"
 features = [
     "echo-test-plugin",
     "audio-bridge-plugin",
@@ -45,6 +37,14 @@ features = [
     "ffi-compatible",
     "__plugin-expiremental",
 ]
+
+[target.'cfg(any(target_os = "ios", target_os = "macos"))'.dependencies]
+apple-tracing-sub = { version = "*", path = "../apple-tracing-sub" }
+
+[target.'cfg(target_os = "android")'.dependencies]
+android_logger = "0.15.0"
+# Newer versions of openssl-sys have a bug that causes the build to fail
+openssl-sys = { version = "=0.9.87", features = ["vendored"] }
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }
