@@ -11,6 +11,7 @@ use jarust::plugins::video_room::params::VideoRoomCreateParams;
 use jarust::plugins::video_room::params::VideoRoomExistsParams;
 use jarust::plugins::video_room::params::VideoRoomPublisherJoinAndConfigureParams;
 use jarust::plugins::video_room::responses::ConfiguredStream;
+use jarust::plugins::video_room::responses::Publisher;
 use jarust::plugins::video_room::responses::VideoRoomCreatedRsp;
 use serde_json::Value;
 use std::fmt::Debug;
@@ -68,6 +69,32 @@ impl VideoRoomHandle {
                         jsep,
                     }) => {
                         cb.on_configure_with_jsep(room, audio_codec, video_codec, streams, jsep);
+                    }
+                    PluginEvent::VideoRoomEvent(VideoRoomEvent::RoomJoined {
+                        id,
+                        room,
+                        description,
+                        private_id,
+                        publishers,
+                    }) => {
+                        cb.on_room_joined(id, room, description, private_id, publishers);
+                    }
+                    PluginEvent::VideoRoomEvent(VideoRoomEvent::RoomJoinedWithJsep {
+                        id,
+                        room,
+                        description,
+                        private_id,
+                        publishers,
+                        jsep,
+                    }) => {
+                        cb.on_room_joined_with_jsep(
+                            id,
+                            room,
+                            description,
+                            private_id,
+                            publishers,
+                            jsep,
+                        );
                     }
                     PluginEvent::VideoRoomEvent(VideoRoomEvent::Kicked { room, participant }) => {
                         cb.on_kicked(room, participant);
@@ -150,8 +177,23 @@ pub trait VideoRoomHandleCallback: Send + Sync + Debug {
         streams: Option<Vec<ConfiguredStream>>,
         jsep: Jsep,
     );
-    fn on_room_joined(&self);
-    fn on_room_joined_with_jsep(&self);
+    fn on_room_joined(
+        &self,
+        id: JanusId,
+        room: JanusId,
+        description: Option<String>,
+        private_id: u64,
+        publishers: Vec<Publisher>,
+    );
+    fn on_room_joined_with_jsep(
+        &self,
+        id: JanusId,
+        room: JanusId,
+        description: Option<String>,
+        private_id: u64,
+        publishers: Vec<Publisher>,
+        jsep: Jsep,
+    );
     fn on_kicked(&self, room: JanusId, participant: JanusId);
     fn on_leaving(&self, room: JanusId, reason: String);
 }
