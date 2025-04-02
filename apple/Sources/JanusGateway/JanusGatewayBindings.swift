@@ -4372,6 +4372,76 @@ public func FfiConverterTypeMetaData_lower(_ value: MetaData) -> RustBuffer {
 }
 
 
+public struct Publisher {
+    public let id: JanusId
+    public let display: String?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(id: JanusId, display: String?) {
+        self.id = id
+        self.display = display
+    }
+}
+
+#if compiler(>=6)
+extension Publisher: Sendable {}
+#endif
+
+
+extension Publisher: Equatable, Hashable {
+    public static func ==(lhs: Publisher, rhs: Publisher) -> Bool {
+        if lhs.id != rhs.id {
+            return false
+        }
+        if lhs.display != rhs.display {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(display)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypePublisher: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Publisher {
+        return
+            try Publisher(
+                id: FfiConverterTypeJanusId.read(from: &buf), 
+                display: FfiConverterOptionString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: Publisher, into buf: inout [UInt8]) {
+        FfiConverterTypeJanusId.write(value.id, into: &buf)
+        FfiConverterOptionString.write(value.display, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypePublisher_lift(_ buf: RustBuffer) throws -> Publisher {
+    return try FfiConverterTypePublisher.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypePublisher_lower(_ value: Publisher) -> RustBuffer {
+    return FfiConverterTypePublisher.lower(value)
+}
+
+
 public struct ServerInfoRsp {
     public let name: String
     public let version: UInt64
@@ -7441,6 +7511,10 @@ public protocol VideoRoomHandleCallback: AnyObject, Sendable {
     
     func onConfigureWithJsep(room: JanusId, audioCodec: String?, videoCodec: String?, streams: [ConfiguredStream]?, jsep: Jsep) 
     
+    func onRoomJoined(id: JanusId, room: JanusId, description: String?, privateId: UInt64, publishers: [Publisher]) 
+    
+    func onRoomJoinedWithJsep(id: JanusId, room: JanusId, description: String?, privateId: UInt64, publishers: [Publisher], jsep: Jsep) 
+    
     func onKicked(room: JanusId, participant: JanusId) 
     
     func onLeaving(room: JanusId, reason: String) 
@@ -7551,6 +7625,72 @@ fileprivate struct UniffiCallbackInterfaceVideoRoomHandleCallback {
                      audioCodec: try FfiConverterOptionString.lift(audioCodec),
                      videoCodec: try FfiConverterOptionString.lift(videoCodec),
                      streams: try FfiConverterOptionSequenceTypeConfiguredStream.lift(streams),
+                     jsep: try FfiConverterTypeJsep_lift(jsep)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onRoomJoined: { (
+            uniffiHandle: UInt64,
+            id: RustBuffer,
+            room: RustBuffer,
+            description: RustBuffer,
+            privateId: UInt64,
+            publishers: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onRoomJoined(
+                     id: try FfiConverterTypeJanusId_lift(id),
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     description: try FfiConverterOptionString.lift(description),
+                     privateId: try FfiConverterUInt64.lift(privateId),
+                     publishers: try FfiConverterSequenceTypePublisher.lift(publishers)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onRoomJoinedWithJsep: { (
+            uniffiHandle: UInt64,
+            id: RustBuffer,
+            room: RustBuffer,
+            description: RustBuffer,
+            privateId: UInt64,
+            publishers: RustBuffer,
+            jsep: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onRoomJoinedWithJsep(
+                     id: try FfiConverterTypeJanusId_lift(id),
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     description: try FfiConverterOptionString.lift(description),
+                     privateId: try FfiConverterUInt64.lift(privateId),
+                     publishers: try FfiConverterSequenceTypePublisher.lift(publishers),
                      jsep: try FfiConverterTypeJsep_lift(jsep)
                 )
             }
@@ -8175,6 +8315,31 @@ fileprivate struct FfiConverterSequenceTypeConfiguredStream: FfiConverterRustBuf
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterSequenceTypePublisher: FfiConverterRustBuffer {
+    typealias SwiftType = [Publisher]
+
+    public static func write(_ value: [Publisher], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypePublisher.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [Publisher] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [Publisher]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypePublisher.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterSequenceTypeVideoRoomConfigurePublisherStream: FfiConverterRustBuffer {
     typealias SwiftType = [VideoRoomConfigurePublisherStream]
 
@@ -8664,10 +8829,16 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_configure_with_jsep() != 32059) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_kicked() != 57488) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_room_joined() != 7821) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_leaving() != 6320) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_room_joined_with_jsep() != 63756) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_kicked() != 15552) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_leaving() != 46877) {
         return InitializationResult.apiChecksumMismatch
     }
 
