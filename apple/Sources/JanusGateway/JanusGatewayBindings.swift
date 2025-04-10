@@ -1882,6 +1882,500 @@ public func FfiConverterTypeHandle_lower(_ value: Handle) -> UnsafeMutableRawPoi
 
 
 
+public protocol LegacyVideoRoomHandleProtocol: AnyObject, Sendable {
+    
+    func completeTrickle(timeout: TimeInterval) async throws 
+    
+    func createRoom(params: LegacyVideoRoomCreateParams, timeout: TimeInterval) async throws  -> LegacyVideoRoomCreatedRsp
+    
+    func detach() async throws 
+    
+    func exist(room: JanusId, timeout: TimeInterval) async throws  -> Bool
+    
+    func fireAndForget(data: Data) async throws 
+    
+    func fireAndForgetWithJsep(data: Data, jsep: Jsep) async throws 
+    
+    func hangup() async throws 
+    
+    func kick(params: LegacyVideoRoomKickParams, timeout: TimeInterval) async throws 
+    
+    func publisherConfigure(params: LegacyVideoRoomPublisherConfigureParams, timeout: TimeInterval) async throws  -> String
+    
+    func publisherJoin(params: LegacyVideoRoomPublisherJoinParams, jsep: Jsep?, timeout: TimeInterval) async throws  -> String
+    
+    func publisherJoinAndConfigure(params: LegacyVideoRoomPublisherJoinAndConfigureParams, jsep: Jsep?, timeout: TimeInterval) async throws  -> String
+    
+    func sendWaitonAck(data: Data, timeout: TimeInterval) async throws  -> String
+    
+    func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval) async throws  -> String
+    
+    func sendWaitonResult(data: Data, timeout: TimeInterval) async throws  -> Data
+    
+    func start(jsep: Jsep, timeout: TimeInterval) async throws  -> String
+    
+    func startEventLoop(cb: LegacyVideoRoomHandleCallback) async 
+    
+    func subscriberConfigure(params: LegacyVideoRoomSubscriberConfigureParams, timeout: TimeInterval) async throws  -> String
+    
+    func subscriberJoin(params: LegacyVideoRoomSubscriberJoinParams, timeout: TimeInterval) async throws  -> String
+    
+    func trickleCandidates(candidates: [Candidate], timeout: TimeInterval) async throws 
+    
+    func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval) async throws 
+    
+}
+open class LegacyVideoRoomHandle: LegacyVideoRoomHandleProtocol, @unchecked Sendable {
+    fileprivate let pointer: UnsafeMutableRawPointer!
+
+    /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public struct NoPointer {
+        public init() {}
+    }
+
+    // TODO: We'd like this to be `private` but for Swifty reasons,
+    // we can't implement `FfiConverter` without making this `required` and we can't
+    // make it `required` without making it `public`.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
+        self.pointer = pointer
+    }
+
+    // This constructor can be used to instantiate a fake object.
+    // - Parameter noPointer: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    //
+    // - Warning:
+    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing [Pointer] the FFI lower functions will crash.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public init(noPointer: NoPointer) {
+        self.pointer = nil
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public func uniffiClonePointer() -> UnsafeMutableRawPointer {
+        return try! rustCall { uniffi_janus_gateway_fn_clone_legacyvideoroomhandle(self.pointer, $0) }
+    }
+    // No primary constructor declared for this class.
+
+    deinit {
+        guard let pointer = pointer else {
+            return
+        }
+
+        try! rustCall { uniffi_janus_gateway_fn_free_legacyvideoroomhandle(pointer, $0) }
+    }
+
+    
+
+    
+open func completeTrickle(timeout: TimeInterval)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_complete_trickle(
+                    self.uniffiClonePointer(),
+                    FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func createRoom(params: LegacyVideoRoomCreateParams, timeout: TimeInterval)async throws  -> LegacyVideoRoomCreatedRsp  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_create_room(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeLegacyVideoRoomCreateParams_lower(params),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterTypeLegacyVideoRoomCreatedRsp_lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func detach()async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_detach(
+                    self.uniffiClonePointer()
+                    
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func exist(room: JanusId, timeout: TimeInterval)async throws  -> Bool  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_exist(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeJanusId_lower(room),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_i8,
+            completeFunc: ffi_janus_gateway_rust_future_complete_i8,
+            freeFunc: ffi_janus_gateway_rust_future_free_i8,
+            liftFunc: FfiConverterBool.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func fireAndForget(data: Data)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_fire_and_forget(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_fire_and_forget_with_jsep(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func hangup()async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_hangup(
+                    self.uniffiClonePointer()
+                    
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func kick(params: LegacyVideoRoomKickParams, timeout: TimeInterval)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_kick(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeLegacyVideoRoomKickParams_lower(params),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func publisherConfigure(params: LegacyVideoRoomPublisherConfigureParams, timeout: TimeInterval)async throws  -> String  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_publisher_configure(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeLegacyVideoRoomPublisherConfigureParams_lower(params),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func publisherJoin(params: LegacyVideoRoomPublisherJoinParams, jsep: Jsep?, timeout: TimeInterval)async throws  -> String  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_publisher_join(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeLegacyVideoRoomPublisherJoinParams_lower(params),FfiConverterOptionTypeJsep.lower(jsep),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func publisherJoinAndConfigure(params: LegacyVideoRoomPublisherJoinAndConfigureParams, jsep: Jsep?, timeout: TimeInterval)async throws  -> String  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_publisher_join_and_configure(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeLegacyVideoRoomPublisherJoinAndConfigureParams_lower(params),FfiConverterOptionTypeJsep.lower(jsep),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  -> String  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_send_waiton_ack(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval)async throws  -> String  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_send_waiton_ack_with_jsep(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Data  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_send_waiton_result(
+                    self.uniffiClonePointer(),
+                    FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterData.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func start(jsep: Jsep, timeout: TimeInterval)async throws  -> String  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_start(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeJsep_lower(jsep),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func startEventLoop(cb: LegacyVideoRoomHandleCallback)async   {
+    return
+        try!  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_start_event_loop(
+                    self.uniffiClonePointer(),
+                    FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback_lower(cb)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: nil
+            
+        )
+}
+    
+open func subscriberConfigure(params: LegacyVideoRoomSubscriberConfigureParams, timeout: TimeInterval)async throws  -> String  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_subscriber_configure(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeLegacyVideoRoomSubscriberConfigureParams_lower(params),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func subscriberJoin(params: LegacyVideoRoomSubscriberJoinParams, timeout: TimeInterval)async throws  -> String  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_subscriber_join(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeLegacyVideoRoomSubscriberJoinParams_lower(params),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_rust_buffer,
+            completeFunc: ffi_janus_gateway_rust_future_complete_rust_buffer,
+            freeFunc: ffi_janus_gateway_rust_future_free_rust_buffer,
+            liftFunc: FfiConverterString.lift,
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_trickle_candidates(
+                    self.uniffiClonePointer(),
+                    FfiConverterSequenceTypeCandidate.lower(candidates),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)async throws   {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_method_legacyvideoroomhandle_trickle_single_candidate(
+                    self.uniffiClonePointer(),
+                    FfiConverterTypeCandidate_lower(candidate),FfiConverterDuration.lower(timeout)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_void,
+            completeFunc: ffi_janus_gateway_rust_future_complete_void,
+            freeFunc: ffi_janus_gateway_rust_future_free_void,
+            liftFunc: { $0 },
+            errorHandler: FfiConverterTypeJanusGatewayCommunicationError_lift
+        )
+}
+    
+
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomHandle: FfiConverter {
+
+    typealias FfiType = UnsafeMutableRawPointer
+    typealias SwiftType = LegacyVideoRoomHandle
+
+    public static func lift(_ pointer: UnsafeMutableRawPointer) throws -> LegacyVideoRoomHandle {
+        return LegacyVideoRoomHandle(unsafeFromRawPointer: pointer)
+    }
+
+    public static func lower(_ value: LegacyVideoRoomHandle) -> UnsafeMutableRawPointer {
+        return value.uniffiClonePointer()
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomHandle {
+        let v: UInt64 = try readInt(&buf)
+        // The Rust code won't compile if a pointer won't fit in a UInt64.
+        // We have to go via `UInt` because that's the thing that's the size of a pointer.
+        let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: v))
+        if (ptr == nil) {
+            throw UniffiInternalError.unexpectedNullPointer
+        }
+        return try lift(ptr!)
+    }
+
+    public static func write(_ value: LegacyVideoRoomHandle, into buf: inout [UInt8]) {
+        // This fiddling is because `Int` is the thing that's the same size as a pointer.
+        // The Rust code won't compile if a pointer won't fit in a `UInt64`.
+        writeInt(&buf, UInt64(bitPattern: Int64(Int(bitPattern: lower(value)))))
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomHandle_lift(_ pointer: UnsafeMutableRawPointer) throws -> LegacyVideoRoomHandle {
+    return try FfiConverterTypeLegacyVideoRoomHandle.lift(pointer)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomHandle_lower(_ value: LegacyVideoRoomHandle) -> UnsafeMutableRawPointer {
+    return FfiConverterTypeLegacyVideoRoomHandle.lower(value)
+}
+
+
+
+
+
+
 public protocol SessionProtocol: AnyObject, Sendable {
     
     func attach(pluginId: String, timeout: TimeInterval) async throws  -> Handle
@@ -4278,6 +4772,1498 @@ public func FfiConverterTypeJsep_lower(_ value: Jsep) -> RustBuffer {
 }
 
 
+public struct LegacyVideoRoomAudioCodecList {
+    public let codecs: [LegacyVideoRoomAudioCodec]
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(codecs: [LegacyVideoRoomAudioCodec]) {
+        self.codecs = codecs
+    }
+}
+
+#if compiler(>=6)
+extension LegacyVideoRoomAudioCodecList: Sendable {}
+#endif
+
+
+extension LegacyVideoRoomAudioCodecList: Equatable, Hashable {
+    public static func ==(lhs: LegacyVideoRoomAudioCodecList, rhs: LegacyVideoRoomAudioCodecList) -> Bool {
+        if lhs.codecs != rhs.codecs {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(codecs)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomAudioCodecList: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomAudioCodecList {
+        return
+            try LegacyVideoRoomAudioCodecList(
+                codecs: FfiConverterSequenceTypeLegacyVideoRoomAudioCodec.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: LegacyVideoRoomAudioCodecList, into buf: inout [UInt8]) {
+        FfiConverterSequenceTypeLegacyVideoRoomAudioCodec.write(value.codecs, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomAudioCodecList_lift(_ buf: RustBuffer) throws -> LegacyVideoRoomAudioCodecList {
+    return try FfiConverterTypeLegacyVideoRoomAudioCodecList.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomAudioCodecList_lower(_ value: LegacyVideoRoomAudioCodecList) -> RustBuffer {
+    return FfiConverterTypeLegacyVideoRoomAudioCodecList.lower(value)
+}
+
+
+public struct LegacyVideoRoomCreateParams {
+    public let adminKey: String?
+    public let room: JanusId?
+    public let description: String?
+    public let isPrivate: Bool?
+    public let allowed: [String]?
+    public let secret: String?
+    public let pin: String?
+    public let requirePvtid: Bool?
+    public let signedTokens: Bool?
+    public let bitrate: UInt64?
+    public let bitrateCap: Bool?
+    public let firFreq: UInt64?
+    public let publishers: UInt64?
+    public let audiocodec: LegacyVideoRoomAudioCodecList?
+    public let videocodec: LegacyVideoRoomVideoCodecList?
+    public let vp9Profile: String?
+    public let h264Profile: String?
+    public let opusFec: Bool?
+    public let opusDtx: Bool?
+    public let audiolevelExt: Bool?
+    public let audiolevelEvent: Bool?
+    public let audioActivePackets: UInt64?
+    public let audioLevelAverage: UInt64?
+    public let videoorientExt: Bool?
+    public let playoutdelayExt: Bool?
+    public let transportWideCcExt: Bool?
+    public let record: Bool?
+    public let recordDir: String?
+    public let lockRecord: Bool?
+    public let permanent: Bool?
+    public let notifyJoining: Bool?
+    public let requireE2ee: Bool?
+    public let dummyPublisher: Bool?
+    public let dummyStreams: Bool?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(adminKey: String? = nil, room: JanusId? = nil, description: String? = nil, isPrivate: Bool? = nil, allowed: [String]? = nil, secret: String? = nil, pin: String? = nil, requirePvtid: Bool? = nil, signedTokens: Bool? = nil, bitrate: UInt64? = nil, bitrateCap: Bool? = nil, firFreq: UInt64? = nil, publishers: UInt64? = nil, audiocodec: LegacyVideoRoomAudioCodecList? = nil, videocodec: LegacyVideoRoomVideoCodecList? = nil, vp9Profile: String? = nil, h264Profile: String? = nil, opusFec: Bool? = nil, opusDtx: Bool? = nil, audiolevelExt: Bool? = nil, audiolevelEvent: Bool? = nil, audioActivePackets: UInt64? = nil, audioLevelAverage: UInt64? = nil, videoorientExt: Bool? = nil, playoutdelayExt: Bool? = nil, transportWideCcExt: Bool? = nil, record: Bool? = nil, recordDir: String? = nil, lockRecord: Bool? = nil, permanent: Bool? = nil, notifyJoining: Bool? = nil, requireE2ee: Bool? = nil, dummyPublisher: Bool? = nil, dummyStreams: Bool? = nil) {
+        self.adminKey = adminKey
+        self.room = room
+        self.description = description
+        self.isPrivate = isPrivate
+        self.allowed = allowed
+        self.secret = secret
+        self.pin = pin
+        self.requirePvtid = requirePvtid
+        self.signedTokens = signedTokens
+        self.bitrate = bitrate
+        self.bitrateCap = bitrateCap
+        self.firFreq = firFreq
+        self.publishers = publishers
+        self.audiocodec = audiocodec
+        self.videocodec = videocodec
+        self.vp9Profile = vp9Profile
+        self.h264Profile = h264Profile
+        self.opusFec = opusFec
+        self.opusDtx = opusDtx
+        self.audiolevelExt = audiolevelExt
+        self.audiolevelEvent = audiolevelEvent
+        self.audioActivePackets = audioActivePackets
+        self.audioLevelAverage = audioLevelAverage
+        self.videoorientExt = videoorientExt
+        self.playoutdelayExt = playoutdelayExt
+        self.transportWideCcExt = transportWideCcExt
+        self.record = record
+        self.recordDir = recordDir
+        self.lockRecord = lockRecord
+        self.permanent = permanent
+        self.notifyJoining = notifyJoining
+        self.requireE2ee = requireE2ee
+        self.dummyPublisher = dummyPublisher
+        self.dummyStreams = dummyStreams
+    }
+}
+
+#if compiler(>=6)
+extension LegacyVideoRoomCreateParams: Sendable {}
+#endif
+
+
+extension LegacyVideoRoomCreateParams: Equatable, Hashable {
+    public static func ==(lhs: LegacyVideoRoomCreateParams, rhs: LegacyVideoRoomCreateParams) -> Bool {
+        if lhs.adminKey != rhs.adminKey {
+            return false
+        }
+        if lhs.room != rhs.room {
+            return false
+        }
+        if lhs.description != rhs.description {
+            return false
+        }
+        if lhs.isPrivate != rhs.isPrivate {
+            return false
+        }
+        if lhs.allowed != rhs.allowed {
+            return false
+        }
+        if lhs.secret != rhs.secret {
+            return false
+        }
+        if lhs.pin != rhs.pin {
+            return false
+        }
+        if lhs.requirePvtid != rhs.requirePvtid {
+            return false
+        }
+        if lhs.signedTokens != rhs.signedTokens {
+            return false
+        }
+        if lhs.bitrate != rhs.bitrate {
+            return false
+        }
+        if lhs.bitrateCap != rhs.bitrateCap {
+            return false
+        }
+        if lhs.firFreq != rhs.firFreq {
+            return false
+        }
+        if lhs.publishers != rhs.publishers {
+            return false
+        }
+        if lhs.audiocodec != rhs.audiocodec {
+            return false
+        }
+        if lhs.videocodec != rhs.videocodec {
+            return false
+        }
+        if lhs.vp9Profile != rhs.vp9Profile {
+            return false
+        }
+        if lhs.h264Profile != rhs.h264Profile {
+            return false
+        }
+        if lhs.opusFec != rhs.opusFec {
+            return false
+        }
+        if lhs.opusDtx != rhs.opusDtx {
+            return false
+        }
+        if lhs.audiolevelExt != rhs.audiolevelExt {
+            return false
+        }
+        if lhs.audiolevelEvent != rhs.audiolevelEvent {
+            return false
+        }
+        if lhs.audioActivePackets != rhs.audioActivePackets {
+            return false
+        }
+        if lhs.audioLevelAverage != rhs.audioLevelAverage {
+            return false
+        }
+        if lhs.videoorientExt != rhs.videoorientExt {
+            return false
+        }
+        if lhs.playoutdelayExt != rhs.playoutdelayExt {
+            return false
+        }
+        if lhs.transportWideCcExt != rhs.transportWideCcExt {
+            return false
+        }
+        if lhs.record != rhs.record {
+            return false
+        }
+        if lhs.recordDir != rhs.recordDir {
+            return false
+        }
+        if lhs.lockRecord != rhs.lockRecord {
+            return false
+        }
+        if lhs.permanent != rhs.permanent {
+            return false
+        }
+        if lhs.notifyJoining != rhs.notifyJoining {
+            return false
+        }
+        if lhs.requireE2ee != rhs.requireE2ee {
+            return false
+        }
+        if lhs.dummyPublisher != rhs.dummyPublisher {
+            return false
+        }
+        if lhs.dummyStreams != rhs.dummyStreams {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(adminKey)
+        hasher.combine(room)
+        hasher.combine(description)
+        hasher.combine(isPrivate)
+        hasher.combine(allowed)
+        hasher.combine(secret)
+        hasher.combine(pin)
+        hasher.combine(requirePvtid)
+        hasher.combine(signedTokens)
+        hasher.combine(bitrate)
+        hasher.combine(bitrateCap)
+        hasher.combine(firFreq)
+        hasher.combine(publishers)
+        hasher.combine(audiocodec)
+        hasher.combine(videocodec)
+        hasher.combine(vp9Profile)
+        hasher.combine(h264Profile)
+        hasher.combine(opusFec)
+        hasher.combine(opusDtx)
+        hasher.combine(audiolevelExt)
+        hasher.combine(audiolevelEvent)
+        hasher.combine(audioActivePackets)
+        hasher.combine(audioLevelAverage)
+        hasher.combine(videoorientExt)
+        hasher.combine(playoutdelayExt)
+        hasher.combine(transportWideCcExt)
+        hasher.combine(record)
+        hasher.combine(recordDir)
+        hasher.combine(lockRecord)
+        hasher.combine(permanent)
+        hasher.combine(notifyJoining)
+        hasher.combine(requireE2ee)
+        hasher.combine(dummyPublisher)
+        hasher.combine(dummyStreams)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomCreateParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomCreateParams {
+        return
+            try LegacyVideoRoomCreateParams(
+                adminKey: FfiConverterOptionString.read(from: &buf), 
+                room: FfiConverterOptionTypeJanusId.read(from: &buf), 
+                description: FfiConverterOptionString.read(from: &buf), 
+                isPrivate: FfiConverterOptionBool.read(from: &buf), 
+                allowed: FfiConverterOptionSequenceString.read(from: &buf), 
+                secret: FfiConverterOptionString.read(from: &buf), 
+                pin: FfiConverterOptionString.read(from: &buf), 
+                requirePvtid: FfiConverterOptionBool.read(from: &buf), 
+                signedTokens: FfiConverterOptionBool.read(from: &buf), 
+                bitrate: FfiConverterOptionUInt64.read(from: &buf), 
+                bitrateCap: FfiConverterOptionBool.read(from: &buf), 
+                firFreq: FfiConverterOptionUInt64.read(from: &buf), 
+                publishers: FfiConverterOptionUInt64.read(from: &buf), 
+                audiocodec: FfiConverterOptionTypeLegacyVideoRoomAudioCodecList.read(from: &buf), 
+                videocodec: FfiConverterOptionTypeLegacyVideoRoomVideoCodecList.read(from: &buf), 
+                vp9Profile: FfiConverterOptionString.read(from: &buf), 
+                h264Profile: FfiConverterOptionString.read(from: &buf), 
+                opusFec: FfiConverterOptionBool.read(from: &buf), 
+                opusDtx: FfiConverterOptionBool.read(from: &buf), 
+                audiolevelExt: FfiConverterOptionBool.read(from: &buf), 
+                audiolevelEvent: FfiConverterOptionBool.read(from: &buf), 
+                audioActivePackets: FfiConverterOptionUInt64.read(from: &buf), 
+                audioLevelAverage: FfiConverterOptionUInt64.read(from: &buf), 
+                videoorientExt: FfiConverterOptionBool.read(from: &buf), 
+                playoutdelayExt: FfiConverterOptionBool.read(from: &buf), 
+                transportWideCcExt: FfiConverterOptionBool.read(from: &buf), 
+                record: FfiConverterOptionBool.read(from: &buf), 
+                recordDir: FfiConverterOptionString.read(from: &buf), 
+                lockRecord: FfiConverterOptionBool.read(from: &buf), 
+                permanent: FfiConverterOptionBool.read(from: &buf), 
+                notifyJoining: FfiConverterOptionBool.read(from: &buf), 
+                requireE2ee: FfiConverterOptionBool.read(from: &buf), 
+                dummyPublisher: FfiConverterOptionBool.read(from: &buf), 
+                dummyStreams: FfiConverterOptionBool.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: LegacyVideoRoomCreateParams, into buf: inout [UInt8]) {
+        FfiConverterOptionString.write(value.adminKey, into: &buf)
+        FfiConverterOptionTypeJanusId.write(value.room, into: &buf)
+        FfiConverterOptionString.write(value.description, into: &buf)
+        FfiConverterOptionBool.write(value.isPrivate, into: &buf)
+        FfiConverterOptionSequenceString.write(value.allowed, into: &buf)
+        FfiConverterOptionString.write(value.secret, into: &buf)
+        FfiConverterOptionString.write(value.pin, into: &buf)
+        FfiConverterOptionBool.write(value.requirePvtid, into: &buf)
+        FfiConverterOptionBool.write(value.signedTokens, into: &buf)
+        FfiConverterOptionUInt64.write(value.bitrate, into: &buf)
+        FfiConverterOptionBool.write(value.bitrateCap, into: &buf)
+        FfiConverterOptionUInt64.write(value.firFreq, into: &buf)
+        FfiConverterOptionUInt64.write(value.publishers, into: &buf)
+        FfiConverterOptionTypeLegacyVideoRoomAudioCodecList.write(value.audiocodec, into: &buf)
+        FfiConverterOptionTypeLegacyVideoRoomVideoCodecList.write(value.videocodec, into: &buf)
+        FfiConverterOptionString.write(value.vp9Profile, into: &buf)
+        FfiConverterOptionString.write(value.h264Profile, into: &buf)
+        FfiConverterOptionBool.write(value.opusFec, into: &buf)
+        FfiConverterOptionBool.write(value.opusDtx, into: &buf)
+        FfiConverterOptionBool.write(value.audiolevelExt, into: &buf)
+        FfiConverterOptionBool.write(value.audiolevelEvent, into: &buf)
+        FfiConverterOptionUInt64.write(value.audioActivePackets, into: &buf)
+        FfiConverterOptionUInt64.write(value.audioLevelAverage, into: &buf)
+        FfiConverterOptionBool.write(value.videoorientExt, into: &buf)
+        FfiConverterOptionBool.write(value.playoutdelayExt, into: &buf)
+        FfiConverterOptionBool.write(value.transportWideCcExt, into: &buf)
+        FfiConverterOptionBool.write(value.record, into: &buf)
+        FfiConverterOptionString.write(value.recordDir, into: &buf)
+        FfiConverterOptionBool.write(value.lockRecord, into: &buf)
+        FfiConverterOptionBool.write(value.permanent, into: &buf)
+        FfiConverterOptionBool.write(value.notifyJoining, into: &buf)
+        FfiConverterOptionBool.write(value.requireE2ee, into: &buf)
+        FfiConverterOptionBool.write(value.dummyPublisher, into: &buf)
+        FfiConverterOptionBool.write(value.dummyStreams, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomCreateParams_lift(_ buf: RustBuffer) throws -> LegacyVideoRoomCreateParams {
+    return try FfiConverterTypeLegacyVideoRoomCreateParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomCreateParams_lower(_ value: LegacyVideoRoomCreateParams) -> RustBuffer {
+    return FfiConverterTypeLegacyVideoRoomCreateParams.lower(value)
+}
+
+
+public struct LegacyVideoRoomCreatedRsp {
+    public let room: JanusId
+    public let permanent: Bool
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(room: JanusId, permanent: Bool) {
+        self.room = room
+        self.permanent = permanent
+    }
+}
+
+#if compiler(>=6)
+extension LegacyVideoRoomCreatedRsp: Sendable {}
+#endif
+
+
+extension LegacyVideoRoomCreatedRsp: Equatable, Hashable {
+    public static func ==(lhs: LegacyVideoRoomCreatedRsp, rhs: LegacyVideoRoomCreatedRsp) -> Bool {
+        if lhs.room != rhs.room {
+            return false
+        }
+        if lhs.permanent != rhs.permanent {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(room)
+        hasher.combine(permanent)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomCreatedRsp: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomCreatedRsp {
+        return
+            try LegacyVideoRoomCreatedRsp(
+                room: FfiConverterTypeJanusId.read(from: &buf), 
+                permanent: FfiConverterBool.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: LegacyVideoRoomCreatedRsp, into buf: inout [UInt8]) {
+        FfiConverterTypeJanusId.write(value.room, into: &buf)
+        FfiConverterBool.write(value.permanent, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomCreatedRsp_lift(_ buf: RustBuffer) throws -> LegacyVideoRoomCreatedRsp {
+    return try FfiConverterTypeLegacyVideoRoomCreatedRsp.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomCreatedRsp_lower(_ value: LegacyVideoRoomCreatedRsp) -> RustBuffer {
+    return FfiConverterTypeLegacyVideoRoomCreatedRsp.lower(value)
+}
+
+
+public struct LegacyVideoRoomKickParams {
+    public let room: JanusId
+    public let participant: JanusId
+    public let secret: String?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(room: JanusId, participant: JanusId, secret: String?) {
+        self.room = room
+        self.participant = participant
+        self.secret = secret
+    }
+}
+
+#if compiler(>=6)
+extension LegacyVideoRoomKickParams: Sendable {}
+#endif
+
+
+extension LegacyVideoRoomKickParams: Equatable, Hashable {
+    public static func ==(lhs: LegacyVideoRoomKickParams, rhs: LegacyVideoRoomKickParams) -> Bool {
+        if lhs.room != rhs.room {
+            return false
+        }
+        if lhs.participant != rhs.participant {
+            return false
+        }
+        if lhs.secret != rhs.secret {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(room)
+        hasher.combine(participant)
+        hasher.combine(secret)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomKickParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomKickParams {
+        return
+            try LegacyVideoRoomKickParams(
+                room: FfiConverterTypeJanusId.read(from: &buf), 
+                participant: FfiConverterTypeJanusId.read(from: &buf), 
+                secret: FfiConverterOptionString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: LegacyVideoRoomKickParams, into buf: inout [UInt8]) {
+        FfiConverterTypeJanusId.write(value.room, into: &buf)
+        FfiConverterTypeJanusId.write(value.participant, into: &buf)
+        FfiConverterOptionString.write(value.secret, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomKickParams_lift(_ buf: RustBuffer) throws -> LegacyVideoRoomKickParams {
+    return try FfiConverterTypeLegacyVideoRoomKickParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomKickParams_lower(_ value: LegacyVideoRoomKickParams) -> RustBuffer {
+    return FfiConverterTypeLegacyVideoRoomKickParams.lower(value)
+}
+
+
+public struct LegacyVideoRoomPublisher {
+    public let id: JanusId
+    public let display: String?
+    public let substream: UInt8?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(id: JanusId, display: String?, substream: UInt8?) {
+        self.id = id
+        self.display = display
+        self.substream = substream
+    }
+}
+
+#if compiler(>=6)
+extension LegacyVideoRoomPublisher: Sendable {}
+#endif
+
+
+extension LegacyVideoRoomPublisher: Equatable, Hashable {
+    public static func ==(lhs: LegacyVideoRoomPublisher, rhs: LegacyVideoRoomPublisher) -> Bool {
+        if lhs.id != rhs.id {
+            return false
+        }
+        if lhs.display != rhs.display {
+            return false
+        }
+        if lhs.substream != rhs.substream {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(display)
+        hasher.combine(substream)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomPublisher: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomPublisher {
+        return
+            try LegacyVideoRoomPublisher(
+                id: FfiConverterTypeJanusId.read(from: &buf), 
+                display: FfiConverterOptionString.read(from: &buf), 
+                substream: FfiConverterOptionUInt8.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: LegacyVideoRoomPublisher, into buf: inout [UInt8]) {
+        FfiConverterTypeJanusId.write(value.id, into: &buf)
+        FfiConverterOptionString.write(value.display, into: &buf)
+        FfiConverterOptionUInt8.write(value.substream, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomPublisher_lift(_ buf: RustBuffer) throws -> LegacyVideoRoomPublisher {
+    return try FfiConverterTypeLegacyVideoRoomPublisher.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomPublisher_lower(_ value: LegacyVideoRoomPublisher) -> RustBuffer {
+    return FfiConverterTypeLegacyVideoRoomPublisher.lower(value)
+}
+
+
+public struct LegacyVideoRoomPublisherConfigureParams {
+    public let audio: Bool?
+    public let video: Bool?
+    public let data: Bool?
+    public let bitrate: UInt64?
+    public let keyframe: Bool?
+    public let record: Bool?
+    public let filename: String?
+    public let display: String?
+    public let audioActivePackets: UInt64?
+    public let audioLevelAverage: UInt64?
+    public let minDelay: UInt64?
+    public let maxDelay: UInt64?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(audio: Bool? = nil, video: Bool? = nil, data: Bool? = nil, bitrate: UInt64? = nil, keyframe: Bool? = nil, record: Bool? = nil, filename: String? = nil, display: String? = nil, audioActivePackets: UInt64? = nil, audioLevelAverage: UInt64? = nil, minDelay: UInt64? = nil, maxDelay: UInt64? = nil) {
+        self.audio = audio
+        self.video = video
+        self.data = data
+        self.bitrate = bitrate
+        self.keyframe = keyframe
+        self.record = record
+        self.filename = filename
+        self.display = display
+        self.audioActivePackets = audioActivePackets
+        self.audioLevelAverage = audioLevelAverage
+        self.minDelay = minDelay
+        self.maxDelay = maxDelay
+    }
+}
+
+#if compiler(>=6)
+extension LegacyVideoRoomPublisherConfigureParams: Sendable {}
+#endif
+
+
+extension LegacyVideoRoomPublisherConfigureParams: Equatable, Hashable {
+    public static func ==(lhs: LegacyVideoRoomPublisherConfigureParams, rhs: LegacyVideoRoomPublisherConfigureParams) -> Bool {
+        if lhs.audio != rhs.audio {
+            return false
+        }
+        if lhs.video != rhs.video {
+            return false
+        }
+        if lhs.data != rhs.data {
+            return false
+        }
+        if lhs.bitrate != rhs.bitrate {
+            return false
+        }
+        if lhs.keyframe != rhs.keyframe {
+            return false
+        }
+        if lhs.record != rhs.record {
+            return false
+        }
+        if lhs.filename != rhs.filename {
+            return false
+        }
+        if lhs.display != rhs.display {
+            return false
+        }
+        if lhs.audioActivePackets != rhs.audioActivePackets {
+            return false
+        }
+        if lhs.audioLevelAverage != rhs.audioLevelAverage {
+            return false
+        }
+        if lhs.minDelay != rhs.minDelay {
+            return false
+        }
+        if lhs.maxDelay != rhs.maxDelay {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(audio)
+        hasher.combine(video)
+        hasher.combine(data)
+        hasher.combine(bitrate)
+        hasher.combine(keyframe)
+        hasher.combine(record)
+        hasher.combine(filename)
+        hasher.combine(display)
+        hasher.combine(audioActivePackets)
+        hasher.combine(audioLevelAverage)
+        hasher.combine(minDelay)
+        hasher.combine(maxDelay)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomPublisherConfigureParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomPublisherConfigureParams {
+        return
+            try LegacyVideoRoomPublisherConfigureParams(
+                audio: FfiConverterOptionBool.read(from: &buf), 
+                video: FfiConverterOptionBool.read(from: &buf), 
+                data: FfiConverterOptionBool.read(from: &buf), 
+                bitrate: FfiConverterOptionUInt64.read(from: &buf), 
+                keyframe: FfiConverterOptionBool.read(from: &buf), 
+                record: FfiConverterOptionBool.read(from: &buf), 
+                filename: FfiConverterOptionString.read(from: &buf), 
+                display: FfiConverterOptionString.read(from: &buf), 
+                audioActivePackets: FfiConverterOptionUInt64.read(from: &buf), 
+                audioLevelAverage: FfiConverterOptionUInt64.read(from: &buf), 
+                minDelay: FfiConverterOptionUInt64.read(from: &buf), 
+                maxDelay: FfiConverterOptionUInt64.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: LegacyVideoRoomPublisherConfigureParams, into buf: inout [UInt8]) {
+        FfiConverterOptionBool.write(value.audio, into: &buf)
+        FfiConverterOptionBool.write(value.video, into: &buf)
+        FfiConverterOptionBool.write(value.data, into: &buf)
+        FfiConverterOptionUInt64.write(value.bitrate, into: &buf)
+        FfiConverterOptionBool.write(value.keyframe, into: &buf)
+        FfiConverterOptionBool.write(value.record, into: &buf)
+        FfiConverterOptionString.write(value.filename, into: &buf)
+        FfiConverterOptionString.write(value.display, into: &buf)
+        FfiConverterOptionUInt64.write(value.audioActivePackets, into: &buf)
+        FfiConverterOptionUInt64.write(value.audioLevelAverage, into: &buf)
+        FfiConverterOptionUInt64.write(value.minDelay, into: &buf)
+        FfiConverterOptionUInt64.write(value.maxDelay, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomPublisherConfigureParams_lift(_ buf: RustBuffer) throws -> LegacyVideoRoomPublisherConfigureParams {
+    return try FfiConverterTypeLegacyVideoRoomPublisherConfigureParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomPublisherConfigureParams_lower(_ value: LegacyVideoRoomPublisherConfigureParams) -> RustBuffer {
+    return FfiConverterTypeLegacyVideoRoomPublisherConfigureParams.lower(value)
+}
+
+
+public struct LegacyVideoRoomPublisherJoinAndConfigureParams {
+    public let joinParams: LegacyVideoRoomPublisherJoinParams
+    public let configureParams: LegacyVideoRoomPublisherConfigureParams
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(joinParams: LegacyVideoRoomPublisherJoinParams, configureParams: LegacyVideoRoomPublisherConfigureParams) {
+        self.joinParams = joinParams
+        self.configureParams = configureParams
+    }
+}
+
+#if compiler(>=6)
+extension LegacyVideoRoomPublisherJoinAndConfigureParams: Sendable {}
+#endif
+
+
+extension LegacyVideoRoomPublisherJoinAndConfigureParams: Equatable, Hashable {
+    public static func ==(lhs: LegacyVideoRoomPublisherJoinAndConfigureParams, rhs: LegacyVideoRoomPublisherJoinAndConfigureParams) -> Bool {
+        if lhs.joinParams != rhs.joinParams {
+            return false
+        }
+        if lhs.configureParams != rhs.configureParams {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(joinParams)
+        hasher.combine(configureParams)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomPublisherJoinAndConfigureParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomPublisherJoinAndConfigureParams {
+        return
+            try LegacyVideoRoomPublisherJoinAndConfigureParams(
+                joinParams: FfiConverterTypeLegacyVideoRoomPublisherJoinParams.read(from: &buf), 
+                configureParams: FfiConverterTypeLegacyVideoRoomPublisherConfigureParams.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: LegacyVideoRoomPublisherJoinAndConfigureParams, into buf: inout [UInt8]) {
+        FfiConverterTypeLegacyVideoRoomPublisherJoinParams.write(value.joinParams, into: &buf)
+        FfiConverterTypeLegacyVideoRoomPublisherConfigureParams.write(value.configureParams, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomPublisherJoinAndConfigureParams_lift(_ buf: RustBuffer) throws -> LegacyVideoRoomPublisherJoinAndConfigureParams {
+    return try FfiConverterTypeLegacyVideoRoomPublisherJoinAndConfigureParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomPublisherJoinAndConfigureParams_lower(_ value: LegacyVideoRoomPublisherJoinAndConfigureParams) -> RustBuffer {
+    return FfiConverterTypeLegacyVideoRoomPublisherJoinAndConfigureParams.lower(value)
+}
+
+
+public struct LegacyVideoRoomPublisherJoinParams {
+    public let room: JanusId
+    public let optional: LegacyVideoRoomPublisherJoinParamsOptional
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(room: JanusId, optional: LegacyVideoRoomPublisherJoinParamsOptional) {
+        self.room = room
+        self.optional = optional
+    }
+}
+
+#if compiler(>=6)
+extension LegacyVideoRoomPublisherJoinParams: Sendable {}
+#endif
+
+
+extension LegacyVideoRoomPublisherJoinParams: Equatable, Hashable {
+    public static func ==(lhs: LegacyVideoRoomPublisherJoinParams, rhs: LegacyVideoRoomPublisherJoinParams) -> Bool {
+        if lhs.room != rhs.room {
+            return false
+        }
+        if lhs.optional != rhs.optional {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(room)
+        hasher.combine(optional)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomPublisherJoinParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomPublisherJoinParams {
+        return
+            try LegacyVideoRoomPublisherJoinParams(
+                room: FfiConverterTypeJanusId.read(from: &buf), 
+                optional: FfiConverterTypeLegacyVideoRoomPublisherJoinParamsOptional.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: LegacyVideoRoomPublisherJoinParams, into buf: inout [UInt8]) {
+        FfiConverterTypeJanusId.write(value.room, into: &buf)
+        FfiConverterTypeLegacyVideoRoomPublisherJoinParamsOptional.write(value.optional, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomPublisherJoinParams_lift(_ buf: RustBuffer) throws -> LegacyVideoRoomPublisherJoinParams {
+    return try FfiConverterTypeLegacyVideoRoomPublisherJoinParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomPublisherJoinParams_lower(_ value: LegacyVideoRoomPublisherJoinParams) -> RustBuffer {
+    return FfiConverterTypeLegacyVideoRoomPublisherJoinParams.lower(value)
+}
+
+
+public struct LegacyVideoRoomPublisherJoinParamsOptional {
+    public let id: JanusId?
+    public let display: String?
+    public let token: String?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(id: JanusId? = nil, display: String? = nil, token: String? = nil) {
+        self.id = id
+        self.display = display
+        self.token = token
+    }
+}
+
+#if compiler(>=6)
+extension LegacyVideoRoomPublisherJoinParamsOptional: Sendable {}
+#endif
+
+
+extension LegacyVideoRoomPublisherJoinParamsOptional: Equatable, Hashable {
+    public static func ==(lhs: LegacyVideoRoomPublisherJoinParamsOptional, rhs: LegacyVideoRoomPublisherJoinParamsOptional) -> Bool {
+        if lhs.id != rhs.id {
+            return false
+        }
+        if lhs.display != rhs.display {
+            return false
+        }
+        if lhs.token != rhs.token {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(display)
+        hasher.combine(token)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomPublisherJoinParamsOptional: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomPublisherJoinParamsOptional {
+        return
+            try LegacyVideoRoomPublisherJoinParamsOptional(
+                id: FfiConverterOptionTypeJanusId.read(from: &buf), 
+                display: FfiConverterOptionString.read(from: &buf), 
+                token: FfiConverterOptionString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: LegacyVideoRoomPublisherJoinParamsOptional, into buf: inout [UInt8]) {
+        FfiConverterOptionTypeJanusId.write(value.id, into: &buf)
+        FfiConverterOptionString.write(value.display, into: &buf)
+        FfiConverterOptionString.write(value.token, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomPublisherJoinParamsOptional_lift(_ buf: RustBuffer) throws -> LegacyVideoRoomPublisherJoinParamsOptional {
+    return try FfiConverterTypeLegacyVideoRoomPublisherJoinParamsOptional.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomPublisherJoinParamsOptional_lower(_ value: LegacyVideoRoomPublisherJoinParamsOptional) -> RustBuffer {
+    return FfiConverterTypeLegacyVideoRoomPublisherJoinParamsOptional.lower(value)
+}
+
+
+public struct LegacyVideoRoomSubscriberConfigureParams {
+    public let audio: Bool?
+    public let video: Bool?
+    public let data: Bool?
+    public let substream: UInt8?
+    public let temporal: UInt8?
+    public let fallback: UInt64?
+    public let spatialLayer: UInt8?
+    public let temporalLayer: UInt8?
+    public let audioLevelAverage: UInt64?
+    public let audioActivePackets: UInt64?
+    public let minDelay: UInt64?
+    public let maxDelay: UInt64?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(audio: Bool? = nil, video: Bool? = nil, data: Bool? = nil, substream: UInt8? = nil, temporal: UInt8? = nil, fallback: UInt64? = nil, spatialLayer: UInt8? = nil, temporalLayer: UInt8? = nil, audioLevelAverage: UInt64? = nil, audioActivePackets: UInt64? = nil, minDelay: UInt64? = nil, maxDelay: UInt64? = nil) {
+        self.audio = audio
+        self.video = video
+        self.data = data
+        self.substream = substream
+        self.temporal = temporal
+        self.fallback = fallback
+        self.spatialLayer = spatialLayer
+        self.temporalLayer = temporalLayer
+        self.audioLevelAverage = audioLevelAverage
+        self.audioActivePackets = audioActivePackets
+        self.minDelay = minDelay
+        self.maxDelay = maxDelay
+    }
+}
+
+#if compiler(>=6)
+extension LegacyVideoRoomSubscriberConfigureParams: Sendable {}
+#endif
+
+
+extension LegacyVideoRoomSubscriberConfigureParams: Equatable, Hashable {
+    public static func ==(lhs: LegacyVideoRoomSubscriberConfigureParams, rhs: LegacyVideoRoomSubscriberConfigureParams) -> Bool {
+        if lhs.audio != rhs.audio {
+            return false
+        }
+        if lhs.video != rhs.video {
+            return false
+        }
+        if lhs.data != rhs.data {
+            return false
+        }
+        if lhs.substream != rhs.substream {
+            return false
+        }
+        if lhs.temporal != rhs.temporal {
+            return false
+        }
+        if lhs.fallback != rhs.fallback {
+            return false
+        }
+        if lhs.spatialLayer != rhs.spatialLayer {
+            return false
+        }
+        if lhs.temporalLayer != rhs.temporalLayer {
+            return false
+        }
+        if lhs.audioLevelAverage != rhs.audioLevelAverage {
+            return false
+        }
+        if lhs.audioActivePackets != rhs.audioActivePackets {
+            return false
+        }
+        if lhs.minDelay != rhs.minDelay {
+            return false
+        }
+        if lhs.maxDelay != rhs.maxDelay {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(audio)
+        hasher.combine(video)
+        hasher.combine(data)
+        hasher.combine(substream)
+        hasher.combine(temporal)
+        hasher.combine(fallback)
+        hasher.combine(spatialLayer)
+        hasher.combine(temporalLayer)
+        hasher.combine(audioLevelAverage)
+        hasher.combine(audioActivePackets)
+        hasher.combine(minDelay)
+        hasher.combine(maxDelay)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomSubscriberConfigureParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomSubscriberConfigureParams {
+        return
+            try LegacyVideoRoomSubscriberConfigureParams(
+                audio: FfiConverterOptionBool.read(from: &buf), 
+                video: FfiConverterOptionBool.read(from: &buf), 
+                data: FfiConverterOptionBool.read(from: &buf), 
+                substream: FfiConverterOptionUInt8.read(from: &buf), 
+                temporal: FfiConverterOptionUInt8.read(from: &buf), 
+                fallback: FfiConverterOptionUInt64.read(from: &buf), 
+                spatialLayer: FfiConverterOptionUInt8.read(from: &buf), 
+                temporalLayer: FfiConverterOptionUInt8.read(from: &buf), 
+                audioLevelAverage: FfiConverterOptionUInt64.read(from: &buf), 
+                audioActivePackets: FfiConverterOptionUInt64.read(from: &buf), 
+                minDelay: FfiConverterOptionUInt64.read(from: &buf), 
+                maxDelay: FfiConverterOptionUInt64.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: LegacyVideoRoomSubscriberConfigureParams, into buf: inout [UInt8]) {
+        FfiConverterOptionBool.write(value.audio, into: &buf)
+        FfiConverterOptionBool.write(value.video, into: &buf)
+        FfiConverterOptionBool.write(value.data, into: &buf)
+        FfiConverterOptionUInt8.write(value.substream, into: &buf)
+        FfiConverterOptionUInt8.write(value.temporal, into: &buf)
+        FfiConverterOptionUInt64.write(value.fallback, into: &buf)
+        FfiConverterOptionUInt8.write(value.spatialLayer, into: &buf)
+        FfiConverterOptionUInt8.write(value.temporalLayer, into: &buf)
+        FfiConverterOptionUInt64.write(value.audioLevelAverage, into: &buf)
+        FfiConverterOptionUInt64.write(value.audioActivePackets, into: &buf)
+        FfiConverterOptionUInt64.write(value.minDelay, into: &buf)
+        FfiConverterOptionUInt64.write(value.maxDelay, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomSubscriberConfigureParams_lift(_ buf: RustBuffer) throws -> LegacyVideoRoomSubscriberConfigureParams {
+    return try FfiConverterTypeLegacyVideoRoomSubscriberConfigureParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomSubscriberConfigureParams_lower(_ value: LegacyVideoRoomSubscriberConfigureParams) -> RustBuffer {
+    return FfiConverterTypeLegacyVideoRoomSubscriberConfigureParams.lower(value)
+}
+
+
+public struct LegacyVideoRoomSubscriberJoinParams {
+    public let required: LegacyVideoRoomSubscriberJoinParamsRequired
+    public let optional: LegacyVideoRoomSubscriberJoinParamsOptional
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(required: LegacyVideoRoomSubscriberJoinParamsRequired, optional: LegacyVideoRoomSubscriberJoinParamsOptional) {
+        self.required = required
+        self.optional = optional
+    }
+}
+
+#if compiler(>=6)
+extension LegacyVideoRoomSubscriberJoinParams: Sendable {}
+#endif
+
+
+extension LegacyVideoRoomSubscriberJoinParams: Equatable, Hashable {
+    public static func ==(lhs: LegacyVideoRoomSubscriberJoinParams, rhs: LegacyVideoRoomSubscriberJoinParams) -> Bool {
+        if lhs.required != rhs.required {
+            return false
+        }
+        if lhs.optional != rhs.optional {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(required)
+        hasher.combine(optional)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomSubscriberJoinParams: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomSubscriberJoinParams {
+        return
+            try LegacyVideoRoomSubscriberJoinParams(
+                required: FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsRequired.read(from: &buf), 
+                optional: FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsOptional.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: LegacyVideoRoomSubscriberJoinParams, into buf: inout [UInt8]) {
+        FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsRequired.write(value.required, into: &buf)
+        FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsOptional.write(value.optional, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomSubscriberJoinParams_lift(_ buf: RustBuffer) throws -> LegacyVideoRoomSubscriberJoinParams {
+    return try FfiConverterTypeLegacyVideoRoomSubscriberJoinParams.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomSubscriberJoinParams_lower(_ value: LegacyVideoRoomSubscriberJoinParams) -> RustBuffer {
+    return FfiConverterTypeLegacyVideoRoomSubscriberJoinParams.lower(value)
+}
+
+
+public struct LegacyVideoRoomSubscriberJoinParamsOptional {
+    public let privateId: UInt64?
+    public let closePc: Bool?
+    public let audio: Bool?
+    public let video: Bool?
+    public let data: Bool?
+    public let offerAudio: Bool?
+    public let offerVideo: Bool?
+    public let offerData: Bool?
+    public let substream: UInt8?
+    public let temporal: UInt8?
+    public let fallback: UInt64?
+    public let spatialLayer: UInt8?
+    public let temporalLayer: UInt8?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(privateId: UInt64? = nil, closePc: Bool? = nil, audio: Bool? = nil, video: Bool? = nil, data: Bool? = nil, offerAudio: Bool? = nil, offerVideo: Bool? = nil, offerData: Bool? = nil, substream: UInt8? = nil, temporal: UInt8? = nil, fallback: UInt64? = nil, spatialLayer: UInt8? = nil, temporalLayer: UInt8? = nil) {
+        self.privateId = privateId
+        self.closePc = closePc
+        self.audio = audio
+        self.video = video
+        self.data = data
+        self.offerAudio = offerAudio
+        self.offerVideo = offerVideo
+        self.offerData = offerData
+        self.substream = substream
+        self.temporal = temporal
+        self.fallback = fallback
+        self.spatialLayer = spatialLayer
+        self.temporalLayer = temporalLayer
+    }
+}
+
+#if compiler(>=6)
+extension LegacyVideoRoomSubscriberJoinParamsOptional: Sendable {}
+#endif
+
+
+extension LegacyVideoRoomSubscriberJoinParamsOptional: Equatable, Hashable {
+    public static func ==(lhs: LegacyVideoRoomSubscriberJoinParamsOptional, rhs: LegacyVideoRoomSubscriberJoinParamsOptional) -> Bool {
+        if lhs.privateId != rhs.privateId {
+            return false
+        }
+        if lhs.closePc != rhs.closePc {
+            return false
+        }
+        if lhs.audio != rhs.audio {
+            return false
+        }
+        if lhs.video != rhs.video {
+            return false
+        }
+        if lhs.data != rhs.data {
+            return false
+        }
+        if lhs.offerAudio != rhs.offerAudio {
+            return false
+        }
+        if lhs.offerVideo != rhs.offerVideo {
+            return false
+        }
+        if lhs.offerData != rhs.offerData {
+            return false
+        }
+        if lhs.substream != rhs.substream {
+            return false
+        }
+        if lhs.temporal != rhs.temporal {
+            return false
+        }
+        if lhs.fallback != rhs.fallback {
+            return false
+        }
+        if lhs.spatialLayer != rhs.spatialLayer {
+            return false
+        }
+        if lhs.temporalLayer != rhs.temporalLayer {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(privateId)
+        hasher.combine(closePc)
+        hasher.combine(audio)
+        hasher.combine(video)
+        hasher.combine(data)
+        hasher.combine(offerAudio)
+        hasher.combine(offerVideo)
+        hasher.combine(offerData)
+        hasher.combine(substream)
+        hasher.combine(temporal)
+        hasher.combine(fallback)
+        hasher.combine(spatialLayer)
+        hasher.combine(temporalLayer)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsOptional: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomSubscriberJoinParamsOptional {
+        return
+            try LegacyVideoRoomSubscriberJoinParamsOptional(
+                privateId: FfiConverterOptionUInt64.read(from: &buf), 
+                closePc: FfiConverterOptionBool.read(from: &buf), 
+                audio: FfiConverterOptionBool.read(from: &buf), 
+                video: FfiConverterOptionBool.read(from: &buf), 
+                data: FfiConverterOptionBool.read(from: &buf), 
+                offerAudio: FfiConverterOptionBool.read(from: &buf), 
+                offerVideo: FfiConverterOptionBool.read(from: &buf), 
+                offerData: FfiConverterOptionBool.read(from: &buf), 
+                substream: FfiConverterOptionUInt8.read(from: &buf), 
+                temporal: FfiConverterOptionUInt8.read(from: &buf), 
+                fallback: FfiConverterOptionUInt64.read(from: &buf), 
+                spatialLayer: FfiConverterOptionUInt8.read(from: &buf), 
+                temporalLayer: FfiConverterOptionUInt8.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: LegacyVideoRoomSubscriberJoinParamsOptional, into buf: inout [UInt8]) {
+        FfiConverterOptionUInt64.write(value.privateId, into: &buf)
+        FfiConverterOptionBool.write(value.closePc, into: &buf)
+        FfiConverterOptionBool.write(value.audio, into: &buf)
+        FfiConverterOptionBool.write(value.video, into: &buf)
+        FfiConverterOptionBool.write(value.data, into: &buf)
+        FfiConverterOptionBool.write(value.offerAudio, into: &buf)
+        FfiConverterOptionBool.write(value.offerVideo, into: &buf)
+        FfiConverterOptionBool.write(value.offerData, into: &buf)
+        FfiConverterOptionUInt8.write(value.substream, into: &buf)
+        FfiConverterOptionUInt8.write(value.temporal, into: &buf)
+        FfiConverterOptionUInt64.write(value.fallback, into: &buf)
+        FfiConverterOptionUInt8.write(value.spatialLayer, into: &buf)
+        FfiConverterOptionUInt8.write(value.temporalLayer, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsOptional_lift(_ buf: RustBuffer) throws -> LegacyVideoRoomSubscriberJoinParamsOptional {
+    return try FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsOptional.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsOptional_lower(_ value: LegacyVideoRoomSubscriberJoinParamsOptional) -> RustBuffer {
+    return FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsOptional.lower(value)
+}
+
+
+public struct LegacyVideoRoomSubscriberJoinParamsRequired {
+    public let room: JanusId
+    public let feed: JanusId
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(room: JanusId, feed: JanusId) {
+        self.room = room
+        self.feed = feed
+    }
+}
+
+#if compiler(>=6)
+extension LegacyVideoRoomSubscriberJoinParamsRequired: Sendable {}
+#endif
+
+
+extension LegacyVideoRoomSubscriberJoinParamsRequired: Equatable, Hashable {
+    public static func ==(lhs: LegacyVideoRoomSubscriberJoinParamsRequired, rhs: LegacyVideoRoomSubscriberJoinParamsRequired) -> Bool {
+        if lhs.room != rhs.room {
+            return false
+        }
+        if lhs.feed != rhs.feed {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(room)
+        hasher.combine(feed)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsRequired: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomSubscriberJoinParamsRequired {
+        return
+            try LegacyVideoRoomSubscriberJoinParamsRequired(
+                room: FfiConverterTypeJanusId.read(from: &buf), 
+                feed: FfiConverterTypeJanusId.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: LegacyVideoRoomSubscriberJoinParamsRequired, into buf: inout [UInt8]) {
+        FfiConverterTypeJanusId.write(value.room, into: &buf)
+        FfiConverterTypeJanusId.write(value.feed, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsRequired_lift(_ buf: RustBuffer) throws -> LegacyVideoRoomSubscriberJoinParamsRequired {
+    return try FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsRequired.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsRequired_lower(_ value: LegacyVideoRoomSubscriberJoinParamsRequired) -> RustBuffer {
+    return FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsRequired.lower(value)
+}
+
+
+public struct LegacyVideoRoomVideoCodecList {
+    public let codecs: [LegacyVideoRoomVideoCodec]
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(codecs: [LegacyVideoRoomVideoCodec]) {
+        self.codecs = codecs
+    }
+}
+
+#if compiler(>=6)
+extension LegacyVideoRoomVideoCodecList: Sendable {}
+#endif
+
+
+extension LegacyVideoRoomVideoCodecList: Equatable, Hashable {
+    public static func ==(lhs: LegacyVideoRoomVideoCodecList, rhs: LegacyVideoRoomVideoCodecList) -> Bool {
+        if lhs.codecs != rhs.codecs {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(codecs)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomVideoCodecList: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomVideoCodecList {
+        return
+            try LegacyVideoRoomVideoCodecList(
+                codecs: FfiConverterSequenceTypeLegacyVideoRoomVideoCodec.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: LegacyVideoRoomVideoCodecList, into buf: inout [UInt8]) {
+        FfiConverterSequenceTypeLegacyVideoRoomVideoCodec.write(value.codecs, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomVideoCodecList_lift(_ buf: RustBuffer) throws -> LegacyVideoRoomVideoCodecList {
+    return try FfiConverterTypeLegacyVideoRoomVideoCodecList.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomVideoCodecList_lower(_ value: LegacyVideoRoomVideoCodecList) -> RustBuffer {
+    return FfiConverterTypeLegacyVideoRoomVideoCodecList.lower(value)
+}
+
+
 public struct MetaData {
     public let name: String
     public let author: String
@@ -6568,6 +8554,189 @@ extension JsepType: Equatable, Hashable {}
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
+public enum LegacyVideoRoomAudioCodec {
+    
+    case opus
+    case g722
+    case pcmu
+    case pcma
+    case isac32
+    case isac16
+}
+
+
+#if compiler(>=6)
+extension LegacyVideoRoomAudioCodec: Sendable {}
+#endif
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomAudioCodec: FfiConverterRustBuffer {
+    typealias SwiftType = LegacyVideoRoomAudioCodec
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomAudioCodec {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .opus
+        
+        case 2: return .g722
+        
+        case 3: return .pcmu
+        
+        case 4: return .pcma
+        
+        case 5: return .isac32
+        
+        case 6: return .isac16
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: LegacyVideoRoomAudioCodec, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .opus:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .g722:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .pcmu:
+            writeInt(&buf, Int32(3))
+        
+        
+        case .pcma:
+            writeInt(&buf, Int32(4))
+        
+        
+        case .isac32:
+            writeInt(&buf, Int32(5))
+        
+        
+        case .isac16:
+            writeInt(&buf, Int32(6))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomAudioCodec_lift(_ buf: RustBuffer) throws -> LegacyVideoRoomAudioCodec {
+    return try FfiConverterTypeLegacyVideoRoomAudioCodec.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomAudioCodec_lower(_ value: LegacyVideoRoomAudioCodec) -> RustBuffer {
+    return FfiConverterTypeLegacyVideoRoomAudioCodec.lower(value)
+}
+
+
+extension LegacyVideoRoomAudioCodec: Equatable, Hashable {}
+
+
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+
+public enum LegacyVideoRoomVideoCodec {
+    
+    case vp8
+    case vp9
+    case h264
+    case av1
+    case h265
+}
+
+
+#if compiler(>=6)
+extension LegacyVideoRoomVideoCodec: Sendable {}
+#endif
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeLegacyVideoRoomVideoCodec: FfiConverterRustBuffer {
+    typealias SwiftType = LegacyVideoRoomVideoCodec
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomVideoCodec {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .vp8
+        
+        case 2: return .vp9
+        
+        case 3: return .h264
+        
+        case 4: return .av1
+        
+        case 5: return .h265
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: LegacyVideoRoomVideoCodec, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .vp8:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .vp9:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .h264:
+            writeInt(&buf, Int32(3))
+        
+        
+        case .av1:
+            writeInt(&buf, Int32(4))
+        
+        
+        case .h265:
+            writeInt(&buf, Int32(5))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomVideoCodec_lift(_ buf: RustBuffer) throws -> LegacyVideoRoomVideoCodec {
+    return try FfiConverterTypeLegacyVideoRoomVideoCodec.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeLegacyVideoRoomVideoCodec_lower(_ value: LegacyVideoRoomVideoCodec) -> RustBuffer {
+    return FfiConverterTypeLegacyVideoRoomVideoCodec.lower(value)
+}
+
+
+extension LegacyVideoRoomVideoCodec: Equatable, Hashable {}
+
+
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+
 public enum VideoRoomAudioCodec {
     
     case opus
@@ -7501,6 +9670,408 @@ public func FfiConverterCallbackInterfaceHandleCallback_lower(_ v: HandleCallbac
 
 
 
+public protocol LegacyVideoRoomHandleCallback: AnyObject, Sendable {
+    
+    func onLegacyVideoRoomOther(data: Data) 
+    
+    func onLegacyVideoRoomHandleEvent(event: GenericEvent) 
+    
+    func onLegacyVideoRoomError(errorCode: UInt16, error: String) 
+    
+    func onLegacyVideoRoomJoined(id: JanusId, room: JanusId, description: String?, privateId: UInt64, publishers: [LegacyVideoRoomPublisher], jsep: Jsep?) 
+    
+    func onLegacyVideoRoomConfigured(room: JanusId, jsep: Jsep?) 
+    
+    func onLegacyVideoRoomSubscriberAttached(id: JanusId, room: JanusId, display: String?, jsep: Jsep) 
+    
+    func onLegacyVideoRoomSlowLink() 
+    
+    func onLegacyVideoRoomUnpublished(room: JanusId, unpublished: JanusId) 
+    
+    func onLegacyVideoRoomSubscriberStarted(room: JanusId, started: String) 
+    
+    func onLegacyVideoRoomLeaving(room: JanusId, reason: String) 
+    
+    func onLegacyVideoRoomKicked(room: JanusId, participant: JanusId) 
+    
+}
+
+
+// Put the implementation in a struct so we don't pollute the top-level namespace
+fileprivate struct UniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
+
+    // Create the VTable using a series of closures.
+    // Swift automatically converts these into C callback functions.
+    //
+    // This creates 1-element array, since this seems to be the only way to construct a const
+    // pointer that we can pass to the Rust code.
+    static let vtable: [UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback] = [UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback(
+        onLegacyVideoRoomOther: { (
+            uniffiHandle: UInt64,
+            data: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onLegacyVideoRoomOther(
+                     data: try FfiConverterData.lift(data)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onLegacyVideoRoomHandleEvent: { (
+            uniffiHandle: UInt64,
+            event: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onLegacyVideoRoomHandleEvent(
+                     event: try FfiConverterTypeGenericEvent_lift(event)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onLegacyVideoRoomError: { (
+            uniffiHandle: UInt64,
+            errorCode: UInt16,
+            error: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onLegacyVideoRoomError(
+                     errorCode: try FfiConverterUInt16.lift(errorCode),
+                     error: try FfiConverterString.lift(error)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onLegacyVideoRoomJoined: { (
+            uniffiHandle: UInt64,
+            id: RustBuffer,
+            room: RustBuffer,
+            description: RustBuffer,
+            privateId: UInt64,
+            publishers: RustBuffer,
+            jsep: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onLegacyVideoRoomJoined(
+                     id: try FfiConverterTypeJanusId_lift(id),
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     description: try FfiConverterOptionString.lift(description),
+                     privateId: try FfiConverterUInt64.lift(privateId),
+                     publishers: try FfiConverterSequenceTypeLegacyVideoRoomPublisher.lift(publishers),
+                     jsep: try FfiConverterOptionTypeJsep.lift(jsep)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onLegacyVideoRoomConfigured: { (
+            uniffiHandle: UInt64,
+            room: RustBuffer,
+            jsep: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onLegacyVideoRoomConfigured(
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     jsep: try FfiConverterOptionTypeJsep.lift(jsep)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onLegacyVideoRoomSubscriberAttached: { (
+            uniffiHandle: UInt64,
+            id: RustBuffer,
+            room: RustBuffer,
+            display: RustBuffer,
+            jsep: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onLegacyVideoRoomSubscriberAttached(
+                     id: try FfiConverterTypeJanusId_lift(id),
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     display: try FfiConverterOptionString.lift(display),
+                     jsep: try FfiConverterTypeJsep_lift(jsep)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onLegacyVideoRoomSlowLink: { (
+            uniffiHandle: UInt64,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onLegacyVideoRoomSlowLink(
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onLegacyVideoRoomUnpublished: { (
+            uniffiHandle: UInt64,
+            room: RustBuffer,
+            unpublished: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onLegacyVideoRoomUnpublished(
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     unpublished: try FfiConverterTypeJanusId_lift(unpublished)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onLegacyVideoRoomSubscriberStarted: { (
+            uniffiHandle: UInt64,
+            room: RustBuffer,
+            started: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onLegacyVideoRoomSubscriberStarted(
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     started: try FfiConverterString.lift(started)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onLegacyVideoRoomLeaving: { (
+            uniffiHandle: UInt64,
+            room: RustBuffer,
+            reason: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onLegacyVideoRoomLeaving(
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     reason: try FfiConverterString.lift(reason)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onLegacyVideoRoomKicked: { (
+            uniffiHandle: UInt64,
+            room: RustBuffer,
+            participant: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onLegacyVideoRoomKicked(
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     participant: try FfiConverterTypeJanusId_lift(participant)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        uniffiFree: { (uniffiHandle: UInt64) -> () in
+            let result = try? FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.remove(handle: uniffiHandle)
+            if result == nil {
+                print("Uniffi callback interface LegacyVideoRoomHandleCallback: handle missing in uniffiFree")
+            }
+        }
+    )]
+}
+
+private func uniffiCallbackInitLegacyVideoRoomHandleCallback() {
+    uniffi_janus_gateway_fn_init_callback_vtable_legacyvideoroomhandlecallback(UniffiCallbackInterfaceLegacyVideoRoomHandleCallback.vtable)
+}
+
+// FfiConverter protocol for callback interfaces
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback {
+    fileprivate static let handleMap = UniffiHandleMap<LegacyVideoRoomHandleCallback>()
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+extension FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback : FfiConverter {
+    typealias SwiftType = LegacyVideoRoomHandleCallback
+    typealias FfiType = UInt64
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func lift(_ handle: UInt64) throws -> SwiftType {
+        try handleMap.get(handle: handle)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func lower(_ v: SwiftType) -> UInt64 {
+        return handleMap.insert(obj: v)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func write(_ v: SwiftType, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(v))
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback_lift(_ handle: UInt64) throws -> LegacyVideoRoomHandleCallback {
+    return try FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.lift(handle)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback_lower(_ v: LegacyVideoRoomHandleCallback) -> UInt64 {
+    return FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.lower(v)
+}
+
+
+
+
 public protocol VideoRoomHandleCallback: AnyObject, Sendable {
     
     func onHandleEvent(event: GenericEvent) 
@@ -8023,6 +10594,54 @@ fileprivate struct FfiConverterOptionTypeJsep: FfiConverterRustBuffer {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterOptionTypeLegacyVideoRoomAudioCodecList: FfiConverterRustBuffer {
+    typealias SwiftType = LegacyVideoRoomAudioCodecList?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeLegacyVideoRoomAudioCodecList.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeLegacyVideoRoomAudioCodecList.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionTypeLegacyVideoRoomVideoCodecList: FfiConverterRustBuffer {
+    typealias SwiftType = LegacyVideoRoomVideoCodecList?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeLegacyVideoRoomVideoCodecList.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeLegacyVideoRoomVideoCodecList.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterOptionTypeVideoRoomAudioCodecList: FfiConverterRustBuffer {
     typealias SwiftType = VideoRoomAudioCodecList?
 
@@ -8315,6 +10934,31 @@ fileprivate struct FfiConverterSequenceTypeConfiguredStream: FfiConverterRustBuf
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterSequenceTypeLegacyVideoRoomPublisher: FfiConverterRustBuffer {
+    typealias SwiftType = [LegacyVideoRoomPublisher]
+
+    public static func write(_ value: [LegacyVideoRoomPublisher], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeLegacyVideoRoomPublisher.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [LegacyVideoRoomPublisher] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [LegacyVideoRoomPublisher]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeLegacyVideoRoomPublisher.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterSequenceTypePublisher: FfiConverterRustBuffer {
     typealias SwiftType = [Publisher]
 
@@ -8382,6 +11026,56 @@ fileprivate struct FfiConverterSequenceTypeVideoRoomPublishDescriptionParams: Ff
         seq.reserveCapacity(Int(len))
         for _ in 0 ..< len {
             seq.append(try FfiConverterTypeVideoRoomPublishDescriptionParams.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceTypeLegacyVideoRoomAudioCodec: FfiConverterRustBuffer {
+    typealias SwiftType = [LegacyVideoRoomAudioCodec]
+
+    public static func write(_ value: [LegacyVideoRoomAudioCodec], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeLegacyVideoRoomAudioCodec.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [LegacyVideoRoomAudioCodec] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [LegacyVideoRoomAudioCodec]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeLegacyVideoRoomAudioCodec.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceTypeLegacyVideoRoomVideoCodec: FfiConverterRustBuffer {
+    typealias SwiftType = [LegacyVideoRoomVideoCodec]
+
+    public static func write(_ value: [LegacyVideoRoomVideoCodec], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeLegacyVideoRoomVideoCodec.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [LegacyVideoRoomVideoCodec] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [LegacyVideoRoomVideoCodec]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeLegacyVideoRoomVideoCodec.read(from: &buf))
         }
         return seq
     }
@@ -8709,6 +11403,66 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_handle_trickle_single_candidate() != 48289) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_complete_trickle() != 53978) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_create_room() != 35272) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_detach() != 7403) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_exist() != 53200) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_fire_and_forget() != 43483) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_fire_and_forget_with_jsep() != 46681) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_hangup() != 43624) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_kick() != 30177) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_publisher_configure() != 56682) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_publisher_join() != 10072) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_publisher_join_and_configure() != 61577) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_send_waiton_ack() != 40893) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_send_waiton_ack_with_jsep() != 64898) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_send_waiton_result() != 60224) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_start() != 38038) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_start_event_loop() != 2051) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_subscriber_configure() != 52781) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_subscriber_join() != 51090) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_trickle_candidates() != 23169) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_trickle_single_candidate() != 64622) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_session_attach() != 16557) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -8817,6 +11571,39 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_handlecallback_on_handle_event() != 1626) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_other() != 27677) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_handle_event() != 17605) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_error() != 11633) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_joined() != 42543) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_configured() != 3953) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_attached() != 45217) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_slow_link() != 3293) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_unpublished() != 14908) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_started() != 8038) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_leaving() != 31440) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_kicked() != 36262) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_handle_event() != 12084) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -8845,6 +11632,7 @@ private let initializationResult: InitializationResult = {
     uniffiCallbackInitAudioBridgeHandleCallback()
     uniffiCallbackInitEchotestHandleCallback()
     uniffiCallbackInitHandleCallback()
+    uniffiCallbackInitLegacyVideoRoomHandleCallback()
     uniffiCallbackInitVideoRoomHandleCallback()
     return InitializationResult.ok
 }()
