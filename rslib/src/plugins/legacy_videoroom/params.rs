@@ -7,6 +7,9 @@ pub type LegacyVideoRoomCreateParams = params::LegacyVideoRoomCreateParams;
 pub type LegacyVideoRoomVideoCodec = params::LegacyVideoRoomVideoCodec;
 pub type LegacyVideoRoomVideoCodecList = params::LegacyVideoRoomVideoCodecList;
 pub type LegacyVideoRoomKickParams = params::LegacyVideoRoomKickParams;
+pub type LegacyVideoRoomPublisherJoinParams = params::LegacyVideoRoomPublisherJoinParams;
+pub type LegacyVideoRoomPublisherJoinParamsOptional =
+    params::LegacyVideoRoomPublisherJoinParamsOptional;
 
 #[uniffi::remote(Record)]
 pub struct LegacyVideoRoomCreateParams {
@@ -114,4 +117,20 @@ pub struct LegacyVideoRoomKickParams {
     pub room: JanusId,
     pub participant: JanusId,
     pub secret: Option<String>,
+}
+
+#[uniffi::remote(Record)]
+pub struct LegacyVideoRoomPublisherJoinParams {
+    pub room: JanusId,
+    pub optional: LegacyVideoRoomPublisherJoinParamsOptional,
+}
+
+#[uniffi::remote(Record)]
+pub struct LegacyVideoRoomPublisherJoinParamsOptional {
+    #[uniffi(default = None)]
+    pub id: Option<JanusId>,
+    #[uniffi(default = None)]
+    pub display: Option<String>,
+    #[uniffi(default = None)]
+    pub token: Option<String>,
 }
