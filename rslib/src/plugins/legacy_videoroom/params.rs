@@ -6,6 +6,7 @@ pub type LegacyVideoRoomAudioCodecList = params::LegacyVideoRoomAudioCodecList;
 pub type LegacyVideoRoomCreateParams = params::LegacyVideoRoomCreateParams;
 pub type LegacyVideoRoomVideoCodec = params::LegacyVideoRoomVideoCodec;
 pub type LegacyVideoRoomVideoCodecList = params::LegacyVideoRoomVideoCodecList;
+pub type LegacyVideoRoomKickParams = params::LegacyVideoRoomKickParams;
 
 #[uniffi::remote(Record)]
 pub struct LegacyVideoRoomCreateParams {
@@ -106,4 +107,11 @@ pub enum LegacyVideoRoomVideoCodec {
 #[uniffi::remote(Record)]
 pub struct LegacyVideoRoomVideoCodecList {
     codecs: Vec<LegacyVideoRoomVideoCodec>,
+}
+
+#[uniffi::remote(Record)]
+pub struct LegacyVideoRoomKickParams {
+    pub room: JanusId,
+    pub participant: JanusId,
+    pub secret: Option<String>,
 }

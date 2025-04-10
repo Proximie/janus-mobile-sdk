@@ -9,6 +9,7 @@ use jarust::plugins::legacy_video_room::events::PluginEvent;
 use jarust::plugins::legacy_video_room::handle::LegacyVideoRoomHandle as JaLegacyVideoRoomHandle;
 use jarust::plugins::legacy_video_room::params::LegacyVideoRoomCreateParams;
 use jarust::plugins::legacy_video_room::params::LegacyVideoRoomExistsParams;
+use jarust::plugins::legacy_video_room::params::LegacyVideoRoomKickParams;
 use jarust::plugins::legacy_video_room::responses::LegacyVideoRoomCreatedRsp;
 use serde_json::Value;
 use std::fmt::Debug;
@@ -96,15 +97,28 @@ impl LegacyVideoRoomHandle {
 
     pub async fn exist(
         &self,
-        room_id: JanusId,
+        room: JanusId,
         timeout: Duration,
     ) -> Result<bool, JanusGatewayCommunicationError> {
         match self
             .inner
-            .exists(LegacyVideoRoomExistsParams { room: room_id }, timeout)
+            .exists(LegacyVideoRoomExistsParams { room }, timeout)
             .await
         {
             Ok(rsp) => Ok(rsp),
+            Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            }),
+        }
+    }
+
+    pub async fn kick(
+        &self,
+        params: LegacyVideoRoomKickParams,
+        timeout: Duration,
+    ) -> Result<(), JanusGatewayCommunicationError> {
+        match self.inner.kick(params, timeout).await {
+            Ok(_) => Ok(()),
             Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
                 reason: why.to_string(),
             }),
