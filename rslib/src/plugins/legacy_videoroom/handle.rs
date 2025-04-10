@@ -16,6 +16,7 @@ use jarust::plugins::legacy_video_room::params::LegacyVideoRoomPublisherJoinPara
 use jarust::plugins::legacy_video_room::params::LegacyVideoRoomSubscriberConfigureParams;
 use jarust::plugins::legacy_video_room::params::LegacyVideoRoomSubscriberJoinParams;
 use jarust::plugins::legacy_video_room::responses::LegacyVideoRoomCreatedRsp;
+use jarust::plugins::legacy_video_room::responses::LegacyVideoRoomPublisher;
 use serde_json::Value;
 use std::fmt::Debug;
 use std::sync::Mutex;
@@ -75,7 +76,65 @@ impl LegacyVideoRoomHandle {
                             cb.on_legacy_video_room_other(data);
                         }
                     }
-                    _ => {}
+                    PluginEvent::LegacyVideoRoomEvent(LegacyVideoRoomEvent::RoomJoined {
+                        id,
+                        room,
+                        description,
+                        private_id,
+                        publishers,
+                        jsep,
+                    }) => {
+                        cb.on_legacy_video_room_joined(
+                            id,
+                            room,
+                            description,
+                            private_id,
+                            publishers,
+                            jsep,
+                        );
+                    }
+                    PluginEvent::LegacyVideoRoomEvent(LegacyVideoRoomEvent::Configured {
+                        room,
+                        jsep,
+                    }) => {
+                        cb.on_legacy_video_room_configured(room, jsep);
+                    }
+                    PluginEvent::LegacyVideoRoomEvent(
+                        LegacyVideoRoomEvent::SubscriberAttached {
+                            id,
+                            room,
+                            display,
+                            jsep,
+                        },
+                    ) => {
+                        cb.on_legacy_video_room_subscriber_attached(id, room, display, jsep);
+                    }
+                    PluginEvent::LegacyVideoRoomEvent(LegacyVideoRoomEvent::SlowLink) => {
+                        cb.on_legacy_video_room_slow_link();
+                    }
+                    PluginEvent::LegacyVideoRoomEvent(LegacyVideoRoomEvent::Unpublished {
+                        room,
+                        unpublished,
+                    }) => {
+                        cb.on_legacy_video_room_unpublished(room, unpublished);
+                    }
+                    PluginEvent::LegacyVideoRoomEvent(
+                        LegacyVideoRoomEvent::SubscriberStarted { room, started },
+                    ) => {
+                        cb.on_legacy_video_room_subscriber_started(room, started);
+                    }
+                    PluginEvent::LegacyVideoRoomEvent(LegacyVideoRoomEvent::Leaving {
+                        room,
+                        reason,
+                    }) => {
+                        cb.on_legacy_video_room_leaving(room, reason);
+                    }
+                    PluginEvent::LegacyVideoRoomEvent(LegacyVideoRoomEvent::Kicked {
+                        room,
+                        participant,
+                    }) => {
+                        cb.on_legacy_video_room_kicked(room, participant);
+                    }
                 }
             }
         });
@@ -222,4 +281,27 @@ pub trait LegacyVideoRoomHandleCallback: Send + Sync + Debug {
     fn on_legacy_video_room_other(&self, data: Vec<u8>);
     fn on_legacy_video_room_handle_event(&self, event: GenericEvent);
     fn on_legacy_video_room_error(&self, error_code: u16, error: String);
+
+    fn on_legacy_video_room_joined(
+        &self,
+        id: JanusId,
+        room: JanusId,
+        description: Option<String>,
+        private_id: u64,
+        publishers: Vec<LegacyVideoRoomPublisher>,
+        jsep: Option<Jsep>,
+    );
+    fn on_legacy_video_room_configured(&self, room: JanusId, jsep: Option<Jsep>);
+    fn on_legacy_video_room_subscriber_attached(
+        &self,
+        id: JanusId,
+        room: JanusId,
+        display: Option<String>,
+        jsep: Jsep,
+    );
+    fn on_legacy_video_room_slow_link(&self);
+    fn on_legacy_video_room_unpublished(&self, room: JanusId, unpublished: JanusId);
+    fn on_legacy_video_room_subscriber_started(&self, room: JanusId, started: String);
+    fn on_legacy_video_room_leaving(&self, room: JanusId, reason: String);
+    fn on_legacy_video_room_kicked(&self, room: JanusId, participant: JanusId);
 }
