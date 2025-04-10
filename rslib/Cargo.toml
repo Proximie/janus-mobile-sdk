@@ -34,6 +34,7 @@ features = [
     "echo-test-plugin",
     "audio-bridge-plugin",
     "video-room-plugin",
+    "legacy-video-room-plugin",
     "ffi-compatible",
     "__plugin-expiremental",
 ]
