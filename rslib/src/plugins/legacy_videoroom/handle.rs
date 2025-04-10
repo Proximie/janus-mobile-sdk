@@ -3,9 +3,13 @@ use crate::error::JanusGatewayCommunicationError;
 use crate::protocol::Candidate;
 use crate::protocol::GenericEvent;
 use crate::protocol::Jsep;
+use jarust::plugins::JanusId;
 use jarust::plugins::legacy_video_room::events::LegacyVideoRoomEvent;
 use jarust::plugins::legacy_video_room::events::PluginEvent;
 use jarust::plugins::legacy_video_room::handle::LegacyVideoRoomHandle as JaLegacyVideoRoomHandle;
+use jarust::plugins::legacy_video_room::params::LegacyVideoRoomCreateParams;
+use jarust::plugins::legacy_video_room::params::LegacyVideoRoomExistsParams;
+use jarust::plugins::legacy_video_room::responses::LegacyVideoRoomCreatedRsp;
 use serde_json::Value;
 use std::fmt::Debug;
 use std::sync::Mutex;
@@ -75,6 +79,36 @@ impl LegacyVideoRoomHandle {
         }
 
         self.is_event_loop_running.store(true, Ordering::Relaxed);
+    }
+
+    pub async fn create_room(
+        &self,
+        params: LegacyVideoRoomCreateParams,
+        timeout: Duration,
+    ) -> Result<LegacyVideoRoomCreatedRsp, JanusGatewayCommunicationError> {
+        match self.inner.create_room(params, timeout).await {
+            Ok(rsp) => Ok(rsp),
+            Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            }),
+        }
+    }
+
+    pub async fn exist(
+        &self,
+        room_id: JanusId,
+        timeout: Duration,
+    ) -> Result<bool, JanusGatewayCommunicationError> {
+        match self
+            .inner
+            .exists(LegacyVideoRoomExistsParams { room: room_id }, timeout)
+            .await
+        {
+            Ok(rsp) => Ok(rsp),
+            Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            }),
+        }
     }
 }
 

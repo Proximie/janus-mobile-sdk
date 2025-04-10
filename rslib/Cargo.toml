@@ -29,7 +29,7 @@ tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 uniffi = { workspace = true, features = ["tokio"] }
 
 [dependencies.jarust]
-version = "1.6.0"
+version = "1.6.1"
 features = [
     "echo-test-plugin",
     "audio-bridge-plugin",
