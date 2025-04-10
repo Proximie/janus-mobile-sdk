@@ -18,6 +18,8 @@ pub type LegacyVideoRoomSubscriberJoinParamsRequired =
     params::LegacyVideoRoomSubscriberJoinParamsRequired;
 pub type LegacyVideoRoomSubscriberJoinParamsOptional =
     params::LegacyVideoRoomSubscriberJoinParamsOptional;
+pub type LegacyVideoRoomSubscriberConfigureParams =
+    params::LegacyVideoRoomSubscriberConfigureParams;
 
 #[uniffi::remote(Record)]
 pub struct LegacyVideoRoomCreateParams {
@@ -191,17 +193,58 @@ pub struct LegacyVideoRoomSubscriberJoinParamsRequired {
 
 #[uniffi::remote(Record)]
 pub struct LegacyVideoRoomSubscriberJoinParamsOptional {
+    #[uniffi(default = None)]
     private_id: Option<u64>,
+    #[uniffi(default = None)]
     close_pc: Option<bool>,
+    #[uniffi(default = None)]
     audio: Option<bool>,
+    #[uniffi(default = None)]
     video: Option<bool>,
+    #[uniffi(default = None)]
     data: Option<bool>,
+    #[uniffi(default = None)]
     offer_audio: Option<bool>,
+    #[uniffi(default = None)]
     offer_video: Option<bool>,
+    #[uniffi(default = None)]
     offer_data: Option<bool>,
+    #[uniffi(default = None)]
     substream: Option<u8>,
+    #[uniffi(default = None)]
     temporal: Option<u8>,
+    #[uniffi(default = None)]
     fallback: Option<u64>,
+    #[uniffi(default = None)]
     spatial_layer: Option<u8>,
+    #[uniffi(default = None)]
     temporal_layer: Option<u8>,
+}
+
+#[uniffi::remote(Record)]
+pub struct LegacyVideoRoomSubscriberConfigureParams {
+    #[uniffi(default = None)]
+    audio: Option<bool>,
+    #[uniffi(default = None)]
+    video: Option<bool>,
+    #[uniffi(default = None)]
+    data: Option<bool>,
+    #[uniffi(default = None)]
+    substream: Option<u8>,
+    #[uniffi(default = None)]
+    temporal: Option<u8>,
+    #[uniffi(default = None)]
+    fallback: Option<u64>,
+    #[uniffi(default = None)]
+    spatial_layer: Option<u8>,
+    #[uniffi(default = None)]
+    temporal_layer: Option<u8>,
+    #[uniffi(default = None)]
+    audio_level_average: Option<u64>,
+    #[uniffi(default = None)]
+    audio_active_packets: Option<u64>,
+    #[uniffi(default = None)]
+    min_delay: Option<u64>,
+    #[uniffi(default = None)]
+    max_delay: Option<u64>,
 }

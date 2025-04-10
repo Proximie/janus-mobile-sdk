@@ -13,6 +13,7 @@ use jarust::plugins::legacy_video_room::params::LegacyVideoRoomKickParams;
 use jarust::plugins::legacy_video_room::params::LegacyVideoRoomPublisherConfigureParams;
 use jarust::plugins::legacy_video_room::params::LegacyVideoRoomPublisherJoinAndConfigureParams;
 use jarust::plugins::legacy_video_room::params::LegacyVideoRoomPublisherJoinParams;
+use jarust::plugins::legacy_video_room::params::LegacyVideoRoomSubscriberConfigureParams;
 use jarust::plugins::legacy_video_room::params::LegacyVideoRoomSubscriberJoinParams;
 use jarust::plugins::legacy_video_room::responses::LegacyVideoRoomCreatedRsp;
 use serde_json::Value;
@@ -180,6 +181,19 @@ impl LegacyVideoRoomHandle {
         timeout: Duration,
     ) -> Result<String, JanusGatewayCommunicationError> {
         match self.inner.subscriber_join(params, timeout).await {
+            Ok(transaction) => Ok(transaction),
+            Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            }),
+        }
+    }
+
+    pub async fn subscriber_configure(
+        &self,
+        params: LegacyVideoRoomSubscriberConfigureParams,
+        timeout: Duration,
+    ) -> Result<String, JanusGatewayCommunicationError> {
+        match self.inner.subscriber_configure(params, timeout).await {
             Ok(transaction) => Ok(transaction),
             Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
                 reason: why.to_string(),
