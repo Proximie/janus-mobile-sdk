@@ -10,6 +10,9 @@ pub type LegacyVideoRoomKickParams = params::LegacyVideoRoomKickParams;
 pub type LegacyVideoRoomPublisherJoinParams = params::LegacyVideoRoomPublisherJoinParams;
 pub type LegacyVideoRoomPublisherJoinParamsOptional =
     params::LegacyVideoRoomPublisherJoinParamsOptional;
+pub type LegacyVideoRoomPublisherConfigureParams = params::LegacyVideoRoomPublisherConfigureParams;
+pub type LegacyVideoRoomPublisherJoinAndConfigureParams =
+    params::LegacyVideoRoomPublisherJoinAndConfigureParams;
 
 #[uniffi::remote(Record)]
 pub struct LegacyVideoRoomCreateParams {
@@ -133,4 +136,38 @@ pub struct LegacyVideoRoomPublisherJoinParamsOptional {
     pub display: Option<String>,
     #[uniffi(default = None)]
     pub token: Option<String>,
+}
+
+#[uniffi::remote(Record)]
+pub struct LegacyVideoRoomPublisherConfigureParams {
+    #[uniffi(default = None)]
+    audio: Option<bool>,
+    #[uniffi(default = None)]
+    video: Option<bool>,
+    #[uniffi(default = None)]
+    data: Option<bool>,
+    #[uniffi(default = None)]
+    bitrate: Option<u64>,
+    #[uniffi(default = None)]
+    keyframe: Option<bool>,
+    #[uniffi(default = None)]
+    record: Option<bool>,
+    #[uniffi(default = None)]
+    filename: Option<String>,
+    #[uniffi(default = None)]
+    display: Option<String>,
+    #[uniffi(default = None)]
+    audio_active_packets: Option<u64>,
+    #[uniffi(default = None)]
+    audio_level_average: Option<u64>,
+    #[uniffi(default = None)]
+    min_delay: Option<u64>,
+    #[uniffi(default = None)]
+    max_delay: Option<u64>,
+}
+
+#[uniffi::remote(Record)]
+pub struct LegacyVideoRoomPublisherJoinAndConfigureParams {
+    pub join_params: LegacyVideoRoomPublisherJoinParams,
+    pub configure_params: LegacyVideoRoomPublisherConfigureParams,
 }
