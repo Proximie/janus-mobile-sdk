@@ -13,6 +13,11 @@ pub type LegacyVideoRoomPublisherJoinParamsOptional =
 pub type LegacyVideoRoomPublisherConfigureParams = params::LegacyVideoRoomPublisherConfigureParams;
 pub type LegacyVideoRoomPublisherJoinAndConfigureParams =
     params::LegacyVideoRoomPublisherJoinAndConfigureParams;
+pub type LegacyVideoRoomSubscriberJoinParams = params::LegacyVideoRoomSubscriberJoinParams;
+pub type LegacyVideoRoomSubscriberJoinParamsRequired =
+    params::LegacyVideoRoomSubscriberJoinParamsRequired;
+pub type LegacyVideoRoomSubscriberJoinParamsOptional =
+    params::LegacyVideoRoomSubscriberJoinParamsOptional;
 
 #[uniffi::remote(Record)]
 pub struct LegacyVideoRoomCreateParams {
@@ -117,25 +122,25 @@ pub struct LegacyVideoRoomVideoCodecList {
 
 #[uniffi::remote(Record)]
 pub struct LegacyVideoRoomKickParams {
-    pub room: JanusId,
-    pub participant: JanusId,
-    pub secret: Option<String>,
+    room: JanusId,
+    participant: JanusId,
+    secret: Option<String>,
 }
 
 #[uniffi::remote(Record)]
 pub struct LegacyVideoRoomPublisherJoinParams {
-    pub room: JanusId,
-    pub optional: LegacyVideoRoomPublisherJoinParamsOptional,
+    room: JanusId,
+    optional: LegacyVideoRoomPublisherJoinParamsOptional,
 }
 
 #[uniffi::remote(Record)]
 pub struct LegacyVideoRoomPublisherJoinParamsOptional {
     #[uniffi(default = None)]
-    pub id: Option<JanusId>,
+    id: Option<JanusId>,
     #[uniffi(default = None)]
-    pub display: Option<String>,
+    display: Option<String>,
     #[uniffi(default = None)]
-    pub token: Option<String>,
+    token: Option<String>,
 }
 
 #[uniffi::remote(Record)]
@@ -168,6 +173,35 @@ pub struct LegacyVideoRoomPublisherConfigureParams {
 
 #[uniffi::remote(Record)]
 pub struct LegacyVideoRoomPublisherJoinAndConfigureParams {
-    pub join_params: LegacyVideoRoomPublisherJoinParams,
-    pub configure_params: LegacyVideoRoomPublisherConfigureParams,
+    join_params: LegacyVideoRoomPublisherJoinParams,
+    configure_params: LegacyVideoRoomPublisherConfigureParams,
+}
+
+#[uniffi::remote(Record)]
+pub struct LegacyVideoRoomSubscriberJoinParams {
+    required: LegacyVideoRoomSubscriberJoinParamsRequired,
+    optional: LegacyVideoRoomSubscriberJoinParamsOptional,
+}
+
+#[uniffi::remote(Record)]
+pub struct LegacyVideoRoomSubscriberJoinParamsRequired {
+    room: JanusId,
+    feed: JanusId,
+}
+
+#[uniffi::remote(Record)]
+pub struct LegacyVideoRoomSubscriberJoinParamsOptional {
+    private_id: Option<u64>,
+    close_pc: Option<bool>,
+    audio: Option<bool>,
+    video: Option<bool>,
+    data: Option<bool>,
+    offer_audio: Option<bool>,
+    offer_video: Option<bool>,
+    offer_data: Option<bool>,
+    substream: Option<u8>,
+    temporal: Option<u8>,
+    fallback: Option<u64>,
+    spatial_layer: Option<u8>,
+    temporal_layer: Option<u8>,
 }
