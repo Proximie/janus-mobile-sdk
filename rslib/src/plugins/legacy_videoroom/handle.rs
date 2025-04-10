@@ -200,6 +200,19 @@ impl LegacyVideoRoomHandle {
             }),
         }
     }
+
+    pub async fn start(
+        &self,
+        jsep: Jsep,
+        timeout: Duration,
+    ) -> Result<String, JanusGatewayCommunicationError> {
+        match self.inner.start(jsep, timeout).await {
+            Ok(transaction) => Ok(transaction),
+            Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            }),
+        }
+    }
 }
 
 base_handle_with_drop_impl!(LegacyVideoRoomHandle);
