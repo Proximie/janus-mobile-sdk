@@ -714,6 +714,39 @@ internal interface UniffiCallbackInterfaceHandleCallbackMethod0 : com.sun.jna.Ca
 internal interface UniffiCallbackInterfaceHandleCallbackMethod1 : com.sun.jna.Callback {
     fun callback(`uniffiHandle`: Long,`event`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
 }
+internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod0 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`data`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod1 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`event`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod2 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`errorCode`: Short,`error`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod3 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`id`: RustBuffer.ByValue,`room`: RustBuffer.ByValue,`description`: RustBuffer.ByValue,`privateId`: Long,`publishers`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod4 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod5 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`id`: RustBuffer.ByValue,`room`: RustBuffer.ByValue,`display`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod6 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod7 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`unpublished`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod8 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`started`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod9 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`reason`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod10 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`participant`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
 internal interface UniffiCallbackInterfaceVideoRoomHandleCallbackMethod0 : com.sun.jna.Callback {
     fun callback(`uniffiHandle`: Long,`event`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
 }
@@ -722,6 +755,21 @@ internal interface UniffiCallbackInterfaceVideoRoomHandleCallbackMethod1 : com.s
 }
 internal interface UniffiCallbackInterfaceVideoRoomHandleCallbackMethod2 : com.sun.jna.Callback {
     fun callback(`uniffiHandle`: Long,`data`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceVideoRoomHandleCallbackMethod3 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`audioCodec`: RustBuffer.ByValue,`videoCodec`: RustBuffer.ByValue,`streams`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceVideoRoomHandleCallbackMethod4 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`id`: RustBuffer.ByValue,`room`: RustBuffer.ByValue,`description`: RustBuffer.ByValue,`privateId`: Long,`publishers`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceVideoRoomHandleCallbackMethod5 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`id`: RustBuffer.ByValue,`room`: RustBuffer.ByValue,`description`: RustBuffer.ByValue,`privateId`: Long,`publishers`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceVideoRoomHandleCallbackMethod6 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`participant`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceVideoRoomHandleCallbackMethod7 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`reason`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
 }
 @Structure.FieldOrder("onResult", "onResultWithJsep", "onRoomJoinedWithJsep", "onRoomJoined", "onParticipantsJoined", "onParticipantsUpdated", "onParticipantLeft", "onHandleEvent", "onAudioBridgeError", "onOther", "uniffiFree")
 internal open class UniffiVTableCallbackInterfaceAudioBridgeHandleCallback(
@@ -813,28 +861,150 @@ internal open class UniffiVTableCallbackInterfaceHandleCallback(
     }
 
 }
-@Structure.FieldOrder("onHandleEvent", "onVideoRoomError", "onOther", "uniffiFree")
+@Structure.FieldOrder("onLegacyVideoRoomOther", "onLegacyVideoRoomHandleEvent", "onLegacyVideoRoomError", "onLegacyVideoRoomJoined", "onLegacyVideoRoomConfigured", "onLegacyVideoRoomSubscriberAttached", "onLegacyVideoRoomSlowLink", "onLegacyVideoRoomUnpublished", "onLegacyVideoRoomSubscriberStarted", "onLegacyVideoRoomLeaving", "onLegacyVideoRoomKicked", "uniffiFree")
+internal open class UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback(
+    @JvmField internal var `onLegacyVideoRoomOther`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod0? = null,
+    @JvmField internal var `onLegacyVideoRoomHandleEvent`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod1? = null,
+    @JvmField internal var `onLegacyVideoRoomError`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod2? = null,
+    @JvmField internal var `onLegacyVideoRoomJoined`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod3? = null,
+    @JvmField internal var `onLegacyVideoRoomConfigured`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod4? = null,
+    @JvmField internal var `onLegacyVideoRoomSubscriberAttached`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod5? = null,
+    @JvmField internal var `onLegacyVideoRoomSlowLink`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod6? = null,
+    @JvmField internal var `onLegacyVideoRoomUnpublished`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod7? = null,
+    @JvmField internal var `onLegacyVideoRoomSubscriberStarted`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod8? = null,
+    @JvmField internal var `onLegacyVideoRoomLeaving`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod9? = null,
+    @JvmField internal var `onLegacyVideoRoomKicked`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod10? = null,
+    @JvmField internal var `uniffiFree`: UniffiCallbackInterfaceFree? = null,
+) : Structure() {
+    class UniffiByValue(
+        `onLegacyVideoRoomOther`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod0? = null,
+        `onLegacyVideoRoomHandleEvent`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod1? = null,
+        `onLegacyVideoRoomError`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod2? = null,
+        `onLegacyVideoRoomJoined`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod3? = null,
+        `onLegacyVideoRoomConfigured`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod4? = null,
+        `onLegacyVideoRoomSubscriberAttached`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod5? = null,
+        `onLegacyVideoRoomSlowLink`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod6? = null,
+        `onLegacyVideoRoomUnpublished`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod7? = null,
+        `onLegacyVideoRoomSubscriberStarted`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod8? = null,
+        `onLegacyVideoRoomLeaving`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod9? = null,
+        `onLegacyVideoRoomKicked`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod10? = null,
+        `uniffiFree`: UniffiCallbackInterfaceFree? = null,
+    ): UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback(`onLegacyVideoRoomOther`,`onLegacyVideoRoomHandleEvent`,`onLegacyVideoRoomError`,`onLegacyVideoRoomJoined`,`onLegacyVideoRoomConfigured`,`onLegacyVideoRoomSubscriberAttached`,`onLegacyVideoRoomSlowLink`,`onLegacyVideoRoomUnpublished`,`onLegacyVideoRoomSubscriberStarted`,`onLegacyVideoRoomLeaving`,`onLegacyVideoRoomKicked`,`uniffiFree`,), Structure.ByValue
+
+   internal fun uniffiSetValue(other: UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback) {
+        `onLegacyVideoRoomOther` = other.`onLegacyVideoRoomOther`
+        `onLegacyVideoRoomHandleEvent` = other.`onLegacyVideoRoomHandleEvent`
+        `onLegacyVideoRoomError` = other.`onLegacyVideoRoomError`
+        `onLegacyVideoRoomJoined` = other.`onLegacyVideoRoomJoined`
+        `onLegacyVideoRoomConfigured` = other.`onLegacyVideoRoomConfigured`
+        `onLegacyVideoRoomSubscriberAttached` = other.`onLegacyVideoRoomSubscriberAttached`
+        `onLegacyVideoRoomSlowLink` = other.`onLegacyVideoRoomSlowLink`
+        `onLegacyVideoRoomUnpublished` = other.`onLegacyVideoRoomUnpublished`
+        `onLegacyVideoRoomSubscriberStarted` = other.`onLegacyVideoRoomSubscriberStarted`
+        `onLegacyVideoRoomLeaving` = other.`onLegacyVideoRoomLeaving`
+        `onLegacyVideoRoomKicked` = other.`onLegacyVideoRoomKicked`
+        `uniffiFree` = other.`uniffiFree`
+    }
+
+}
+@Structure.FieldOrder("onHandleEvent", "onVideoRoomError", "onOther", "onConfigureWithJsep", "onRoomJoined", "onRoomJoinedWithJsep", "onKicked", "onLeaving", "uniffiFree")
 internal open class UniffiVTableCallbackInterfaceVideoRoomHandleCallback(
     @JvmField internal var `onHandleEvent`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod0? = null,
     @JvmField internal var `onVideoRoomError`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod1? = null,
     @JvmField internal var `onOther`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod2? = null,
+    @JvmField internal var `onConfigureWithJsep`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod3? = null,
+    @JvmField internal var `onRoomJoined`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod4? = null,
+    @JvmField internal var `onRoomJoinedWithJsep`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod5? = null,
+    @JvmField internal var `onKicked`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod6? = null,
+    @JvmField internal var `onLeaving`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod7? = null,
     @JvmField internal var `uniffiFree`: UniffiCallbackInterfaceFree? = null,
 ) : Structure() {
     class UniffiByValue(
         `onHandleEvent`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod0? = null,
         `onVideoRoomError`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod1? = null,
         `onOther`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod2? = null,
+        `onConfigureWithJsep`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod3? = null,
+        `onRoomJoined`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod4? = null,
+        `onRoomJoinedWithJsep`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod5? = null,
+        `onKicked`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod6? = null,
+        `onLeaving`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod7? = null,
         `uniffiFree`: UniffiCallbackInterfaceFree? = null,
-    ): UniffiVTableCallbackInterfaceVideoRoomHandleCallback(`onHandleEvent`,`onVideoRoomError`,`onOther`,`uniffiFree`,), Structure.ByValue
+    ): UniffiVTableCallbackInterfaceVideoRoomHandleCallback(`onHandleEvent`,`onVideoRoomError`,`onOther`,`onConfigureWithJsep`,`onRoomJoined`,`onRoomJoinedWithJsep`,`onKicked`,`onLeaving`,`uniffiFree`,), Structure.ByValue
 
    internal fun uniffiSetValue(other: UniffiVTableCallbackInterfaceVideoRoomHandleCallback) {
         `onHandleEvent` = other.`onHandleEvent`
         `onVideoRoomError` = other.`onVideoRoomError`
         `onOther` = other.`onOther`
+        `onConfigureWithJsep` = other.`onConfigureWithJsep`
+        `onRoomJoined` = other.`onRoomJoined`
+        `onRoomJoinedWithJsep` = other.`onRoomJoinedWithJsep`
+        `onKicked` = other.`onKicked`
+        `onLeaving` = other.`onLeaving`
         `uniffiFree` = other.`uniffiFree`
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1164,6 +1334,46 @@ fun uniffi_janus_gateway_checksum_method_handle_trickle_candidates(
 ): Short
 fun uniffi_janus_gateway_checksum_method_handle_trickle_single_candidate(
 ): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_complete_trickle(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_create_room(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_detach(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_exist(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_fire_and_forget(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_fire_and_forget_with_jsep(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_hangup(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_kick(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_publisher_configure(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_publisher_join(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_publisher_join_and_configure(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_send_waiton_ack(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_send_waiton_ack_with_jsep(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_send_waiton_result(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_start(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_start_event_loop(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_subscriber_configure(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_subscriber_join(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_trickle_candidates(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_trickle_single_candidate(
+): Short
 fun uniffi_janus_gateway_checksum_method_session_attach(
 ): Short
 fun uniffi_janus_gateway_checksum_method_session_attach_audio_bridge(
@@ -1187,6 +1397,8 @@ fun uniffi_janus_gateway_checksum_method_videoroomhandle_fire_and_forget(
 fun uniffi_janus_gateway_checksum_method_videoroomhandle_fire_and_forget_with_jsep(
 ): Short
 fun uniffi_janus_gateway_checksum_method_videoroomhandle_hangup(
+): Short
+fun uniffi_janus_gateway_checksum_method_videoroomhandle_publisher_join_and_configure(
 ): Short
 fun uniffi_janus_gateway_checksum_method_videoroomhandle_send_waiton_ack(
 ): Short
@@ -1234,11 +1446,43 @@ fun uniffi_janus_gateway_checksum_method_handlecallback_on_plugin_event(
 ): Short
 fun uniffi_janus_gateway_checksum_method_handlecallback_on_handle_event(
 ): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_other(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_handle_event(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_error(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_joined(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_configured(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_attached(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_slow_link(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_unpublished(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_started(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_leaving(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_kicked(
+): Short
 fun uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_handle_event(
 ): Short
 fun uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_video_room_error(
 ): Short
 fun uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_other(
+): Short
+fun uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_configure_with_jsep(
+): Short
+fun uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_room_joined(
+): Short
+fun uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_room_joined_with_jsep(
+): Short
+fun uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_kicked(
+): Short
+fun uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_leaving(
 ): Short
 fun ffi_janus_gateway_uniffi_contract_version(
 ): Int
@@ -1281,6 +1525,7 @@ internal interface UniffiLib : Library {
             uniffiCallbackInterfaceAudioBridgeHandleCallback.register(lib)
             uniffiCallbackInterfaceEchotestHandleCallback.register(lib)
             uniffiCallbackInterfaceHandleCallback.register(lib)
+            uniffiCallbackInterfaceLegacyVideoRoomHandleCallback.register(lib)
             uniffiCallbackInterfaceVideoRoomHandleCallback.register(lib)
             // Loading of library with integrity check done.
             lib
@@ -1397,6 +1642,50 @@ fun uniffi_janus_gateway_fn_method_handle_trickle_candidates(`ptr`: Pointer,`can
 ): Long
 fun uniffi_janus_gateway_fn_method_handle_trickle_single_candidate(`ptr`: Pointer,`candidate`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
 ): Long
+fun uniffi_janus_gateway_fn_clone_legacyvideoroomhandle(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+): Pointer
+fun uniffi_janus_gateway_fn_free_legacyvideoroomhandle(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+): Unit
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_complete_trickle(`ptr`: Pointer,`timeout`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_create_room(`ptr`: Pointer,`params`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_detach(`ptr`: Pointer,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_exist(`ptr`: Pointer,`room`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_fire_and_forget(`ptr`: Pointer,`data`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_fire_and_forget_with_jsep(`ptr`: Pointer,`data`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_hangup(`ptr`: Pointer,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_kick(`ptr`: Pointer,`params`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_publisher_configure(`ptr`: Pointer,`params`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_publisher_join(`ptr`: Pointer,`params`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_publisher_join_and_configure(`ptr`: Pointer,`params`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_send_waiton_ack(`ptr`: Pointer,`data`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_send_waiton_ack_with_jsep(`ptr`: Pointer,`data`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_send_waiton_result(`ptr`: Pointer,`data`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_start(`ptr`: Pointer,`jsep`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_start_event_loop(`ptr`: Pointer,`cb`: Long,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_subscriber_configure(`ptr`: Pointer,`params`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_subscriber_join(`ptr`: Pointer,`params`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_trickle_candidates(`ptr`: Pointer,`candidates`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_legacyvideoroomhandle_trickle_single_candidate(`ptr`: Pointer,`candidate`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+): Long
 fun uniffi_janus_gateway_fn_clone_session(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
 ): Pointer
 fun uniffi_janus_gateway_fn_free_session(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
@@ -1429,6 +1718,8 @@ fun uniffi_janus_gateway_fn_method_videoroomhandle_fire_and_forget_with_jsep(`pt
 ): Long
 fun uniffi_janus_gateway_fn_method_videoroomhandle_hangup(`ptr`: Pointer,
 ): Long
+fun uniffi_janus_gateway_fn_method_videoroomhandle_publisher_join_and_configure(`ptr`: Pointer,`params`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
+): Long
 fun uniffi_janus_gateway_fn_method_videoroomhandle_send_waiton_ack(`ptr`: Pointer,`data`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
 ): Long
 fun uniffi_janus_gateway_fn_method_videoroomhandle_send_waiton_ack_with_jsep(`ptr`: Pointer,`data`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`timeout`: RustBuffer.ByValue,
@@ -1446,6 +1737,8 @@ fun uniffi_janus_gateway_fn_init_callback_vtable_audiobridgehandlecallback(`vtab
 fun uniffi_janus_gateway_fn_init_callback_vtable_echotesthandlecallback(`vtable`: UniffiVTableCallbackInterfaceEchotestHandleCallback,
 ): Unit
 fun uniffi_janus_gateway_fn_init_callback_vtable_handlecallback(`vtable`: UniffiVTableCallbackInterfaceHandleCallback,
+): Unit
+fun uniffi_janus_gateway_fn_init_callback_vtable_legacyvideoroomhandlecallback(`vtable`: UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback,
 ): Unit
 fun uniffi_janus_gateway_fn_init_callback_vtable_videoroomhandlecallback(`vtable`: UniffiVTableCallbackInterfaceVideoRoomHandleCallback,
 ): Unit
@@ -1717,6 +2010,66 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_janus_gateway_checksum_method_handle_trickle_single_candidate() != 48289.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_complete_trickle() != 53978.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_create_room() != 35272.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_detach() != 7403.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_exist() != 53200.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_fire_and_forget() != 43483.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_fire_and_forget_with_jsep() != 46681.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_hangup() != 43624.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_kick() != 30177.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_publisher_configure() != 56682.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_publisher_join() != 10072.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_publisher_join_and_configure() != 61577.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_send_waiton_ack() != 40893.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_send_waiton_ack_with_jsep() != 64898.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_send_waiton_result() != 60224.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_start() != 38038.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_start_event_loop() != 2051.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_subscriber_configure() != 52781.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_subscriber_join() != 51090.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_trickle_candidates() != 23169.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_trickle_single_candidate() != 64622.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_janus_gateway_checksum_method_session_attach() != 16557.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1751,6 +2104,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_janus_gateway_checksum_method_videoroomhandle_hangup() != 22972.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_videoroomhandle_publisher_join_and_configure() != 39661.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_janus_gateway_checksum_method_videoroomhandle_send_waiton_ack() != 5152.toShort()) {
@@ -1822,6 +2178,39 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_janus_gateway_checksum_method_handlecallback_on_handle_event() != 1626.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_other() != 27677.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_handle_event() != 17605.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_error() != 11633.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_joined() != 42543.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_configured() != 3953.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_attached() != 45217.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_slow_link() != 3293.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_unpublished() != 14908.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_started() != 8038.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_leaving() != 31440.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_kicked() != 36262.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_handle_event() != 12084.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1829,6 +2218,21 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_other() != 28224.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_configure_with_jsep() != 32059.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_room_joined() != 7821.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_room_joined_with_jsep() != 63756.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_kicked() != 15552.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_leaving() != 46877.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
 }
@@ -4291,6 +4695,696 @@ public object FfiConverterTypeHandle: FfiConverter<Handle, Pointer> {
 //
 
 
+public interface LegacyVideoRoomHandleInterface {
+    
+    suspend fun `completeTrickle`(`timeout`: java.time.Duration)
+    
+    suspend fun `createRoom`(`params`: LegacyVideoRoomCreateParams, `timeout`: java.time.Duration): LegacyVideoRoomCreatedRsp
+    
+    suspend fun `detach`()
+    
+    suspend fun `exist`(`room`: JanusId, `timeout`: java.time.Duration): kotlin.Boolean
+    
+    suspend fun `fireAndForget`(`data`: kotlin.ByteArray)
+    
+    suspend fun `fireAndForgetWithJsep`(`data`: kotlin.ByteArray, `jsep`: Jsep)
+    
+    suspend fun `hangup`()
+    
+    suspend fun `kick`(`params`: LegacyVideoRoomKickParams, `timeout`: java.time.Duration)
+    
+    suspend fun `publisherConfigure`(`params`: LegacyVideoRoomPublisherConfigureParams, `timeout`: java.time.Duration): kotlin.String
+    
+    suspend fun `publisherJoin`(`params`: LegacyVideoRoomPublisherJoinParams, `jsep`: Jsep?, `timeout`: java.time.Duration): kotlin.String
+    
+    suspend fun `publisherJoinAndConfigure`(`params`: LegacyVideoRoomPublisherJoinAndConfigureParams, `jsep`: Jsep?, `timeout`: java.time.Duration): kotlin.String
+    
+    suspend fun `sendWaitonAck`(`data`: kotlin.ByteArray, `timeout`: java.time.Duration): kotlin.String
+    
+    suspend fun `sendWaitonAckWithJsep`(`data`: kotlin.ByteArray, `jsep`: Jsep, `timeout`: java.time.Duration): kotlin.String
+    
+    suspend fun `sendWaitonResult`(`data`: kotlin.ByteArray, `timeout`: java.time.Duration): kotlin.ByteArray
+    
+    suspend fun `start`(`jsep`: Jsep, `timeout`: java.time.Duration): kotlin.String
+    
+    suspend fun `startEventLoop`(`cb`: LegacyVideoRoomHandleCallback)
+    
+    suspend fun `subscriberConfigure`(`params`: LegacyVideoRoomSubscriberConfigureParams, `timeout`: java.time.Duration): kotlin.String
+    
+    suspend fun `subscriberJoin`(`params`: LegacyVideoRoomSubscriberJoinParams, `timeout`: java.time.Duration): kotlin.String
+    
+    suspend fun `trickleCandidates`(`candidates`: List<Candidate>, `timeout`: java.time.Duration)
+    
+    suspend fun `trickleSingleCandidate`(`candidate`: Candidate, `timeout`: java.time.Duration)
+    
+    companion object
+}
+
+open class LegacyVideoRoomHandle: Disposable, AutoCloseable, LegacyVideoRoomHandleInterface
+{
+
+    constructor(pointer: Pointer) {
+        this.pointer = pointer
+        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(pointer))
+    }
+
+    /**
+     * This constructor can be used to instantiate a fake object. Only used for tests. Any
+     * attempt to actually use an object constructed this way will fail as there is no
+     * connected Rust object.
+     */
+    @Suppress("UNUSED_PARAMETER")
+    constructor(noPointer: NoPointer) {
+        this.pointer = null
+        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(pointer))
+    }
+
+    protected val pointer: Pointer?
+    protected val cleanable: UniffiCleaner.Cleanable
+
+    private val wasDestroyed = AtomicBoolean(false)
+    private val callCounter = AtomicLong(1)
+
+    override fun destroy() {
+        // Only allow a single call to this method.
+        // TODO: maybe we should log a warning if called more than once?
+        if (this.wasDestroyed.compareAndSet(false, true)) {
+            // This decrement always matches the initial count of 1 given at creation time.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable.clean()
+            }
+        }
+    }
+
+    @Synchronized
+    override fun close() {
+        this.destroy()
+    }
+
+    internal inline fun <R> callWithPointer(block: (ptr: Pointer) -> R): R {
+        // Check and increment the call counter, to keep the object alive.
+        // This needs a compare-and-set retry loop in case of concurrent updates.
+        do {
+            val c = this.callCounter.get()
+            if (c == 0L) {
+                throw IllegalStateException("${this.javaClass.simpleName} object has already been destroyed")
+            }
+            if (c == Long.MAX_VALUE) {
+                throw IllegalStateException("${this.javaClass.simpleName} call counter would overflow")
+            }
+        } while (! this.callCounter.compareAndSet(c, c + 1L))
+        // Now we can safely do the method call without the pointer being freed concurrently.
+        try {
+            return block(this.uniffiClonePointer())
+        } finally {
+            // This decrement always matches the increment we performed above.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable.clean()
+            }
+        }
+    }
+
+    // Use a static inner class instead of a closure so as not to accidentally
+    // capture `this` as part of the cleanable's action.
+    private class UniffiCleanAction(private val pointer: Pointer?) : Runnable {
+        override fun run() {
+            pointer?.let { ptr ->
+                uniffiRustCall { status ->
+                    UniffiLib.INSTANCE.uniffi_janus_gateway_fn_free_legacyvideoroomhandle(ptr, status)
+                }
+            }
+        }
+    }
+
+    fun uniffiClonePointer(): Pointer {
+        return uniffiRustCall() { status ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_clone_legacyvideoroomhandle(pointer!!, status)
+        }
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `completeTrickle`(`timeout`: java.time.Duration) {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_complete_trickle(
+                thisPtr,
+                FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `createRoom`(`params`: LegacyVideoRoomCreateParams, `timeout`: java.time.Duration) : LegacyVideoRoomCreatedRsp {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_create_room(
+                thisPtr,
+                FfiConverterTypeLegacyVideoRoomCreateParams.lower(`params`),FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterTypeLegacyVideoRoomCreatedRsp.lift(it) },
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `detach`() {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_detach(
+                thisPtr,
+                
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `exist`(`room`: JanusId, `timeout`: java.time.Duration) : kotlin.Boolean {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_exist(
+                thisPtr,
+                FfiConverterTypeJanusId.lower(`room`),FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_i8(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_i8(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_i8(future) },
+        // lift function
+        { FfiConverterBoolean.lift(it) },
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `fireAndForget`(`data`: kotlin.ByteArray) {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_fire_and_forget(
+                thisPtr,
+                FfiConverterByteArray.lower(`data`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `fireAndForgetWithJsep`(`data`: kotlin.ByteArray, `jsep`: Jsep) {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_fire_and_forget_with_jsep(
+                thisPtr,
+                FfiConverterByteArray.lower(`data`),FfiConverterTypeJsep.lower(`jsep`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `hangup`() {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_hangup(
+                thisPtr,
+                
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `kick`(`params`: LegacyVideoRoomKickParams, `timeout`: java.time.Duration) {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_kick(
+                thisPtr,
+                FfiConverterTypeLegacyVideoRoomKickParams.lower(`params`),FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `publisherConfigure`(`params`: LegacyVideoRoomPublisherConfigureParams, `timeout`: java.time.Duration) : kotlin.String {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_publisher_configure(
+                thisPtr,
+                FfiConverterTypeLegacyVideoRoomPublisherConfigureParams.lower(`params`),FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterString.lift(it) },
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `publisherJoin`(`params`: LegacyVideoRoomPublisherJoinParams, `jsep`: Jsep?, `timeout`: java.time.Duration) : kotlin.String {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_publisher_join(
+                thisPtr,
+                FfiConverterTypeLegacyVideoRoomPublisherJoinParams.lower(`params`),FfiConverterOptionalTypeJsep.lower(`jsep`),FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterString.lift(it) },
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `publisherJoinAndConfigure`(`params`: LegacyVideoRoomPublisherJoinAndConfigureParams, `jsep`: Jsep?, `timeout`: java.time.Duration) : kotlin.String {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_publisher_join_and_configure(
+                thisPtr,
+                FfiConverterTypeLegacyVideoRoomPublisherJoinAndConfigureParams.lower(`params`),FfiConverterOptionalTypeJsep.lower(`jsep`),FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterString.lift(it) },
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `sendWaitonAck`(`data`: kotlin.ByteArray, `timeout`: java.time.Duration) : kotlin.String {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_send_waiton_ack(
+                thisPtr,
+                FfiConverterByteArray.lower(`data`),FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterString.lift(it) },
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `sendWaitonAckWithJsep`(`data`: kotlin.ByteArray, `jsep`: Jsep, `timeout`: java.time.Duration) : kotlin.String {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_send_waiton_ack_with_jsep(
+                thisPtr,
+                FfiConverterByteArray.lower(`data`),FfiConverterTypeJsep.lower(`jsep`),FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterString.lift(it) },
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `sendWaitonResult`(`data`: kotlin.ByteArray, `timeout`: java.time.Duration) : kotlin.ByteArray {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_send_waiton_result(
+                thisPtr,
+                FfiConverterByteArray.lower(`data`),FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterByteArray.lift(it) },
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `start`(`jsep`: Jsep, `timeout`: java.time.Duration) : kotlin.String {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_start(
+                thisPtr,
+                FfiConverterTypeJsep.lower(`jsep`),FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterString.lift(it) },
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `startEventLoop`(`cb`: LegacyVideoRoomHandleCallback) {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_start_event_loop(
+                thisPtr,
+                FfiConverterTypeLegacyVideoRoomHandleCallback.lower(`cb`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        UniffiNullRustCallStatusErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `subscriberConfigure`(`params`: LegacyVideoRoomSubscriberConfigureParams, `timeout`: java.time.Duration) : kotlin.String {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_subscriber_configure(
+                thisPtr,
+                FfiConverterTypeLegacyVideoRoomSubscriberConfigureParams.lower(`params`),FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterString.lift(it) },
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `subscriberJoin`(`params`: LegacyVideoRoomSubscriberJoinParams, `timeout`: java.time.Duration) : kotlin.String {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_subscriber_join(
+                thisPtr,
+                FfiConverterTypeLegacyVideoRoomSubscriberJoinParams.lower(`params`),FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterString.lift(it) },
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `trickleCandidates`(`candidates`: List<Candidate>, `timeout`: java.time.Duration) {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_trickle_candidates(
+                thisPtr,
+                FfiConverterSequenceTypeCandidate.lower(`candidates`),FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `trickleSingleCandidate`(`candidate`: Candidate, `timeout`: java.time.Duration) {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_legacyvideoroomhandle_trickle_single_candidate(
+                thisPtr,
+                FfiConverterTypeCandidate.lower(`candidate`),FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+
+    
+    
+    companion object
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomHandle: FfiConverter<LegacyVideoRoomHandle, Pointer> {
+
+    override fun lower(value: LegacyVideoRoomHandle): Pointer {
+        return value.uniffiClonePointer()
+    }
+
+    override fun lift(value: Pointer): LegacyVideoRoomHandle {
+        return LegacyVideoRoomHandle(value)
+    }
+
+    override fun read(buf: ByteBuffer): LegacyVideoRoomHandle {
+        // The Rust code always writes pointers as 8 bytes, and will
+        // fail to compile if they don't fit.
+        return lift(Pointer(buf.getLong()))
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomHandle) = 8UL
+
+    override fun write(value: LegacyVideoRoomHandle, buf: ByteBuffer) {
+        // The Rust code always expects pointers written as 8 bytes,
+        // and will fail to compile if they don't fit.
+        buf.putLong(Pointer.nativeValue(lower(value)))
+    }
+}
+
+
+// This template implements a class for working with a Rust struct via a Pointer/Arc<T>
+// to the live Rust struct on the other side of the FFI.
+//
+// Each instance implements core operations for working with the Rust `Arc<T>` and the
+// Kotlin Pointer to work with the live Rust struct on the other side of the FFI.
+//
+// There's some subtlety here, because we have to be careful not to operate on a Rust
+// struct after it has been dropped, and because we must expose a public API for freeing
+// theq Kotlin wrapper object in lieu of reliable finalizers. The core requirements are:
+//
+//   * Each instance holds an opaque pointer to the underlying Rust struct.
+//     Method calls need to read this pointer from the object's state and pass it in to
+//     the Rust FFI.
+//
+//   * When an instance is no longer needed, its pointer should be passed to a
+//     special destructor function provided by the Rust FFI, which will drop the
+//     underlying Rust struct.
+//
+//   * Given an instance, calling code is expected to call the special
+//     `destroy` method in order to free it after use, either by calling it explicitly
+//     or by using a higher-level helper like the `use` method. Failing to do so risks
+//     leaking the underlying Rust struct.
+//
+//   * We can't assume that calling code will do the right thing, and must be prepared
+//     to handle Kotlin method calls executing concurrently with or even after a call to
+//     `destroy`, and to handle multiple (possibly concurrent!) calls to `destroy`.
+//
+//   * We must never allow Rust code to operate on the underlying Rust struct after
+//     the destructor has been called, and must never call the destructor more than once.
+//     Doing so may trigger memory unsafety.
+//
+//   * To mitigate many of the risks of leaking memory and use-after-free unsafety, a `Cleaner`
+//     is implemented to call the destructor when the Kotlin object becomes unreachable.
+//     This is done in a background thread. This is not a panacea, and client code should be aware that
+//      1. the thread may starve if some there are objects that have poorly performing
+//     `drop` methods or do significant work in their `drop` methods.
+//      2. the thread is shared across the whole library. This can be tuned by using `android_cleaner = true`,
+//         or `android = true` in the [`kotlin` section of the `uniffi.toml` file](https://mozilla.github.io/uniffi-rs/kotlin/configuration.html).
+//
+// If we try to implement this with mutual exclusion on access to the pointer, there is the
+// possibility of a race between a method call and a concurrent call to `destroy`:
+//
+//    * Thread A starts a method call, reads the value of the pointer, but is interrupted
+//      before it can pass the pointer over the FFI to Rust.
+//    * Thread B calls `destroy` and frees the underlying Rust struct.
+//    * Thread A resumes, passing the already-read pointer value to Rust and triggering
+//      a use-after-free.
+//
+// One possible solution would be to use a `ReadWriteLock`, with each method call taking
+// a read lock (and thus allowed to run concurrently) and the special `destroy` method
+// taking a write lock (and thus blocking on live method calls). However, we aim not to
+// generate methods with any hidden blocking semantics, and a `destroy` method that might
+// block if called incorrectly seems to meet that bar.
+//
+// So, we achieve our goals by giving each instance an associated `AtomicLong` counter to track
+// the number of in-flight method calls, and an `AtomicBoolean` flag to indicate whether `destroy`
+// has been called. These are updated according to the following rules:
+//
+//    * The initial value of the counter is 1, indicating a live object with no in-flight calls.
+//      The initial value for the flag is false.
+//
+//    * At the start of each method call, we atomically check the counter.
+//      If it is 0 then the underlying Rust struct has already been destroyed and the call is aborted.
+//      If it is nonzero them we atomically increment it by 1 and proceed with the method call.
+//
+//    * At the end of each method call, we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+//    * When `destroy` is called, we atomically flip the flag from false to true.
+//      If the flag was already true we silently fail.
+//      Otherwise we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+// Astute readers may observe that this all sounds very similar to the way that Rust's `Arc<T>` works,
+// and indeed it is, with the addition of a flag to guard against multiple calls to `destroy`.
+//
+// The overall effect is that the underlying Rust struct is destroyed only when `destroy` has been
+// called *and* all in-flight method calls have completed, avoiding violating any of the expectations
+// of the underlying Rust code.
+//
+// This makes a cleaner a better alternative to _not_ calling `destroy()` as
+// and when the object is finished with, but the abstraction is not perfect: if the Rust object's `drop`
+// method is slow, and/or there are many objects to cleanup, and it's on a low end Android device, then the cleaner
+// thread may be starved, and the app will leak memory.
+//
+// In this case, `destroy`ing manually may be a better solution.
+//
+// The cleaner can live side by side with the manual calling of `destroy`. In the order of responsiveness, uniffi objects
+// with Rust peers are reclaimed:
+//
+// 1. By calling the `destroy` method of the object, which calls `rustObject.free()`. If that doesn't happen:
+// 2. When the object becomes unreachable, AND the Cleaner thread gets to call `rustObject.free()`. If the thread is starved then:
+// 3. The memory is reclaimed when the process terminates.
+//
+// [1] https://stackoverflow.com/questions/24376768/can-java-finalize-an-object-when-it-is-still-in-scope/24380219
+//
+
+
 public interface SessionInterface {
     
     suspend fun `attach`(`pluginId`: kotlin.String, `timeout`: java.time.Duration): Handle
@@ -4645,6 +5739,8 @@ public interface VideoRoomHandleInterface {
     
     suspend fun `hangup`()
     
+    suspend fun `publisherJoinAndConfigure`(`params`: VideoRoomPublisherJoinAndConfigureParams, `jsep`: Jsep?, `timeout`: java.time.Duration): kotlin.String
+    
     suspend fun `sendWaitonAck`(`data`: kotlin.ByteArray, `timeout`: java.time.Duration): kotlin.String
     
     suspend fun `sendWaitonAckWithJsep`(`data`: kotlin.ByteArray, `jsep`: Jsep, `timeout`: java.time.Duration): kotlin.String
@@ -4889,6 +5985,27 @@ open class VideoRoomHandle: Disposable, AutoCloseable, VideoRoomHandleInterface
         // lift function
         { Unit },
         
+        // Error FFI converter
+        JanusGatewayCommunicationException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayCommunicationException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `publisherJoinAndConfigure`(`params`: VideoRoomPublisherJoinAndConfigureParams, `jsep`: Jsep?, `timeout`: java.time.Duration) : kotlin.String {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_videoroomhandle_publisher_join_and_configure(
+                thisPtr,
+                FfiConverterTypeVideoRoomPublisherJoinAndConfigureParams.lower(`params`),FfiConverterOptionalTypeJsep.lower(`jsep`),FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterString.lift(it) },
         // Error FFI converter
         JanusGatewayCommunicationException.ErrorHandler,
     )
@@ -5713,6 +6830,82 @@ public object FfiConverterTypeConfig: FfiConverterRustBuffer<Config> {
 
 
 
+data class ConfiguredStream (
+    val `mediaType`: kotlin.String, 
+    val `mindex`: kotlin.ULong, 
+    val `mid`: kotlin.String, 
+    val `disabled`: kotlin.Boolean, 
+    val `codec`: kotlin.String, 
+    val `stereo`: kotlin.Boolean, 
+    val `fec`: kotlin.Boolean, 
+    val `dtx`: kotlin.Boolean, 
+    val `h264Profile`: kotlin.String?, 
+    val `vp9Profile`: kotlin.String?, 
+    val `moderated`: kotlin.Boolean, 
+    val `simulcast`: kotlin.Boolean, 
+    val `svc`: kotlin.Boolean
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeConfiguredStream: FfiConverterRustBuffer<ConfiguredStream> {
+    override fun read(buf: ByteBuffer): ConfiguredStream {
+        return ConfiguredStream(
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ConfiguredStream) = (
+            FfiConverterString.allocationSize(value.`mediaType`) +
+            FfiConverterULong.allocationSize(value.`mindex`) +
+            FfiConverterString.allocationSize(value.`mid`) +
+            FfiConverterBoolean.allocationSize(value.`disabled`) +
+            FfiConverterString.allocationSize(value.`codec`) +
+            FfiConverterBoolean.allocationSize(value.`stereo`) +
+            FfiConverterBoolean.allocationSize(value.`fec`) +
+            FfiConverterBoolean.allocationSize(value.`dtx`) +
+            FfiConverterOptionalString.allocationSize(value.`h264Profile`) +
+            FfiConverterOptionalString.allocationSize(value.`vp9Profile`) +
+            FfiConverterBoolean.allocationSize(value.`moderated`) +
+            FfiConverterBoolean.allocationSize(value.`simulcast`) +
+            FfiConverterBoolean.allocationSize(value.`svc`)
+    )
+
+    override fun write(value: ConfiguredStream, buf: ByteBuffer) {
+            FfiConverterString.write(value.`mediaType`, buf)
+            FfiConverterULong.write(value.`mindex`, buf)
+            FfiConverterString.write(value.`mid`, buf)
+            FfiConverterBoolean.write(value.`disabled`, buf)
+            FfiConverterString.write(value.`codec`, buf)
+            FfiConverterBoolean.write(value.`stereo`, buf)
+            FfiConverterBoolean.write(value.`fec`, buf)
+            FfiConverterBoolean.write(value.`dtx`, buf)
+            FfiConverterOptionalString.write(value.`h264Profile`, buf)
+            FfiConverterOptionalString.write(value.`vp9Profile`, buf)
+            FfiConverterBoolean.write(value.`moderated`, buf)
+            FfiConverterBoolean.write(value.`simulcast`, buf)
+            FfiConverterBoolean.write(value.`svc`, buf)
+    }
+}
+
+
+
 data class EchoTestStartParams (
     val `audio`: kotlin.Boolean? = null, 
     val `video`: kotlin.Boolean? = null, 
@@ -5841,6 +7034,710 @@ public object FfiConverterTypeJsep: FfiConverterRustBuffer<Jsep> {
 
 
 
+data class LegacyVideoRoomAudioCodecList (
+    val `codecs`: List<LegacyVideoRoomAudioCodec>
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomAudioCodecList: FfiConverterRustBuffer<LegacyVideoRoomAudioCodecList> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomAudioCodecList {
+        return LegacyVideoRoomAudioCodecList(
+            FfiConverterSequenceTypeLegacyVideoRoomAudioCodec.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomAudioCodecList) = (
+            FfiConverterSequenceTypeLegacyVideoRoomAudioCodec.allocationSize(value.`codecs`)
+    )
+
+    override fun write(value: LegacyVideoRoomAudioCodecList, buf: ByteBuffer) {
+            FfiConverterSequenceTypeLegacyVideoRoomAudioCodec.write(value.`codecs`, buf)
+    }
+}
+
+
+
+data class LegacyVideoRoomCreateParams (
+    val `adminKey`: kotlin.String? = null, 
+    val `room`: JanusId? = null, 
+    val `description`: kotlin.String? = null, 
+    val `isPrivate`: kotlin.Boolean? = null, 
+    val `allowed`: List<kotlin.String>? = null, 
+    val `secret`: kotlin.String? = null, 
+    val `pin`: kotlin.String? = null, 
+    val `requirePvtid`: kotlin.Boolean? = null, 
+    val `signedTokens`: kotlin.Boolean? = null, 
+    val `bitrate`: kotlin.ULong? = null, 
+    val `bitrateCap`: kotlin.Boolean? = null, 
+    val `firFreq`: kotlin.ULong? = null, 
+    val `publishers`: kotlin.ULong? = null, 
+    val `audiocodec`: LegacyVideoRoomAudioCodecList? = null, 
+    val `videocodec`: LegacyVideoRoomVideoCodecList? = null, 
+    val `vp9Profile`: kotlin.String? = null, 
+    val `h264Profile`: kotlin.String? = null, 
+    val `opusFec`: kotlin.Boolean? = null, 
+    val `opusDtx`: kotlin.Boolean? = null, 
+    val `audiolevelExt`: kotlin.Boolean? = null, 
+    val `audiolevelEvent`: kotlin.Boolean? = null, 
+    val `audioActivePackets`: kotlin.ULong? = null, 
+    val `audioLevelAverage`: kotlin.ULong? = null, 
+    val `videoorientExt`: kotlin.Boolean? = null, 
+    val `playoutdelayExt`: kotlin.Boolean? = null, 
+    val `transportWideCcExt`: kotlin.Boolean? = null, 
+    val `record`: kotlin.Boolean? = null, 
+    val `recordDir`: kotlin.String? = null, 
+    val `lockRecord`: kotlin.Boolean? = null, 
+    val `permanent`: kotlin.Boolean? = null, 
+    val `notifyJoining`: kotlin.Boolean? = null, 
+    val `requireE2ee`: kotlin.Boolean? = null, 
+    val `dummyPublisher`: kotlin.Boolean? = null, 
+    val `dummyStreams`: kotlin.Boolean? = null
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomCreateParams: FfiConverterRustBuffer<LegacyVideoRoomCreateParams> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomCreateParams {
+        return LegacyVideoRoomCreateParams(
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalTypeJanusId.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalSequenceString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalTypeLegacyVideoRoomAudioCodecList.read(buf),
+            FfiConverterOptionalTypeLegacyVideoRoomVideoCodecList.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomCreateParams) = (
+            FfiConverterOptionalString.allocationSize(value.`adminKey`) +
+            FfiConverterOptionalTypeJanusId.allocationSize(value.`room`) +
+            FfiConverterOptionalString.allocationSize(value.`description`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`isPrivate`) +
+            FfiConverterOptionalSequenceString.allocationSize(value.`allowed`) +
+            FfiConverterOptionalString.allocationSize(value.`secret`) +
+            FfiConverterOptionalString.allocationSize(value.`pin`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`requirePvtid`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`signedTokens`) +
+            FfiConverterOptionalULong.allocationSize(value.`bitrate`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`bitrateCap`) +
+            FfiConverterOptionalULong.allocationSize(value.`firFreq`) +
+            FfiConverterOptionalULong.allocationSize(value.`publishers`) +
+            FfiConverterOptionalTypeLegacyVideoRoomAudioCodecList.allocationSize(value.`audiocodec`) +
+            FfiConverterOptionalTypeLegacyVideoRoomVideoCodecList.allocationSize(value.`videocodec`) +
+            FfiConverterOptionalString.allocationSize(value.`vp9Profile`) +
+            FfiConverterOptionalString.allocationSize(value.`h264Profile`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`opusFec`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`opusDtx`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`audiolevelExt`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`audiolevelEvent`) +
+            FfiConverterOptionalULong.allocationSize(value.`audioActivePackets`) +
+            FfiConverterOptionalULong.allocationSize(value.`audioLevelAverage`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`videoorientExt`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`playoutdelayExt`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`transportWideCcExt`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`record`) +
+            FfiConverterOptionalString.allocationSize(value.`recordDir`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`lockRecord`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`permanent`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`notifyJoining`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`requireE2ee`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`dummyPublisher`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`dummyStreams`)
+    )
+
+    override fun write(value: LegacyVideoRoomCreateParams, buf: ByteBuffer) {
+            FfiConverterOptionalString.write(value.`adminKey`, buf)
+            FfiConverterOptionalTypeJanusId.write(value.`room`, buf)
+            FfiConverterOptionalString.write(value.`description`, buf)
+            FfiConverterOptionalBoolean.write(value.`isPrivate`, buf)
+            FfiConverterOptionalSequenceString.write(value.`allowed`, buf)
+            FfiConverterOptionalString.write(value.`secret`, buf)
+            FfiConverterOptionalString.write(value.`pin`, buf)
+            FfiConverterOptionalBoolean.write(value.`requirePvtid`, buf)
+            FfiConverterOptionalBoolean.write(value.`signedTokens`, buf)
+            FfiConverterOptionalULong.write(value.`bitrate`, buf)
+            FfiConverterOptionalBoolean.write(value.`bitrateCap`, buf)
+            FfiConverterOptionalULong.write(value.`firFreq`, buf)
+            FfiConverterOptionalULong.write(value.`publishers`, buf)
+            FfiConverterOptionalTypeLegacyVideoRoomAudioCodecList.write(value.`audiocodec`, buf)
+            FfiConverterOptionalTypeLegacyVideoRoomVideoCodecList.write(value.`videocodec`, buf)
+            FfiConverterOptionalString.write(value.`vp9Profile`, buf)
+            FfiConverterOptionalString.write(value.`h264Profile`, buf)
+            FfiConverterOptionalBoolean.write(value.`opusFec`, buf)
+            FfiConverterOptionalBoolean.write(value.`opusDtx`, buf)
+            FfiConverterOptionalBoolean.write(value.`audiolevelExt`, buf)
+            FfiConverterOptionalBoolean.write(value.`audiolevelEvent`, buf)
+            FfiConverterOptionalULong.write(value.`audioActivePackets`, buf)
+            FfiConverterOptionalULong.write(value.`audioLevelAverage`, buf)
+            FfiConverterOptionalBoolean.write(value.`videoorientExt`, buf)
+            FfiConverterOptionalBoolean.write(value.`playoutdelayExt`, buf)
+            FfiConverterOptionalBoolean.write(value.`transportWideCcExt`, buf)
+            FfiConverterOptionalBoolean.write(value.`record`, buf)
+            FfiConverterOptionalString.write(value.`recordDir`, buf)
+            FfiConverterOptionalBoolean.write(value.`lockRecord`, buf)
+            FfiConverterOptionalBoolean.write(value.`permanent`, buf)
+            FfiConverterOptionalBoolean.write(value.`notifyJoining`, buf)
+            FfiConverterOptionalBoolean.write(value.`requireE2ee`, buf)
+            FfiConverterOptionalBoolean.write(value.`dummyPublisher`, buf)
+            FfiConverterOptionalBoolean.write(value.`dummyStreams`, buf)
+    }
+}
+
+
+
+data class LegacyVideoRoomCreatedRsp (
+    val `room`: JanusId, 
+    val `permanent`: kotlin.Boolean
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomCreatedRsp: FfiConverterRustBuffer<LegacyVideoRoomCreatedRsp> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomCreatedRsp {
+        return LegacyVideoRoomCreatedRsp(
+            FfiConverterTypeJanusId.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomCreatedRsp) = (
+            FfiConverterTypeJanusId.allocationSize(value.`room`) +
+            FfiConverterBoolean.allocationSize(value.`permanent`)
+    )
+
+    override fun write(value: LegacyVideoRoomCreatedRsp, buf: ByteBuffer) {
+            FfiConverterTypeJanusId.write(value.`room`, buf)
+            FfiConverterBoolean.write(value.`permanent`, buf)
+    }
+}
+
+
+
+data class LegacyVideoRoomKickParams (
+    val `room`: JanusId, 
+    val `participant`: JanusId, 
+    val `secret`: kotlin.String?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomKickParams: FfiConverterRustBuffer<LegacyVideoRoomKickParams> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomKickParams {
+        return LegacyVideoRoomKickParams(
+            FfiConverterTypeJanusId.read(buf),
+            FfiConverterTypeJanusId.read(buf),
+            FfiConverterOptionalString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomKickParams) = (
+            FfiConverterTypeJanusId.allocationSize(value.`room`) +
+            FfiConverterTypeJanusId.allocationSize(value.`participant`) +
+            FfiConverterOptionalString.allocationSize(value.`secret`)
+    )
+
+    override fun write(value: LegacyVideoRoomKickParams, buf: ByteBuffer) {
+            FfiConverterTypeJanusId.write(value.`room`, buf)
+            FfiConverterTypeJanusId.write(value.`participant`, buf)
+            FfiConverterOptionalString.write(value.`secret`, buf)
+    }
+}
+
+
+
+data class LegacyVideoRoomPublisher (
+    val `id`: JanusId, 
+    val `display`: kotlin.String?, 
+    val `substream`: kotlin.UByte?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomPublisher: FfiConverterRustBuffer<LegacyVideoRoomPublisher> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomPublisher {
+        return LegacyVideoRoomPublisher(
+            FfiConverterTypeJanusId.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalUByte.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomPublisher) = (
+            FfiConverterTypeJanusId.allocationSize(value.`id`) +
+            FfiConverterOptionalString.allocationSize(value.`display`) +
+            FfiConverterOptionalUByte.allocationSize(value.`substream`)
+    )
+
+    override fun write(value: LegacyVideoRoomPublisher, buf: ByteBuffer) {
+            FfiConverterTypeJanusId.write(value.`id`, buf)
+            FfiConverterOptionalString.write(value.`display`, buf)
+            FfiConverterOptionalUByte.write(value.`substream`, buf)
+    }
+}
+
+
+
+data class LegacyVideoRoomPublisherConfigureParams (
+    val `audio`: kotlin.Boolean? = null, 
+    val `video`: kotlin.Boolean? = null, 
+    val `data`: kotlin.Boolean? = null, 
+    val `bitrate`: kotlin.ULong? = null, 
+    val `keyframe`: kotlin.Boolean? = null, 
+    val `record`: kotlin.Boolean? = null, 
+    val `filename`: kotlin.String? = null, 
+    val `display`: kotlin.String? = null, 
+    val `audioActivePackets`: kotlin.ULong? = null, 
+    val `audioLevelAverage`: kotlin.ULong? = null, 
+    val `minDelay`: kotlin.ULong? = null, 
+    val `maxDelay`: kotlin.ULong? = null
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomPublisherConfigureParams: FfiConverterRustBuffer<LegacyVideoRoomPublisherConfigureParams> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomPublisherConfigureParams {
+        return LegacyVideoRoomPublisherConfigureParams(
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomPublisherConfigureParams) = (
+            FfiConverterOptionalBoolean.allocationSize(value.`audio`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`video`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`data`) +
+            FfiConverterOptionalULong.allocationSize(value.`bitrate`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`keyframe`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`record`) +
+            FfiConverterOptionalString.allocationSize(value.`filename`) +
+            FfiConverterOptionalString.allocationSize(value.`display`) +
+            FfiConverterOptionalULong.allocationSize(value.`audioActivePackets`) +
+            FfiConverterOptionalULong.allocationSize(value.`audioLevelAverage`) +
+            FfiConverterOptionalULong.allocationSize(value.`minDelay`) +
+            FfiConverterOptionalULong.allocationSize(value.`maxDelay`)
+    )
+
+    override fun write(value: LegacyVideoRoomPublisherConfigureParams, buf: ByteBuffer) {
+            FfiConverterOptionalBoolean.write(value.`audio`, buf)
+            FfiConverterOptionalBoolean.write(value.`video`, buf)
+            FfiConverterOptionalBoolean.write(value.`data`, buf)
+            FfiConverterOptionalULong.write(value.`bitrate`, buf)
+            FfiConverterOptionalBoolean.write(value.`keyframe`, buf)
+            FfiConverterOptionalBoolean.write(value.`record`, buf)
+            FfiConverterOptionalString.write(value.`filename`, buf)
+            FfiConverterOptionalString.write(value.`display`, buf)
+            FfiConverterOptionalULong.write(value.`audioActivePackets`, buf)
+            FfiConverterOptionalULong.write(value.`audioLevelAverage`, buf)
+            FfiConverterOptionalULong.write(value.`minDelay`, buf)
+            FfiConverterOptionalULong.write(value.`maxDelay`, buf)
+    }
+}
+
+
+
+data class LegacyVideoRoomPublisherJoinAndConfigureParams (
+    val `joinParams`: LegacyVideoRoomPublisherJoinParams, 
+    val `configureParams`: LegacyVideoRoomPublisherConfigureParams
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomPublisherJoinAndConfigureParams: FfiConverterRustBuffer<LegacyVideoRoomPublisherJoinAndConfigureParams> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomPublisherJoinAndConfigureParams {
+        return LegacyVideoRoomPublisherJoinAndConfigureParams(
+            FfiConverterTypeLegacyVideoRoomPublisherJoinParams.read(buf),
+            FfiConverterTypeLegacyVideoRoomPublisherConfigureParams.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomPublisherJoinAndConfigureParams) = (
+            FfiConverterTypeLegacyVideoRoomPublisherJoinParams.allocationSize(value.`joinParams`) +
+            FfiConverterTypeLegacyVideoRoomPublisherConfigureParams.allocationSize(value.`configureParams`)
+    )
+
+    override fun write(value: LegacyVideoRoomPublisherJoinAndConfigureParams, buf: ByteBuffer) {
+            FfiConverterTypeLegacyVideoRoomPublisherJoinParams.write(value.`joinParams`, buf)
+            FfiConverterTypeLegacyVideoRoomPublisherConfigureParams.write(value.`configureParams`, buf)
+    }
+}
+
+
+
+data class LegacyVideoRoomPublisherJoinParams (
+    val `room`: JanusId, 
+    val `optional`: LegacyVideoRoomPublisherJoinParamsOptional
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomPublisherJoinParams: FfiConverterRustBuffer<LegacyVideoRoomPublisherJoinParams> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomPublisherJoinParams {
+        return LegacyVideoRoomPublisherJoinParams(
+            FfiConverterTypeJanusId.read(buf),
+            FfiConverterTypeLegacyVideoRoomPublisherJoinParamsOptional.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomPublisherJoinParams) = (
+            FfiConverterTypeJanusId.allocationSize(value.`room`) +
+            FfiConverterTypeLegacyVideoRoomPublisherJoinParamsOptional.allocationSize(value.`optional`)
+    )
+
+    override fun write(value: LegacyVideoRoomPublisherJoinParams, buf: ByteBuffer) {
+            FfiConverterTypeJanusId.write(value.`room`, buf)
+            FfiConverterTypeLegacyVideoRoomPublisherJoinParamsOptional.write(value.`optional`, buf)
+    }
+}
+
+
+
+data class LegacyVideoRoomPublisherJoinParamsOptional (
+    val `id`: JanusId? = null, 
+    val `display`: kotlin.String? = null, 
+    val `token`: kotlin.String? = null
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomPublisherJoinParamsOptional: FfiConverterRustBuffer<LegacyVideoRoomPublisherJoinParamsOptional> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomPublisherJoinParamsOptional {
+        return LegacyVideoRoomPublisherJoinParamsOptional(
+            FfiConverterOptionalTypeJanusId.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomPublisherJoinParamsOptional) = (
+            FfiConverterOptionalTypeJanusId.allocationSize(value.`id`) +
+            FfiConverterOptionalString.allocationSize(value.`display`) +
+            FfiConverterOptionalString.allocationSize(value.`token`)
+    )
+
+    override fun write(value: LegacyVideoRoomPublisherJoinParamsOptional, buf: ByteBuffer) {
+            FfiConverterOptionalTypeJanusId.write(value.`id`, buf)
+            FfiConverterOptionalString.write(value.`display`, buf)
+            FfiConverterOptionalString.write(value.`token`, buf)
+    }
+}
+
+
+
+data class LegacyVideoRoomSubscriberConfigureParams (
+    val `audio`: kotlin.Boolean? = null, 
+    val `video`: kotlin.Boolean? = null, 
+    val `data`: kotlin.Boolean? = null, 
+    val `substream`: kotlin.UByte? = null, 
+    val `temporal`: kotlin.UByte? = null, 
+    val `fallback`: kotlin.ULong? = null, 
+    val `spatialLayer`: kotlin.UByte? = null, 
+    val `temporalLayer`: kotlin.UByte? = null, 
+    val `audioLevelAverage`: kotlin.ULong? = null, 
+    val `audioActivePackets`: kotlin.ULong? = null, 
+    val `minDelay`: kotlin.ULong? = null, 
+    val `maxDelay`: kotlin.ULong? = null
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomSubscriberConfigureParams: FfiConverterRustBuffer<LegacyVideoRoomSubscriberConfigureParams> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomSubscriberConfigureParams {
+        return LegacyVideoRoomSubscriberConfigureParams(
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalUByte.read(buf),
+            FfiConverterOptionalUByte.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalUByte.read(buf),
+            FfiConverterOptionalUByte.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomSubscriberConfigureParams) = (
+            FfiConverterOptionalBoolean.allocationSize(value.`audio`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`video`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`data`) +
+            FfiConverterOptionalUByte.allocationSize(value.`substream`) +
+            FfiConverterOptionalUByte.allocationSize(value.`temporal`) +
+            FfiConverterOptionalULong.allocationSize(value.`fallback`) +
+            FfiConverterOptionalUByte.allocationSize(value.`spatialLayer`) +
+            FfiConverterOptionalUByte.allocationSize(value.`temporalLayer`) +
+            FfiConverterOptionalULong.allocationSize(value.`audioLevelAverage`) +
+            FfiConverterOptionalULong.allocationSize(value.`audioActivePackets`) +
+            FfiConverterOptionalULong.allocationSize(value.`minDelay`) +
+            FfiConverterOptionalULong.allocationSize(value.`maxDelay`)
+    )
+
+    override fun write(value: LegacyVideoRoomSubscriberConfigureParams, buf: ByteBuffer) {
+            FfiConverterOptionalBoolean.write(value.`audio`, buf)
+            FfiConverterOptionalBoolean.write(value.`video`, buf)
+            FfiConverterOptionalBoolean.write(value.`data`, buf)
+            FfiConverterOptionalUByte.write(value.`substream`, buf)
+            FfiConverterOptionalUByte.write(value.`temporal`, buf)
+            FfiConverterOptionalULong.write(value.`fallback`, buf)
+            FfiConverterOptionalUByte.write(value.`spatialLayer`, buf)
+            FfiConverterOptionalUByte.write(value.`temporalLayer`, buf)
+            FfiConverterOptionalULong.write(value.`audioLevelAverage`, buf)
+            FfiConverterOptionalULong.write(value.`audioActivePackets`, buf)
+            FfiConverterOptionalULong.write(value.`minDelay`, buf)
+            FfiConverterOptionalULong.write(value.`maxDelay`, buf)
+    }
+}
+
+
+
+data class LegacyVideoRoomSubscriberJoinParams (
+    val `required`: LegacyVideoRoomSubscriberJoinParamsRequired, 
+    val `optional`: LegacyVideoRoomSubscriberJoinParamsOptional
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomSubscriberJoinParams: FfiConverterRustBuffer<LegacyVideoRoomSubscriberJoinParams> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomSubscriberJoinParams {
+        return LegacyVideoRoomSubscriberJoinParams(
+            FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsRequired.read(buf),
+            FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsOptional.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomSubscriberJoinParams) = (
+            FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsRequired.allocationSize(value.`required`) +
+            FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsOptional.allocationSize(value.`optional`)
+    )
+
+    override fun write(value: LegacyVideoRoomSubscriberJoinParams, buf: ByteBuffer) {
+            FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsRequired.write(value.`required`, buf)
+            FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsOptional.write(value.`optional`, buf)
+    }
+}
+
+
+
+data class LegacyVideoRoomSubscriberJoinParamsOptional (
+    val `privateId`: kotlin.ULong? = null, 
+    val `closePc`: kotlin.Boolean? = null, 
+    val `audio`: kotlin.Boolean? = null, 
+    val `video`: kotlin.Boolean? = null, 
+    val `data`: kotlin.Boolean? = null, 
+    val `offerAudio`: kotlin.Boolean? = null, 
+    val `offerVideo`: kotlin.Boolean? = null, 
+    val `offerData`: kotlin.Boolean? = null, 
+    val `substream`: kotlin.UByte? = null, 
+    val `temporal`: kotlin.UByte? = null, 
+    val `fallback`: kotlin.ULong? = null, 
+    val `spatialLayer`: kotlin.UByte? = null, 
+    val `temporalLayer`: kotlin.UByte? = null
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsOptional: FfiConverterRustBuffer<LegacyVideoRoomSubscriberJoinParamsOptional> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomSubscriberJoinParamsOptional {
+        return LegacyVideoRoomSubscriberJoinParamsOptional(
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalUByte.read(buf),
+            FfiConverterOptionalUByte.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalUByte.read(buf),
+            FfiConverterOptionalUByte.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomSubscriberJoinParamsOptional) = (
+            FfiConverterOptionalULong.allocationSize(value.`privateId`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`closePc`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`audio`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`video`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`data`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`offerAudio`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`offerVideo`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`offerData`) +
+            FfiConverterOptionalUByte.allocationSize(value.`substream`) +
+            FfiConverterOptionalUByte.allocationSize(value.`temporal`) +
+            FfiConverterOptionalULong.allocationSize(value.`fallback`) +
+            FfiConverterOptionalUByte.allocationSize(value.`spatialLayer`) +
+            FfiConverterOptionalUByte.allocationSize(value.`temporalLayer`)
+    )
+
+    override fun write(value: LegacyVideoRoomSubscriberJoinParamsOptional, buf: ByteBuffer) {
+            FfiConverterOptionalULong.write(value.`privateId`, buf)
+            FfiConverterOptionalBoolean.write(value.`closePc`, buf)
+            FfiConverterOptionalBoolean.write(value.`audio`, buf)
+            FfiConverterOptionalBoolean.write(value.`video`, buf)
+            FfiConverterOptionalBoolean.write(value.`data`, buf)
+            FfiConverterOptionalBoolean.write(value.`offerAudio`, buf)
+            FfiConverterOptionalBoolean.write(value.`offerVideo`, buf)
+            FfiConverterOptionalBoolean.write(value.`offerData`, buf)
+            FfiConverterOptionalUByte.write(value.`substream`, buf)
+            FfiConverterOptionalUByte.write(value.`temporal`, buf)
+            FfiConverterOptionalULong.write(value.`fallback`, buf)
+            FfiConverterOptionalUByte.write(value.`spatialLayer`, buf)
+            FfiConverterOptionalUByte.write(value.`temporalLayer`, buf)
+    }
+}
+
+
+
+data class LegacyVideoRoomSubscriberJoinParamsRequired (
+    val `room`: JanusId, 
+    val `feed`: JanusId
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsRequired: FfiConverterRustBuffer<LegacyVideoRoomSubscriberJoinParamsRequired> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomSubscriberJoinParamsRequired {
+        return LegacyVideoRoomSubscriberJoinParamsRequired(
+            FfiConverterTypeJanusId.read(buf),
+            FfiConverterTypeJanusId.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomSubscriberJoinParamsRequired) = (
+            FfiConverterTypeJanusId.allocationSize(value.`room`) +
+            FfiConverterTypeJanusId.allocationSize(value.`feed`)
+    )
+
+    override fun write(value: LegacyVideoRoomSubscriberJoinParamsRequired, buf: ByteBuffer) {
+            FfiConverterTypeJanusId.write(value.`room`, buf)
+            FfiConverterTypeJanusId.write(value.`feed`, buf)
+    }
+}
+
+
+
+data class LegacyVideoRoomVideoCodecList (
+    val `codecs`: List<LegacyVideoRoomVideoCodec>
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomVideoCodecList: FfiConverterRustBuffer<LegacyVideoRoomVideoCodecList> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomVideoCodecList {
+        return LegacyVideoRoomVideoCodecList(
+            FfiConverterSequenceTypeLegacyVideoRoomVideoCodec.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomVideoCodecList) = (
+            FfiConverterSequenceTypeLegacyVideoRoomVideoCodec.allocationSize(value.`codecs`)
+    )
+
+    override fun write(value: LegacyVideoRoomVideoCodecList, buf: ByteBuffer) {
+            FfiConverterSequenceTypeLegacyVideoRoomVideoCodec.write(value.`codecs`, buf)
+    }
+}
+
+
+
 data class MetaData (
     val `name`: kotlin.String, 
     val `author`: kotlin.String, 
@@ -5880,6 +7777,38 @@ public object FfiConverterTypeMetaData: FfiConverterRustBuffer<MetaData> {
             FfiConverterString.write(value.`description`, buf)
             FfiConverterString.write(value.`versionString`, buf)
             FfiConverterULong.write(value.`version`, buf)
+    }
+}
+
+
+
+data class Publisher (
+    val `id`: JanusId, 
+    val `display`: kotlin.String?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePublisher: FfiConverterRustBuffer<Publisher> {
+    override fun read(buf: ByteBuffer): Publisher {
+        return Publisher(
+            FfiConverterTypeJanusId.read(buf),
+            FfiConverterOptionalString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: Publisher) = (
+            FfiConverterTypeJanusId.allocationSize(value.`id`) +
+            FfiConverterOptionalString.allocationSize(value.`display`)
+    )
+
+    override fun write(value: Publisher, buf: ByteBuffer) {
+            FfiConverterTypeJanusId.write(value.`id`, buf)
+            FfiConverterOptionalString.write(value.`display`, buf)
     }
 }
 
@@ -6097,6 +8026,78 @@ public object FfiConverterTypeVideoRoomAudioCodecList: FfiConverterRustBuffer<Vi
 
 
 
+data class VideoRoomConfigurePublisherStream (
+    val `mid`: kotlin.String, 
+    val `optional`: VideoRoomConfigurePublisherStreamOptional
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeVideoRoomConfigurePublisherStream: FfiConverterRustBuffer<VideoRoomConfigurePublisherStream> {
+    override fun read(buf: ByteBuffer): VideoRoomConfigurePublisherStream {
+        return VideoRoomConfigurePublisherStream(
+            FfiConverterString.read(buf),
+            FfiConverterTypeVideoRoomConfigurePublisherStreamOptional.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: VideoRoomConfigurePublisherStream) = (
+            FfiConverterString.allocationSize(value.`mid`) +
+            FfiConverterTypeVideoRoomConfigurePublisherStreamOptional.allocationSize(value.`optional`)
+    )
+
+    override fun write(value: VideoRoomConfigurePublisherStream, buf: ByteBuffer) {
+            FfiConverterString.write(value.`mid`, buf)
+            FfiConverterTypeVideoRoomConfigurePublisherStreamOptional.write(value.`optional`, buf)
+    }
+}
+
+
+
+data class VideoRoomConfigurePublisherStreamOptional (
+    val `keyframe`: kotlin.Boolean? = null, 
+    val `send`: kotlin.Boolean? = null, 
+    val `minDelay`: kotlin.ULong? = null, 
+    val `maxDelay`: kotlin.ULong? = null
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeVideoRoomConfigurePublisherStreamOptional: FfiConverterRustBuffer<VideoRoomConfigurePublisherStreamOptional> {
+    override fun read(buf: ByteBuffer): VideoRoomConfigurePublisherStreamOptional {
+        return VideoRoomConfigurePublisherStreamOptional(
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: VideoRoomConfigurePublisherStreamOptional) = (
+            FfiConverterOptionalBoolean.allocationSize(value.`keyframe`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`send`) +
+            FfiConverterOptionalULong.allocationSize(value.`minDelay`) +
+            FfiConverterOptionalULong.allocationSize(value.`maxDelay`)
+    )
+
+    override fun write(value: VideoRoomConfigurePublisherStreamOptional, buf: ByteBuffer) {
+            FfiConverterOptionalBoolean.write(value.`keyframe`, buf)
+            FfiConverterOptionalBoolean.write(value.`send`, buf)
+            FfiConverterOptionalULong.write(value.`minDelay`, buf)
+            FfiConverterOptionalULong.write(value.`maxDelay`, buf)
+    }
+}
+
+
+
 data class VideoRoomCreateParams (
     val `adminKey`: kotlin.String? = null, 
     val `room`: JanusId? = null, 
@@ -6284,6 +8285,206 @@ public object FfiConverterTypeVideoRoomCreatedRsp: FfiConverterRustBuffer<VideoR
     override fun write(value: VideoRoomCreatedRsp, buf: ByteBuffer) {
             FfiConverterTypeJanusId.write(value.`room`, buf)
             FfiConverterBoolean.write(value.`permanent`, buf)
+    }
+}
+
+
+
+data class VideoRoomPublishDescriptionParams (
+    val `mid`: kotlin.String, 
+    val `description`: kotlin.String
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeVideoRoomPublishDescriptionParams: FfiConverterRustBuffer<VideoRoomPublishDescriptionParams> {
+    override fun read(buf: ByteBuffer): VideoRoomPublishDescriptionParams {
+        return VideoRoomPublishDescriptionParams(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: VideoRoomPublishDescriptionParams) = (
+            FfiConverterString.allocationSize(value.`mid`) +
+            FfiConverterString.allocationSize(value.`description`)
+    )
+
+    override fun write(value: VideoRoomPublishDescriptionParams, buf: ByteBuffer) {
+            FfiConverterString.write(value.`mid`, buf)
+            FfiConverterString.write(value.`description`, buf)
+    }
+}
+
+
+
+data class VideoRoomPublisherConfigureParams (
+    val `audio`: kotlin.Boolean? = null, 
+    val `video`: kotlin.Boolean? = null, 
+    val `bitrate`: kotlin.ULong? = null, 
+    val `keyframe`: kotlin.Boolean? = null, 
+    val `record`: kotlin.Boolean? = null, 
+    val `filename`: kotlin.String? = null, 
+    val `display`: kotlin.String? = null, 
+    val `audioActivePackets`: kotlin.ULong? = null, 
+    val `audioLevelAverage`: kotlin.ULong? = null, 
+    val `streams`: List<VideoRoomConfigurePublisherStream>? = null, 
+    val `descriptions`: List<VideoRoomPublishDescriptionParams>? = null
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeVideoRoomPublisherConfigureParams: FfiConverterRustBuffer<VideoRoomPublisherConfigureParams> {
+    override fun read(buf: ByteBuffer): VideoRoomPublisherConfigureParams {
+        return VideoRoomPublisherConfigureParams(
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalBoolean.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalSequenceTypeVideoRoomConfigurePublisherStream.read(buf),
+            FfiConverterOptionalSequenceTypeVideoRoomPublishDescriptionParams.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: VideoRoomPublisherConfigureParams) = (
+            FfiConverterOptionalBoolean.allocationSize(value.`audio`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`video`) +
+            FfiConverterOptionalULong.allocationSize(value.`bitrate`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`keyframe`) +
+            FfiConverterOptionalBoolean.allocationSize(value.`record`) +
+            FfiConverterOptionalString.allocationSize(value.`filename`) +
+            FfiConverterOptionalString.allocationSize(value.`display`) +
+            FfiConverterOptionalULong.allocationSize(value.`audioActivePackets`) +
+            FfiConverterOptionalULong.allocationSize(value.`audioLevelAverage`) +
+            FfiConverterOptionalSequenceTypeVideoRoomConfigurePublisherStream.allocationSize(value.`streams`) +
+            FfiConverterOptionalSequenceTypeVideoRoomPublishDescriptionParams.allocationSize(value.`descriptions`)
+    )
+
+    override fun write(value: VideoRoomPublisherConfigureParams, buf: ByteBuffer) {
+            FfiConverterOptionalBoolean.write(value.`audio`, buf)
+            FfiConverterOptionalBoolean.write(value.`video`, buf)
+            FfiConverterOptionalULong.write(value.`bitrate`, buf)
+            FfiConverterOptionalBoolean.write(value.`keyframe`, buf)
+            FfiConverterOptionalBoolean.write(value.`record`, buf)
+            FfiConverterOptionalString.write(value.`filename`, buf)
+            FfiConverterOptionalString.write(value.`display`, buf)
+            FfiConverterOptionalULong.write(value.`audioActivePackets`, buf)
+            FfiConverterOptionalULong.write(value.`audioLevelAverage`, buf)
+            FfiConverterOptionalSequenceTypeVideoRoomConfigurePublisherStream.write(value.`streams`, buf)
+            FfiConverterOptionalSequenceTypeVideoRoomPublishDescriptionParams.write(value.`descriptions`, buf)
+    }
+}
+
+
+
+data class VideoRoomPublisherJoinAndConfigureParams (
+    val `joinParams`: VideoRoomPublisherJoinParams, 
+    val `configureParams`: VideoRoomPublisherConfigureParams
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeVideoRoomPublisherJoinAndConfigureParams: FfiConverterRustBuffer<VideoRoomPublisherJoinAndConfigureParams> {
+    override fun read(buf: ByteBuffer): VideoRoomPublisherJoinAndConfigureParams {
+        return VideoRoomPublisherJoinAndConfigureParams(
+            FfiConverterTypeVideoRoomPublisherJoinParams.read(buf),
+            FfiConverterTypeVideoRoomPublisherConfigureParams.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: VideoRoomPublisherJoinAndConfigureParams) = (
+            FfiConverterTypeVideoRoomPublisherJoinParams.allocationSize(value.`joinParams`) +
+            FfiConverterTypeVideoRoomPublisherConfigureParams.allocationSize(value.`configureParams`)
+    )
+
+    override fun write(value: VideoRoomPublisherJoinAndConfigureParams, buf: ByteBuffer) {
+            FfiConverterTypeVideoRoomPublisherJoinParams.write(value.`joinParams`, buf)
+            FfiConverterTypeVideoRoomPublisherConfigureParams.write(value.`configureParams`, buf)
+    }
+}
+
+
+
+data class VideoRoomPublisherJoinParams (
+    val `room`: JanusId, 
+    val `optional`: VideoRoomPublisherJoinParamsOptional
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeVideoRoomPublisherJoinParams: FfiConverterRustBuffer<VideoRoomPublisherJoinParams> {
+    override fun read(buf: ByteBuffer): VideoRoomPublisherJoinParams {
+        return VideoRoomPublisherJoinParams(
+            FfiConverterTypeJanusId.read(buf),
+            FfiConverterTypeVideoRoomPublisherJoinParamsOptional.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: VideoRoomPublisherJoinParams) = (
+            FfiConverterTypeJanusId.allocationSize(value.`room`) +
+            FfiConverterTypeVideoRoomPublisherJoinParamsOptional.allocationSize(value.`optional`)
+    )
+
+    override fun write(value: VideoRoomPublisherJoinParams, buf: ByteBuffer) {
+            FfiConverterTypeJanusId.write(value.`room`, buf)
+            FfiConverterTypeVideoRoomPublisherJoinParamsOptional.write(value.`optional`, buf)
+    }
+}
+
+
+
+data class VideoRoomPublisherJoinParamsOptional (
+    val `id`: JanusId? = null, 
+    val `display`: kotlin.String? = null, 
+    val `token`: kotlin.String? = null
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeVideoRoomPublisherJoinParamsOptional: FfiConverterRustBuffer<VideoRoomPublisherJoinParamsOptional> {
+    override fun read(buf: ByteBuffer): VideoRoomPublisherJoinParamsOptional {
+        return VideoRoomPublisherJoinParamsOptional(
+            FfiConverterOptionalTypeJanusId.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: VideoRoomPublisherJoinParamsOptional) = (
+            FfiConverterOptionalTypeJanusId.allocationSize(value.`id`) +
+            FfiConverterOptionalString.allocationSize(value.`display`) +
+            FfiConverterOptionalString.allocationSize(value.`token`)
+    )
+
+    override fun write(value: VideoRoomPublisherJoinParamsOptional, buf: ByteBuffer) {
+            FfiConverterOptionalTypeJanusId.write(value.`id`, buf)
+            FfiConverterOptionalString.write(value.`display`, buf)
+            FfiConverterOptionalString.write(value.`token`, buf)
     }
 }
 
@@ -6755,6 +8956,73 @@ public object FfiConverterTypeJsepType: FfiConverterRustBuffer<JsepType> {
     override fun allocationSize(value: JsepType) = 4UL
 
     override fun write(value: JsepType, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+
+enum class LegacyVideoRoomAudioCodec {
+    
+    OPUS,
+    G722,
+    PCMU,
+    PCMA,
+    ISAC32,
+    ISAC16;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomAudioCodec: FfiConverterRustBuffer<LegacyVideoRoomAudioCodec> {
+    override fun read(buf: ByteBuffer) = try {
+        LegacyVideoRoomAudioCodec.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomAudioCodec) = 4UL
+
+    override fun write(value: LegacyVideoRoomAudioCodec, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+
+enum class LegacyVideoRoomVideoCodec {
+    
+    VP8,
+    VP9,
+    H264,
+    AV1,
+    H265;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomVideoCodec: FfiConverterRustBuffer<LegacyVideoRoomVideoCodec> {
+    override fun read(buf: ByteBuffer) = try {
+        LegacyVideoRoomVideoCodec.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomVideoCodec) = 4UL
+
+    override fun write(value: LegacyVideoRoomVideoCodec, buf: ByteBuffer) {
         buf.putInt(value.ordinal + 1)
     }
 }
@@ -7248,6 +9516,222 @@ public object FfiConverterTypeHandleCallback: FfiConverterCallbackInterface<Hand
 
 
 
+public interface LegacyVideoRoomHandleCallback {
+    
+    fun `onLegacyVideoRoomOther`(`data`: kotlin.ByteArray)
+    
+    fun `onLegacyVideoRoomHandleEvent`(`event`: GenericEvent)
+    
+    fun `onLegacyVideoRoomError`(`errorCode`: kotlin.UShort, `error`: kotlin.String)
+    
+    fun `onLegacyVideoRoomJoined`(`id`: JanusId, `room`: JanusId, `description`: kotlin.String?, `privateId`: kotlin.ULong, `publishers`: List<LegacyVideoRoomPublisher>, `jsep`: Jsep?)
+    
+    fun `onLegacyVideoRoomConfigured`(`room`: JanusId, `jsep`: Jsep?)
+    
+    fun `onLegacyVideoRoomSubscriberAttached`(`id`: JanusId, `room`: JanusId, `display`: kotlin.String?, `jsep`: Jsep)
+    
+    fun `onLegacyVideoRoomSlowLink`()
+    
+    fun `onLegacyVideoRoomUnpublished`(`room`: JanusId, `unpublished`: JanusId)
+    
+    fun `onLegacyVideoRoomSubscriberStarted`(`room`: JanusId, `started`: kotlin.String)
+    
+    fun `onLegacyVideoRoomLeaving`(`room`: JanusId, `reason`: kotlin.String)
+    
+    fun `onLegacyVideoRoomKicked`(`room`: JanusId, `participant`: JanusId)
+    
+    companion object
+}
+
+
+
+// Put the implementation in an object so we don't pollute the top-level namespace
+internal object uniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
+    internal object `onLegacyVideoRoomOther`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod0 {
+        override fun callback(`uniffiHandle`: Long,`data`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onLegacyVideoRoomOther`(
+                    FfiConverterByteArray.lift(`data`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `onLegacyVideoRoomHandleEvent`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod1 {
+        override fun callback(`uniffiHandle`: Long,`event`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onLegacyVideoRoomHandleEvent`(
+                    FfiConverterTypeGenericEvent.lift(`event`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `onLegacyVideoRoomError`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod2 {
+        override fun callback(`uniffiHandle`: Long,`errorCode`: Short,`error`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onLegacyVideoRoomError`(
+                    FfiConverterUShort.lift(`errorCode`),
+                    FfiConverterString.lift(`error`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `onLegacyVideoRoomJoined`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod3 {
+        override fun callback(`uniffiHandle`: Long,`id`: RustBuffer.ByValue,`room`: RustBuffer.ByValue,`description`: RustBuffer.ByValue,`privateId`: Long,`publishers`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onLegacyVideoRoomJoined`(
+                    FfiConverterTypeJanusId.lift(`id`),
+                    FfiConverterTypeJanusId.lift(`room`),
+                    FfiConverterOptionalString.lift(`description`),
+                    FfiConverterULong.lift(`privateId`),
+                    FfiConverterSequenceTypeLegacyVideoRoomPublisher.lift(`publishers`),
+                    FfiConverterOptionalTypeJsep.lift(`jsep`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `onLegacyVideoRoomConfigured`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod4 {
+        override fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onLegacyVideoRoomConfigured`(
+                    FfiConverterTypeJanusId.lift(`room`),
+                    FfiConverterOptionalTypeJsep.lift(`jsep`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `onLegacyVideoRoomSubscriberAttached`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod5 {
+        override fun callback(`uniffiHandle`: Long,`id`: RustBuffer.ByValue,`room`: RustBuffer.ByValue,`display`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onLegacyVideoRoomSubscriberAttached`(
+                    FfiConverterTypeJanusId.lift(`id`),
+                    FfiConverterTypeJanusId.lift(`room`),
+                    FfiConverterOptionalString.lift(`display`),
+                    FfiConverterTypeJsep.lift(`jsep`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `onLegacyVideoRoomSlowLink`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod6 {
+        override fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onLegacyVideoRoomSlowLink`(
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `onLegacyVideoRoomUnpublished`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod7 {
+        override fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`unpublished`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onLegacyVideoRoomUnpublished`(
+                    FfiConverterTypeJanusId.lift(`room`),
+                    FfiConverterTypeJanusId.lift(`unpublished`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `onLegacyVideoRoomSubscriberStarted`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod8 {
+        override fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`started`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onLegacyVideoRoomSubscriberStarted`(
+                    FfiConverterTypeJanusId.lift(`room`),
+                    FfiConverterString.lift(`started`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `onLegacyVideoRoomLeaving`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod9 {
+        override fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`reason`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onLegacyVideoRoomLeaving`(
+                    FfiConverterTypeJanusId.lift(`room`),
+                    FfiConverterString.lift(`reason`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `onLegacyVideoRoomKicked`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod10 {
+        override fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`participant`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onLegacyVideoRoomKicked`(
+                    FfiConverterTypeJanusId.lift(`room`),
+                    FfiConverterTypeJanusId.lift(`participant`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+
+    internal object uniffiFree: UniffiCallbackInterfaceFree {
+        override fun callback(handle: Long) {
+            FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.remove(handle)
+        }
+    }
+
+    internal var vtable = UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback.UniffiByValue(
+        `onLegacyVideoRoomOther`,
+        `onLegacyVideoRoomHandleEvent`,
+        `onLegacyVideoRoomError`,
+        `onLegacyVideoRoomJoined`,
+        `onLegacyVideoRoomConfigured`,
+        `onLegacyVideoRoomSubscriberAttached`,
+        `onLegacyVideoRoomSlowLink`,
+        `onLegacyVideoRoomUnpublished`,
+        `onLegacyVideoRoomSubscriberStarted`,
+        `onLegacyVideoRoomLeaving`,
+        `onLegacyVideoRoomKicked`,
+        uniffiFree,
+    )
+
+    // Registers the foreign callback with the Rust side.
+    // This method is generated for each callback interface.
+    internal fun register(lib: UniffiLib) {
+        lib.uniffi_janus_gateway_fn_init_callback_vtable_legacyvideoroomhandlecallback(vtable)
+    }
+}
+
+/**
+ * The ffiConverter which transforms the Callbacks in to handles to pass to Rust.
+ *
+ * @suppress
+ */
+public object FfiConverterTypeLegacyVideoRoomHandleCallback: FfiConverterCallbackInterface<LegacyVideoRoomHandleCallback>()
+
+
+
+
+
 public interface VideoRoomHandleCallback {
     
     fun `onHandleEvent`(`event`: GenericEvent)
@@ -7255,6 +9739,16 @@ public interface VideoRoomHandleCallback {
     fun `onVideoRoomError`(`errorCode`: kotlin.UShort, `error`: kotlin.String)
     
     fun `onOther`(`data`: kotlin.ByteArray)
+    
+    fun `onConfigureWithJsep`(`room`: JanusId, `audioCodec`: kotlin.String?, `videoCodec`: kotlin.String?, `streams`: List<ConfiguredStream>?, `jsep`: Jsep)
+    
+    fun `onRoomJoined`(`id`: JanusId, `room`: JanusId, `description`: kotlin.String?, `privateId`: kotlin.ULong, `publishers`: List<Publisher>)
+    
+    fun `onRoomJoinedWithJsep`(`id`: JanusId, `room`: JanusId, `description`: kotlin.String?, `privateId`: kotlin.ULong, `publishers`: List<Publisher>, `jsep`: Jsep)
+    
+    fun `onKicked`(`room`: JanusId, `participant`: JanusId)
+    
+    fun `onLeaving`(`room`: JanusId, `reason`: kotlin.String)
     
     companion object
 }
@@ -7300,6 +9794,81 @@ internal object uniffiCallbackInterfaceVideoRoomHandleCallback {
             uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
         }
     }
+    internal object `onConfigureWithJsep`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod3 {
+        override fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`audioCodec`: RustBuffer.ByValue,`videoCodec`: RustBuffer.ByValue,`streams`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onConfigureWithJsep`(
+                    FfiConverterTypeJanusId.lift(`room`),
+                    FfiConverterOptionalString.lift(`audioCodec`),
+                    FfiConverterOptionalString.lift(`videoCodec`),
+                    FfiConverterOptionalSequenceTypeConfiguredStream.lift(`streams`),
+                    FfiConverterTypeJsep.lift(`jsep`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `onRoomJoined`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod4 {
+        override fun callback(`uniffiHandle`: Long,`id`: RustBuffer.ByValue,`room`: RustBuffer.ByValue,`description`: RustBuffer.ByValue,`privateId`: Long,`publishers`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onRoomJoined`(
+                    FfiConverterTypeJanusId.lift(`id`),
+                    FfiConverterTypeJanusId.lift(`room`),
+                    FfiConverterOptionalString.lift(`description`),
+                    FfiConverterULong.lift(`privateId`),
+                    FfiConverterSequenceTypePublisher.lift(`publishers`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `onRoomJoinedWithJsep`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod5 {
+        override fun callback(`uniffiHandle`: Long,`id`: RustBuffer.ByValue,`room`: RustBuffer.ByValue,`description`: RustBuffer.ByValue,`privateId`: Long,`publishers`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onRoomJoinedWithJsep`(
+                    FfiConverterTypeJanusId.lift(`id`),
+                    FfiConverterTypeJanusId.lift(`room`),
+                    FfiConverterOptionalString.lift(`description`),
+                    FfiConverterULong.lift(`privateId`),
+                    FfiConverterSequenceTypePublisher.lift(`publishers`),
+                    FfiConverterTypeJsep.lift(`jsep`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `onKicked`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod6 {
+        override fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`participant`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onKicked`(
+                    FfiConverterTypeJanusId.lift(`room`),
+                    FfiConverterTypeJanusId.lift(`participant`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `onLeaving`: UniffiCallbackInterfaceVideoRoomHandleCallbackMethod7 {
+        override fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`reason`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onLeaving`(
+                    FfiConverterTypeJanusId.lift(`room`),
+                    FfiConverterString.lift(`reason`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
 
     internal object uniffiFree: UniffiCallbackInterfaceFree {
         override fun callback(handle: Long) {
@@ -7311,6 +9880,11 @@ internal object uniffiCallbackInterfaceVideoRoomHandleCallback {
         `onHandleEvent`,
         `onVideoRoomError`,
         `onOther`,
+        `onConfigureWithJsep`,
+        `onRoomJoined`,
+        `onRoomJoinedWithJsep`,
+        `onKicked`,
+        `onLeaving`,
         uniffiFree,
     )
 
@@ -7590,6 +10164,70 @@ public object FfiConverterOptionalTypeJsep: FfiConverterRustBuffer<Jsep?> {
 /**
  * @suppress
  */
+public object FfiConverterOptionalTypeLegacyVideoRoomAudioCodecList: FfiConverterRustBuffer<LegacyVideoRoomAudioCodecList?> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomAudioCodecList? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeLegacyVideoRoomAudioCodecList.read(buf)
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomAudioCodecList?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeLegacyVideoRoomAudioCodecList.allocationSize(value)
+        }
+    }
+
+    override fun write(value: LegacyVideoRoomAudioCodecList?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeLegacyVideoRoomAudioCodecList.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeLegacyVideoRoomVideoCodecList: FfiConverterRustBuffer<LegacyVideoRoomVideoCodecList?> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomVideoCodecList? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeLegacyVideoRoomVideoCodecList.read(buf)
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomVideoCodecList?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeLegacyVideoRoomVideoCodecList.allocationSize(value)
+        }
+    }
+
+    override fun write(value: LegacyVideoRoomVideoCodecList?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeLegacyVideoRoomVideoCodecList.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalTypeVideoRoomAudioCodecList: FfiConverterRustBuffer<VideoRoomAudioCodecList?> {
     override fun read(buf: ByteBuffer): VideoRoomAudioCodecList? {
         if (buf.get().toInt() == 0) {
@@ -7750,6 +10388,102 @@ public object FfiConverterOptionalSequenceString: FfiConverterRustBuffer<List<ko
 /**
  * @suppress
  */
+public object FfiConverterOptionalSequenceTypeConfiguredStream: FfiConverterRustBuffer<List<ConfiguredStream>?> {
+    override fun read(buf: ByteBuffer): List<ConfiguredStream>? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterSequenceTypeConfiguredStream.read(buf)
+    }
+
+    override fun allocationSize(value: List<ConfiguredStream>?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterSequenceTypeConfiguredStream.allocationSize(value)
+        }
+    }
+
+    override fun write(value: List<ConfiguredStream>?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterSequenceTypeConfiguredStream.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalSequenceTypeVideoRoomConfigurePublisherStream: FfiConverterRustBuffer<List<VideoRoomConfigurePublisherStream>?> {
+    override fun read(buf: ByteBuffer): List<VideoRoomConfigurePublisherStream>? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterSequenceTypeVideoRoomConfigurePublisherStream.read(buf)
+    }
+
+    override fun allocationSize(value: List<VideoRoomConfigurePublisherStream>?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterSequenceTypeVideoRoomConfigurePublisherStream.allocationSize(value)
+        }
+    }
+
+    override fun write(value: List<VideoRoomConfigurePublisherStream>?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterSequenceTypeVideoRoomConfigurePublisherStream.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalSequenceTypeVideoRoomPublishDescriptionParams: FfiConverterRustBuffer<List<VideoRoomPublishDescriptionParams>?> {
+    override fun read(buf: ByteBuffer): List<VideoRoomPublishDescriptionParams>? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterSequenceTypeVideoRoomPublishDescriptionParams.read(buf)
+    }
+
+    override fun allocationSize(value: List<VideoRoomPublishDescriptionParams>?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterSequenceTypeVideoRoomPublishDescriptionParams.allocationSize(value)
+        }
+    }
+
+    override fun write(value: List<VideoRoomPublishDescriptionParams>?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterSequenceTypeVideoRoomPublishDescriptionParams.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceString: FfiConverterRustBuffer<List<kotlin.String>> {
     override fun read(buf: ByteBuffer): List<kotlin.String> {
         val len = buf.getInt()
@@ -7824,6 +10558,202 @@ public object FfiConverterSequenceTypeCandidate: FfiConverterRustBuffer<List<Can
         buf.putInt(value.size)
         value.iterator().forEach {
             FfiConverterTypeCandidate.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeConfiguredStream: FfiConverterRustBuffer<List<ConfiguredStream>> {
+    override fun read(buf: ByteBuffer): List<ConfiguredStream> {
+        val len = buf.getInt()
+        return List<ConfiguredStream>(len) {
+            FfiConverterTypeConfiguredStream.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<ConfiguredStream>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeConfiguredStream.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<ConfiguredStream>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeConfiguredStream.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeLegacyVideoRoomPublisher: FfiConverterRustBuffer<List<LegacyVideoRoomPublisher>> {
+    override fun read(buf: ByteBuffer): List<LegacyVideoRoomPublisher> {
+        val len = buf.getInt()
+        return List<LegacyVideoRoomPublisher>(len) {
+            FfiConverterTypeLegacyVideoRoomPublisher.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<LegacyVideoRoomPublisher>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeLegacyVideoRoomPublisher.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<LegacyVideoRoomPublisher>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeLegacyVideoRoomPublisher.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypePublisher: FfiConverterRustBuffer<List<Publisher>> {
+    override fun read(buf: ByteBuffer): List<Publisher> {
+        val len = buf.getInt()
+        return List<Publisher>(len) {
+            FfiConverterTypePublisher.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<Publisher>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypePublisher.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<Publisher>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypePublisher.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeVideoRoomConfigurePublisherStream: FfiConverterRustBuffer<List<VideoRoomConfigurePublisherStream>> {
+    override fun read(buf: ByteBuffer): List<VideoRoomConfigurePublisherStream> {
+        val len = buf.getInt()
+        return List<VideoRoomConfigurePublisherStream>(len) {
+            FfiConverterTypeVideoRoomConfigurePublisherStream.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<VideoRoomConfigurePublisherStream>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeVideoRoomConfigurePublisherStream.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<VideoRoomConfigurePublisherStream>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeVideoRoomConfigurePublisherStream.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeVideoRoomPublishDescriptionParams: FfiConverterRustBuffer<List<VideoRoomPublishDescriptionParams>> {
+    override fun read(buf: ByteBuffer): List<VideoRoomPublishDescriptionParams> {
+        val len = buf.getInt()
+        return List<VideoRoomPublishDescriptionParams>(len) {
+            FfiConverterTypeVideoRoomPublishDescriptionParams.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<VideoRoomPublishDescriptionParams>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeVideoRoomPublishDescriptionParams.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<VideoRoomPublishDescriptionParams>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeVideoRoomPublishDescriptionParams.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeLegacyVideoRoomAudioCodec: FfiConverterRustBuffer<List<LegacyVideoRoomAudioCodec>> {
+    override fun read(buf: ByteBuffer): List<LegacyVideoRoomAudioCodec> {
+        val len = buf.getInt()
+        return List<LegacyVideoRoomAudioCodec>(len) {
+            FfiConverterTypeLegacyVideoRoomAudioCodec.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<LegacyVideoRoomAudioCodec>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeLegacyVideoRoomAudioCodec.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<LegacyVideoRoomAudioCodec>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeLegacyVideoRoomAudioCodec.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeLegacyVideoRoomVideoCodec: FfiConverterRustBuffer<List<LegacyVideoRoomVideoCodec>> {
+    override fun read(buf: ByteBuffer): List<LegacyVideoRoomVideoCodec> {
+        val len = buf.getInt()
+        return List<LegacyVideoRoomVideoCodec>(len) {
+            FfiConverterTypeLegacyVideoRoomVideoCodec.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<LegacyVideoRoomVideoCodec>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeLegacyVideoRoomVideoCodec.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<LegacyVideoRoomVideoCodec>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeLegacyVideoRoomVideoCodec.write(it, buf)
         }
     }
 }
