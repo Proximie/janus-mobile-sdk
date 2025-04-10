@@ -10,6 +10,8 @@ use jarust::plugins::legacy_video_room::handle::LegacyVideoRoomHandle as JaLegac
 use jarust::plugins::legacy_video_room::params::LegacyVideoRoomCreateParams;
 use jarust::plugins::legacy_video_room::params::LegacyVideoRoomExistsParams;
 use jarust::plugins::legacy_video_room::params::LegacyVideoRoomKickParams;
+use jarust::plugins::legacy_video_room::params::LegacyVideoRoomPublisherConfigureParams;
+use jarust::plugins::legacy_video_room::params::LegacyVideoRoomPublisherJoinAndConfigureParams;
 use jarust::plugins::legacy_video_room::params::LegacyVideoRoomPublisherJoinParams;
 use jarust::plugins::legacy_video_room::responses::LegacyVideoRoomCreatedRsp;
 use serde_json::Value;
@@ -133,6 +135,37 @@ impl LegacyVideoRoomHandle {
         timeout: Duration,
     ) -> Result<String, JanusGatewayCommunicationError> {
         match self.inner.publisher_join(params, jsep, timeout).await {
+            Ok(transaction) => Ok(transaction),
+            Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            }),
+        }
+    }
+
+    pub async fn publisher_configure(
+        &self,
+        params: LegacyVideoRoomPublisherConfigureParams,
+        timeout: Duration,
+    ) -> Result<String, JanusGatewayCommunicationError> {
+        match self.inner.publisher_configure(params, timeout).await {
+            Ok(transaction) => Ok(transaction),
+            Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
+                reason: why.to_string(),
+            }),
+        }
+    }
+
+    pub async fn publisher_join_and_configure(
+        &self,
+        params: LegacyVideoRoomPublisherJoinAndConfigureParams,
+        jsep: Option<Jsep>,
+        timeout: Duration,
+    ) -> Result<String, JanusGatewayCommunicationError> {
+        match self
+            .inner
+            .publisher_join_and_configure(params, jsep, timeout)
+            .await
+        {
             Ok(transaction) => Ok(transaction),
             Err(why) => Err(JanusGatewayCommunicationError::SendFailure {
                 reason: why.to_string(),
