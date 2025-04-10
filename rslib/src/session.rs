@@ -3,11 +3,13 @@ use crate::error::JanusGatewayHandleError;
 use crate::handle::Handle;
 use crate::plugins::audiobridge::handle::AudioBridgeHandle;
 use crate::plugins::echotest::handle::EchotestHandle;
+use crate::plugins::legacy_videoroom::handle::LegacyVideoRoomHandle;
 use crate::plugins::videoroom::handle::VideoRoomHandle;
 use jarust::core::japlugin::Attach;
 use jarust::core::jasession::JaSession;
 use jarust::plugins::audio_bridge::jahandle_ext::AudioBridge;
 use jarust::plugins::echo_test::jahandle_ext::EchoTest;
+use jarust::plugins::legacy_video_room::jahandle_ext::LegacyVideoRoom;
 use jarust::plugins::video_room::jahandle_ext::VideoRoom;
 use std::time::Duration;
 
@@ -87,6 +89,22 @@ impl Session {
             }
         };
         Ok(VideoRoomHandle::new(handle, receiver))
+    }
+
+    pub async fn attach_legacy_video_room(
+        &self,
+        timeout: Duration,
+    ) -> Result<LegacyVideoRoomHandle, JanusGatewayHandleError> {
+        let (handle, receiver) = match self.inner.attach_legacy_video_room(timeout).await {
+            Ok(handle) => handle,
+            Err(why) => {
+                return Err(JanusGatewayHandleError::HandleCreationFailure {
+                    plugin: "videoroom".to_string(),
+                    reason: why.to_string(),
+                });
+            }
+        };
+        Ok(LegacyVideoRoomHandle::new(handle, receiver))
     }
 
     pub async fn destory(&self, timeout: Duration) -> Result<(), JanusGatewayCommunicationError> {

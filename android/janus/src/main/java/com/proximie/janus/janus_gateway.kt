@@ -1227,6 +1227,8 @@ internal open class UniffiVTableCallbackInterfaceVideoRoomHandleCallback(
 
 
 
+
+
 // For large crates we prevent `MethodTooLargeException` (see #2340)
 // N.B. the name of the extension is very misleading, since it is 
 // rather `InterfaceTooLargeException`, caused by too many methods 
@@ -1379,6 +1381,8 @@ fun uniffi_janus_gateway_checksum_method_session_attach(
 fun uniffi_janus_gateway_checksum_method_session_attach_audio_bridge(
 ): Short
 fun uniffi_janus_gateway_checksum_method_session_attach_echo_test(
+): Short
+fun uniffi_janus_gateway_checksum_method_session_attach_legacy_video_room(
 ): Short
 fun uniffi_janus_gateway_checksum_method_session_attach_video_room(
 ): Short
@@ -1695,6 +1699,8 @@ fun uniffi_janus_gateway_fn_method_session_attach(`ptr`: Pointer,`pluginId`: Rus
 fun uniffi_janus_gateway_fn_method_session_attach_audio_bridge(`ptr`: Pointer,`timeout`: RustBuffer.ByValue,
 ): Long
 fun uniffi_janus_gateway_fn_method_session_attach_echo_test(`ptr`: Pointer,`timeout`: RustBuffer.ByValue,
+): Long
+fun uniffi_janus_gateway_fn_method_session_attach_legacy_video_room(`ptr`: Pointer,`timeout`: RustBuffer.ByValue,
 ): Long
 fun uniffi_janus_gateway_fn_method_session_attach_video_room(`ptr`: Pointer,`timeout`: RustBuffer.ByValue,
 ): Long
@@ -2077,6 +2083,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_janus_gateway_checksum_method_session_attach_echo_test() != 28942.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_session_attach_legacy_video_room() != 63300.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_janus_gateway_checksum_method_session_attach_video_room() != 2521.toShort()) {
@@ -5393,6 +5402,8 @@ public interface SessionInterface {
     
     suspend fun `attachEchoTest`(`timeout`: java.time.Duration): EchotestHandle
     
+    suspend fun `attachLegacyVideoRoom`(`timeout`: java.time.Duration): LegacyVideoRoomHandle
+    
     suspend fun `attachVideoRoom`(`timeout`: java.time.Duration): VideoRoomHandle
     
     suspend fun `destory`(`timeout`: java.time.Duration)
@@ -5540,6 +5551,27 @@ open class Session: Disposable, AutoCloseable, SessionInterface
         { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_pointer(future) },
         // lift function
         { FfiConverterTypeEchotestHandle.lift(it) },
+        // Error FFI converter
+        JanusGatewayHandleException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(JanusGatewayHandleException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `attachLegacyVideoRoom`(`timeout`: java.time.Duration) : LegacyVideoRoomHandle {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_janus_gateway_fn_method_session_attach_legacy_video_room(
+                thisPtr,
+                FfiConverterDuration.lower(`timeout`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_poll_pointer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_complete_pointer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_janus_gateway_rust_future_free_pointer(future) },
+        // lift function
+        { FfiConverterTypeLegacyVideoRoomHandle.lift(it) },
         // Error FFI converter
         JanusGatewayHandleException.ErrorHandler,
     )
