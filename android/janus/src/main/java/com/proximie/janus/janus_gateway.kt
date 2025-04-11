@@ -730,21 +730,24 @@ internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod4 :
     fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
 }
 internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod5 : com.sun.jna.Callback {
-    fun callback(`uniffiHandle`: Long,`id`: RustBuffer.ByValue,`room`: RustBuffer.ByValue,`display`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+    fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`publishers`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
 }
 internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod6 : com.sun.jna.Callback {
-    fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+    fun callback(`uniffiHandle`: Long,`id`: RustBuffer.ByValue,`room`: RustBuffer.ByValue,`display`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
 }
 internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod7 : com.sun.jna.Callback {
-    fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`unpublished`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+    fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
 }
 internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod8 : com.sun.jna.Callback {
-    fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`started`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+    fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`unpublished`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
 }
 internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod9 : com.sun.jna.Callback {
-    fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`reason`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+    fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`started`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
 }
 internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod10 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`reason`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod11 : com.sun.jna.Callback {
     fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`participant`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
 }
 internal interface UniffiCallbackInterfaceVideoRoomHandleCallbackMethod0 : com.sun.jna.Callback {
@@ -861,19 +864,20 @@ internal open class UniffiVTableCallbackInterfaceHandleCallback(
     }
 
 }
-@Structure.FieldOrder("onLegacyVideoRoomOther", "onLegacyVideoRoomHandleEvent", "onLegacyVideoRoomError", "onLegacyVideoRoomJoined", "onLegacyVideoRoomConfigured", "onLegacyVideoRoomSubscriberAttached", "onLegacyVideoRoomSlowLink", "onLegacyVideoRoomUnpublished", "onLegacyVideoRoomSubscriberStarted", "onLegacyVideoRoomLeaving", "onLegacyVideoRoomKicked", "uniffiFree")
+@Structure.FieldOrder("onLegacyVideoRoomOther", "onLegacyVideoRoomHandleEvent", "onLegacyVideoRoomError", "onLegacyVideoRoomJoined", "onLegacyVideoRoomConfigured", "onLegacyVideoRoomNewPublishers", "onLegacyVideoRoomSubscriberAttached", "onLegacyVideoRoomSlowLink", "onLegacyVideoRoomUnpublished", "onLegacyVideoRoomSubscriberStarted", "onLegacyVideoRoomLeaving", "onLegacyVideoRoomKicked", "uniffiFree")
 internal open class UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback(
     @JvmField internal var `onLegacyVideoRoomOther`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod0? = null,
     @JvmField internal var `onLegacyVideoRoomHandleEvent`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod1? = null,
     @JvmField internal var `onLegacyVideoRoomError`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod2? = null,
     @JvmField internal var `onLegacyVideoRoomJoined`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod3? = null,
     @JvmField internal var `onLegacyVideoRoomConfigured`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod4? = null,
-    @JvmField internal var `onLegacyVideoRoomSubscriberAttached`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod5? = null,
-    @JvmField internal var `onLegacyVideoRoomSlowLink`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod6? = null,
-    @JvmField internal var `onLegacyVideoRoomUnpublished`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod7? = null,
-    @JvmField internal var `onLegacyVideoRoomSubscriberStarted`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod8? = null,
-    @JvmField internal var `onLegacyVideoRoomLeaving`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod9? = null,
-    @JvmField internal var `onLegacyVideoRoomKicked`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod10? = null,
+    @JvmField internal var `onLegacyVideoRoomNewPublishers`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod5? = null,
+    @JvmField internal var `onLegacyVideoRoomSubscriberAttached`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod6? = null,
+    @JvmField internal var `onLegacyVideoRoomSlowLink`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod7? = null,
+    @JvmField internal var `onLegacyVideoRoomUnpublished`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod8? = null,
+    @JvmField internal var `onLegacyVideoRoomSubscriberStarted`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod9? = null,
+    @JvmField internal var `onLegacyVideoRoomLeaving`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod10? = null,
+    @JvmField internal var `onLegacyVideoRoomKicked`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod11? = null,
     @JvmField internal var `uniffiFree`: UniffiCallbackInterfaceFree? = null,
 ) : Structure() {
     class UniffiByValue(
@@ -882,14 +886,15 @@ internal open class UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback(
         `onLegacyVideoRoomError`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod2? = null,
         `onLegacyVideoRoomJoined`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod3? = null,
         `onLegacyVideoRoomConfigured`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod4? = null,
-        `onLegacyVideoRoomSubscriberAttached`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod5? = null,
-        `onLegacyVideoRoomSlowLink`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod6? = null,
-        `onLegacyVideoRoomUnpublished`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod7? = null,
-        `onLegacyVideoRoomSubscriberStarted`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod8? = null,
-        `onLegacyVideoRoomLeaving`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod9? = null,
-        `onLegacyVideoRoomKicked`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod10? = null,
+        `onLegacyVideoRoomNewPublishers`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod5? = null,
+        `onLegacyVideoRoomSubscriberAttached`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod6? = null,
+        `onLegacyVideoRoomSlowLink`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod7? = null,
+        `onLegacyVideoRoomUnpublished`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod8? = null,
+        `onLegacyVideoRoomSubscriberStarted`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod9? = null,
+        `onLegacyVideoRoomLeaving`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod10? = null,
+        `onLegacyVideoRoomKicked`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod11? = null,
         `uniffiFree`: UniffiCallbackInterfaceFree? = null,
-    ): UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback(`onLegacyVideoRoomOther`,`onLegacyVideoRoomHandleEvent`,`onLegacyVideoRoomError`,`onLegacyVideoRoomJoined`,`onLegacyVideoRoomConfigured`,`onLegacyVideoRoomSubscriberAttached`,`onLegacyVideoRoomSlowLink`,`onLegacyVideoRoomUnpublished`,`onLegacyVideoRoomSubscriberStarted`,`onLegacyVideoRoomLeaving`,`onLegacyVideoRoomKicked`,`uniffiFree`,), Structure.ByValue
+    ): UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback(`onLegacyVideoRoomOther`,`onLegacyVideoRoomHandleEvent`,`onLegacyVideoRoomError`,`onLegacyVideoRoomJoined`,`onLegacyVideoRoomConfigured`,`onLegacyVideoRoomNewPublishers`,`onLegacyVideoRoomSubscriberAttached`,`onLegacyVideoRoomSlowLink`,`onLegacyVideoRoomUnpublished`,`onLegacyVideoRoomSubscriberStarted`,`onLegacyVideoRoomLeaving`,`onLegacyVideoRoomKicked`,`uniffiFree`,), Structure.ByValue
 
    internal fun uniffiSetValue(other: UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback) {
         `onLegacyVideoRoomOther` = other.`onLegacyVideoRoomOther`
@@ -897,6 +902,7 @@ internal open class UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback(
         `onLegacyVideoRoomError` = other.`onLegacyVideoRoomError`
         `onLegacyVideoRoomJoined` = other.`onLegacyVideoRoomJoined`
         `onLegacyVideoRoomConfigured` = other.`onLegacyVideoRoomConfigured`
+        `onLegacyVideoRoomNewPublishers` = other.`onLegacyVideoRoomNewPublishers`
         `onLegacyVideoRoomSubscriberAttached` = other.`onLegacyVideoRoomSubscriberAttached`
         `onLegacyVideoRoomSlowLink` = other.`onLegacyVideoRoomSlowLink`
         `onLegacyVideoRoomUnpublished` = other.`onLegacyVideoRoomUnpublished`
@@ -944,6 +950,7 @@ internal open class UniffiVTableCallbackInterfaceVideoRoomHandleCallback(
     }
 
 }
+
 
 
 
@@ -1459,6 +1466,8 @@ fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy
 fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_joined(
 ): Short
 fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_configured(
+): Short
+fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_new_publishers(
 ): Short
 fun uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_attached(
 ): Short
@@ -2202,22 +2211,25 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_configured() != 3953.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_attached() != 45217.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_new_publishers() != 55055.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_slow_link() != 3293.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_attached() != 27716.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_unpublished() != 14908.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_slow_link() != 29634.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_started() != 8038.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_unpublished() != 45917.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_leaving() != 31440.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_started() != 3683.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_kicked() != 36262.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_leaving() != 40337.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_kicked() != 2902.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_handle_event() != 12084.toShort()) {
@@ -9560,6 +9572,8 @@ public interface LegacyVideoRoomHandleCallback {
     
     fun `onLegacyVideoRoomConfigured`(`room`: JanusId, `jsep`: Jsep?)
     
+    fun `onLegacyVideoRoomNewPublishers`(`room`: JanusId, `publishers`: List<LegacyVideoRoomPublisher>)
+    
     fun `onLegacyVideoRoomSubscriberAttached`(`id`: JanusId, `room`: JanusId, `display`: kotlin.String?, `jsep`: Jsep)
     
     fun `onLegacyVideoRoomSlowLink`()
@@ -9646,7 +9660,20 @@ internal object uniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
             uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
         }
     }
-    internal object `onLegacyVideoRoomSubscriberAttached`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod5 {
+    internal object `onLegacyVideoRoomNewPublishers`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod5 {
+        override fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`publishers`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`onLegacyVideoRoomNewPublishers`(
+                    FfiConverterTypeJanusId.lift(`room`),
+                    FfiConverterSequenceTypeLegacyVideoRoomPublisher.lift(`publishers`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `onLegacyVideoRoomSubscriberAttached`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod6 {
         override fun callback(`uniffiHandle`: Long,`id`: RustBuffer.ByValue,`room`: RustBuffer.ByValue,`display`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
             val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
             val makeCall = { ->
@@ -9661,7 +9688,7 @@ internal object uniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
             uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
         }
     }
-    internal object `onLegacyVideoRoomSlowLink`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod6 {
+    internal object `onLegacyVideoRoomSlowLink`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod7 {
         override fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
             val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
             val makeCall = { ->
@@ -9672,7 +9699,7 @@ internal object uniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
             uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
         }
     }
-    internal object `onLegacyVideoRoomUnpublished`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod7 {
+    internal object `onLegacyVideoRoomUnpublished`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod8 {
         override fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`unpublished`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
             val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
             val makeCall = { ->
@@ -9685,7 +9712,7 @@ internal object uniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
             uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
         }
     }
-    internal object `onLegacyVideoRoomSubscriberStarted`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod8 {
+    internal object `onLegacyVideoRoomSubscriberStarted`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod9 {
         override fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`started`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
             val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
             val makeCall = { ->
@@ -9698,7 +9725,7 @@ internal object uniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
             uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
         }
     }
-    internal object `onLegacyVideoRoomLeaving`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod9 {
+    internal object `onLegacyVideoRoomLeaving`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod10 {
         override fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`reason`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
             val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
             val makeCall = { ->
@@ -9711,7 +9738,7 @@ internal object uniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
             uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
         }
     }
-    internal object `onLegacyVideoRoomKicked`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod10 {
+    internal object `onLegacyVideoRoomKicked`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod11 {
         override fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`participant`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
             val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
             val makeCall = { ->
@@ -9737,6 +9764,7 @@ internal object uniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
         `onLegacyVideoRoomError`,
         `onLegacyVideoRoomJoined`,
         `onLegacyVideoRoomConfigured`,
+        `onLegacyVideoRoomNewPublishers`,
         `onLegacyVideoRoomSubscriberAttached`,
         `onLegacyVideoRoomSlowLink`,
         `onLegacyVideoRoomUnpublished`,

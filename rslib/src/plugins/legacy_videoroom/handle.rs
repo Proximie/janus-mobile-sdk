@@ -99,6 +99,12 @@ impl LegacyVideoRoomHandle {
                     }) => {
                         cb.on_legacy_video_room_configured(room, jsep);
                     }
+                    PluginEvent::LegacyVideoRoomEvent(LegacyVideoRoomEvent::NewPublishers {
+                        room,
+                        publishers,
+                    }) => {
+                        cb.on_legacy_video_room_new_publishers(room, publishers);
+                    }
                     PluginEvent::LegacyVideoRoomEvent(
                         LegacyVideoRoomEvent::SubscriberAttached {
                             id,
@@ -292,6 +298,11 @@ pub trait LegacyVideoRoomHandleCallback: Send + Sync + Debug {
         jsep: Option<Jsep>,
     );
     fn on_legacy_video_room_configured(&self, room: JanusId, jsep: Option<Jsep>);
+    fn on_legacy_video_room_new_publishers(
+        &self,
+        room: JanusId,
+        publishers: Vec<LegacyVideoRoomPublisher>,
+    );
     fn on_legacy_video_room_subscriber_attached(
         &self,
         id: JanusId,
