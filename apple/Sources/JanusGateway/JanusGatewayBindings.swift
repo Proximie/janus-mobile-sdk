@@ -9701,6 +9701,8 @@ public protocol LegacyVideoRoomHandleCallback: AnyObject, Sendable {
     
     func onLegacyVideoRoomConfigured(room: JanusId, jsep: Jsep?) 
     
+    func onLegacyVideoRoomNewPublishers(room: JanusId, publishers: [LegacyVideoRoomPublisher]) 
+    
     func onLegacyVideoRoomSubscriberAttached(id: JanusId, room: JanusId, display: String?, jsep: Jsep) 
     
     func onLegacyVideoRoomSlowLink() 
@@ -9848,6 +9850,32 @@ fileprivate struct UniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
                 return uniffiObj.onLegacyVideoRoomConfigured(
                      room: try FfiConverterTypeJanusId_lift(room),
                      jsep: try FfiConverterOptionTypeJsep.lift(jsep)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onLegacyVideoRoomNewPublishers: { (
+            uniffiHandle: UInt64,
+            room: RustBuffer,
+            publishers: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.onLegacyVideoRoomNewPublishers(
+                     room: try FfiConverterTypeJanusId_lift(room),
+                     publishers: try FfiConverterSequenceTypeLegacyVideoRoomPublisher.lift(publishers)
                 )
             }
 
@@ -11608,22 +11636,25 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_configured() != 3953) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_attached() != 45217) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_new_publishers() != 55055) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_slow_link() != 3293) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_attached() != 27716) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_unpublished() != 14908) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_slow_link() != 29634) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_started() != 8038) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_unpublished() != 45917) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_leaving() != 31440) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_started() != 3683) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_kicked() != 36262) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_leaving() != 40337) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_kicked() != 2902) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_handle_event() != 12084) {
