@@ -293,7 +293,7 @@ pub trait LegacyVideoRoomHandleCallback: Send + Sync + Debug {
         id: JanusId,
         room: JanusId,
         description: Option<String>,
-        private_id: u64,
+        private_id: Option<u64>,
         publishers: Vec<LegacyVideoRoomPublisher>,
         jsep: Option<Jsep>,
     );

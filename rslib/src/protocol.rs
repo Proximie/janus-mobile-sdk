@@ -26,7 +26,11 @@ pub enum GenericEvent {
     /// ICE and DTLS succeeded, and so Janus correctly established a PeerConnection with the user/application.
     WebrtcUp,
     /// Whether Janus is reporting trouble sending/receiving (uplink: true/false) media on this PeerConnection.
-    Slowlink,
+    Slowlink {
+        uplink: bool,
+        media: String,
+        lost: u32,
+    },
     Trickle,
 }
 
