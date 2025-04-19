@@ -5,8 +5,8 @@ import PackageDescription
 
 // Never push to remote with this flag set to true
 let useLocalFramework = false
-let releaseTag = "0.15.0"
-let releaseChecksum = "e04a233e465f13fa70fdd7fbd0e449a1bf60a205bfa8e760ebb4d54f74741b67"
+let releaseTag = "0.15.1"
+let releaseChecksum = "1a4112315d6923a54e7215c50060ba432bb9701bdcb778cde2931c9cb6d15179"
 
 let binaryTarget: Target = if useLocalFramework {
     .binaryTarget(
