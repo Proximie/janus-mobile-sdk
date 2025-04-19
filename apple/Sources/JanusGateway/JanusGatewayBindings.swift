@@ -8034,7 +8034,8 @@ public enum GenericEvent {
     /**
      * Whether Janus is reporting trouble sending/receiving (uplink: true/false) media on this PeerConnection.
      */
-    case slowlink
+    case slowlink(uplink: Bool, media: String, lost: UInt32
+    )
     case trickle
 }
 
@@ -8063,7 +8064,8 @@ public struct FfiConverterTypeGenericEvent: FfiConverterRustBuffer {
         
         case 5: return .webrtcUp
         
-        case 6: return .slowlink
+        case 6: return .slowlink(uplink: try FfiConverterBool.read(from: &buf), media: try FfiConverterString.read(from: &buf), lost: try FfiConverterUInt32.read(from: &buf)
+        )
         
         case 7: return .trickle
         
@@ -8095,9 +8097,12 @@ public struct FfiConverterTypeGenericEvent: FfiConverterRustBuffer {
             writeInt(&buf, Int32(5))
         
         
-        case .slowlink:
+        case let .slowlink(uplink,media,lost):
             writeInt(&buf, Int32(6))
-        
+            FfiConverterBool.write(uplink, into: &buf)
+            FfiConverterString.write(media, into: &buf)
+            FfiConverterUInt32.write(lost, into: &buf)
+            
         
         case .trickle:
             writeInt(&buf, Int32(7))
@@ -9697,7 +9702,7 @@ public protocol LegacyVideoRoomHandleCallback: AnyObject, Sendable {
     
     func onLegacyVideoRoomError(errorCode: UInt16, error: String) 
     
-    func onLegacyVideoRoomJoined(id: JanusId, room: JanusId, description: String?, privateId: UInt64, publishers: [LegacyVideoRoomPublisher], jsep: Jsep?) 
+    func onLegacyVideoRoomJoined(id: JanusId, room: JanusId, description: String?, privateId: UInt64?, publishers: [LegacyVideoRoomPublisher], jsep: Jsep?) 
     
     func onLegacyVideoRoomConfigured(room: JanusId, jsep: Jsep?) 
     
@@ -9806,7 +9811,7 @@ fileprivate struct UniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
             id: RustBuffer,
             room: RustBuffer,
             description: RustBuffer,
-            privateId: UInt64,
+            privateId: RustBuffer,
             publishers: RustBuffer,
             jsep: RustBuffer,
             uniffiOutReturn: UnsafeMutableRawPointer,
@@ -9821,7 +9826,7 @@ fileprivate struct UniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
                      id: try FfiConverterTypeJanusId_lift(id),
                      room: try FfiConverterTypeJanusId_lift(room),
                      description: try FfiConverterOptionString.lift(description),
-                     privateId: try FfiConverterUInt64.lift(privateId),
+                     privateId: try FfiConverterOptionUInt64.lift(privateId),
                      publishers: try FfiConverterSequenceTypeLegacyVideoRoomPublisher.lift(publishers),
                      jsep: try FfiConverterOptionTypeJsep.lift(jsep)
                 )
@@ -11630,7 +11635,7 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_error() != 11633) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_joined() != 42543) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_joined() != 45081) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_configured() != 3953) {

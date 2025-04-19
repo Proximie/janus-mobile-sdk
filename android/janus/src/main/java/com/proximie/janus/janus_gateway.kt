@@ -724,7 +724,7 @@ internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod2 :
     fun callback(`uniffiHandle`: Long,`errorCode`: Short,`error`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
 }
 internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod3 : com.sun.jna.Callback {
-    fun callback(`uniffiHandle`: Long,`id`: RustBuffer.ByValue,`room`: RustBuffer.ByValue,`description`: RustBuffer.ByValue,`privateId`: Long,`publishers`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+    fun callback(`uniffiHandle`: Long,`id`: RustBuffer.ByValue,`room`: RustBuffer.ByValue,`description`: RustBuffer.ByValue,`privateId`: RustBuffer.ByValue,`publishers`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
 }
 internal interface UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod4 : com.sun.jna.Callback {
     fun callback(`uniffiHandle`: Long,`room`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
@@ -2205,7 +2205,7 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_error() != 11633.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_joined() != 42543.toShort()) {
+    if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_joined() != 45081.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_configured() != 3953.toShort()) {
@@ -8599,46 +8599,153 @@ public object FfiConverterTypeAudioBridgeCodec: FfiConverterRustBuffer<AudioBrid
 
 
 
-
-enum class GenericEvent {
+sealed class GenericEvent {
     
-    DETACHED,
+    object Detached : GenericEvent()
+    
+    
     /**
      * The PeerConnection was closed, either by Janus or by the user/application, and as such cannot be used anymore.
      */
-    HANGUP,
+    object Hangup : GenericEvent()
+    
+    
     /**
      * Whether Janus is receiving (receiving: true/false) audio/video (type: "audio/video") on this PeerConnection.
      */
-    MEDIA,
-    TIMEOUT,
+    object Media : GenericEvent()
+    
+    
+    object Timeout : GenericEvent()
+    
+    
     /**
      * ICE and DTLS succeeded, and so Janus correctly established a PeerConnection with the user/application.
      */
-    WEBRTC_UP,
+    object WebrtcUp : GenericEvent()
+    
+    
     /**
      * Whether Janus is reporting trouble sending/receiving (uplink: true/false) media on this PeerConnection.
      */
-    SLOWLINK,
-    TRICKLE;
+    data class Slowlink(
+        val `uplink`: kotlin.Boolean, 
+        val `media`: kotlin.String, 
+        val `lost`: kotlin.UInt) : GenericEvent() {
+        companion object
+    }
+    
+    object Trickle : GenericEvent()
+    
+    
+
+    
     companion object
 }
-
 
 /**
  * @suppress
  */
-public object FfiConverterTypeGenericEvent: FfiConverterRustBuffer<GenericEvent> {
-    override fun read(buf: ByteBuffer) = try {
-        GenericEvent.values()[buf.getInt() - 1]
-    } catch (e: IndexOutOfBoundsException) {
-        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+public object FfiConverterTypeGenericEvent : FfiConverterRustBuffer<GenericEvent>{
+    override fun read(buf: ByteBuffer): GenericEvent {
+        return when(buf.getInt()) {
+            1 -> GenericEvent.Detached
+            2 -> GenericEvent.Hangup
+            3 -> GenericEvent.Media
+            4 -> GenericEvent.Timeout
+            5 -> GenericEvent.WebrtcUp
+            6 -> GenericEvent.Slowlink(
+                FfiConverterBoolean.read(buf),
+                FfiConverterString.read(buf),
+                FfiConverterUInt.read(buf),
+                )
+            7 -> GenericEvent.Trickle
+            else -> throw RuntimeException("invalid enum value, something is very wrong!!")
+        }
     }
 
-    override fun allocationSize(value: GenericEvent) = 4UL
+    override fun allocationSize(value: GenericEvent) = when(value) {
+        is GenericEvent.Detached -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is GenericEvent.Hangup -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is GenericEvent.Media -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is GenericEvent.Timeout -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is GenericEvent.WebrtcUp -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is GenericEvent.Slowlink -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterBoolean.allocationSize(value.`uplink`)
+                + FfiConverterString.allocationSize(value.`media`)
+                + FfiConverterUInt.allocationSize(value.`lost`)
+            )
+        }
+        is GenericEvent.Trickle -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+    }
 
     override fun write(value: GenericEvent, buf: ByteBuffer) {
-        buf.putInt(value.ordinal + 1)
+        when(value) {
+            is GenericEvent.Detached -> {
+                buf.putInt(1)
+                Unit
+            }
+            is GenericEvent.Hangup -> {
+                buf.putInt(2)
+                Unit
+            }
+            is GenericEvent.Media -> {
+                buf.putInt(3)
+                Unit
+            }
+            is GenericEvent.Timeout -> {
+                buf.putInt(4)
+                Unit
+            }
+            is GenericEvent.WebrtcUp -> {
+                buf.putInt(5)
+                Unit
+            }
+            is GenericEvent.Slowlink -> {
+                buf.putInt(6)
+                FfiConverterBoolean.write(value.`uplink`, buf)
+                FfiConverterString.write(value.`media`, buf)
+                FfiConverterUInt.write(value.`lost`, buf)
+                Unit
+            }
+            is GenericEvent.Trickle -> {
+                buf.putInt(7)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
     }
 }
 
@@ -9568,7 +9675,7 @@ public interface LegacyVideoRoomHandleCallback {
     
     fun `onLegacyVideoRoomError`(`errorCode`: kotlin.UShort, `error`: kotlin.String)
     
-    fun `onLegacyVideoRoomJoined`(`id`: JanusId, `room`: JanusId, `description`: kotlin.String?, `privateId`: kotlin.ULong, `publishers`: List<LegacyVideoRoomPublisher>, `jsep`: Jsep?)
+    fun `onLegacyVideoRoomJoined`(`id`: JanusId, `room`: JanusId, `description`: kotlin.String?, `privateId`: kotlin.ULong?, `publishers`: List<LegacyVideoRoomPublisher>, `jsep`: Jsep?)
     
     fun `onLegacyVideoRoomConfigured`(`room`: JanusId, `jsep`: Jsep?)
     
@@ -9631,14 +9738,14 @@ internal object uniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
         }
     }
     internal object `onLegacyVideoRoomJoined`: UniffiCallbackInterfaceLegacyVideoRoomHandleCallbackMethod3 {
-        override fun callback(`uniffiHandle`: Long,`id`: RustBuffer.ByValue,`room`: RustBuffer.ByValue,`description`: RustBuffer.ByValue,`privateId`: Long,`publishers`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+        override fun callback(`uniffiHandle`: Long,`id`: RustBuffer.ByValue,`room`: RustBuffer.ByValue,`description`: RustBuffer.ByValue,`privateId`: RustBuffer.ByValue,`publishers`: RustBuffer.ByValue,`jsep`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
             val uniffiObj = FfiConverterTypeLegacyVideoRoomHandleCallback.handleMap.get(uniffiHandle)
             val makeCall = { ->
                 uniffiObj.`onLegacyVideoRoomJoined`(
                     FfiConverterTypeJanusId.lift(`id`),
                     FfiConverterTypeJanusId.lift(`room`),
                     FfiConverterOptionalString.lift(`description`),
-                    FfiConverterULong.lift(`privateId`),
+                    FfiConverterOptionalULong.lift(`privateId`),
                     FfiConverterSequenceTypeLegacyVideoRoomPublisher.lift(`publishers`),
                     FfiConverterOptionalTypeJsep.lift(`jsep`),
                 )
