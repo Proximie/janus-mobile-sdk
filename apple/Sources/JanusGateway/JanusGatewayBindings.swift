@@ -5251,14 +5251,14 @@ public func FfiConverterTypeLegacyVideoRoomCreatedRsp_lower(_ value: LegacyVideo
 
 public struct LegacyVideoRoomKickParams {
     public let room: JanusId
-    public let participant: JanusId
+    public let id: JanusId
     public let secret: String?
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(room: JanusId, participant: JanusId, secret: String?) {
+    public init(room: JanusId, id: JanusId, secret: String?) {
         self.room = room
-        self.participant = participant
+        self.id = id
         self.secret = secret
     }
 }
@@ -5273,7 +5273,7 @@ extension LegacyVideoRoomKickParams: Equatable, Hashable {
         if lhs.room != rhs.room {
             return false
         }
-        if lhs.participant != rhs.participant {
+        if lhs.id != rhs.id {
             return false
         }
         if lhs.secret != rhs.secret {
@@ -5284,7 +5284,7 @@ extension LegacyVideoRoomKickParams: Equatable, Hashable {
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(room)
-        hasher.combine(participant)
+        hasher.combine(id)
         hasher.combine(secret)
     }
 }
@@ -5299,14 +5299,14 @@ public struct FfiConverterTypeLegacyVideoRoomKickParams: FfiConverterRustBuffer 
         return
             try LegacyVideoRoomKickParams(
                 room: FfiConverterTypeJanusId.read(from: &buf), 
-                participant: FfiConverterTypeJanusId.read(from: &buf), 
+                id: FfiConverterTypeJanusId.read(from: &buf), 
                 secret: FfiConverterOptionString.read(from: &buf)
         )
     }
 
     public static func write(_ value: LegacyVideoRoomKickParams, into buf: inout [UInt8]) {
         FfiConverterTypeJanusId.write(value.room, into: &buf)
-        FfiConverterTypeJanusId.write(value.participant, into: &buf)
+        FfiConverterTypeJanusId.write(value.id, into: &buf)
         FfiConverterOptionString.write(value.secret, into: &buf)
     }
 }

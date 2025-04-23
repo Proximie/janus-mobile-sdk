@@ -7300,7 +7300,7 @@ public object FfiConverterTypeLegacyVideoRoomCreatedRsp: FfiConverterRustBuffer<
 
 data class LegacyVideoRoomKickParams (
     val `room`: JanusId, 
-    val `participant`: JanusId, 
+    val `id`: JanusId, 
     val `secret`: kotlin.String?
 ) {
     
@@ -7321,13 +7321,13 @@ public object FfiConverterTypeLegacyVideoRoomKickParams: FfiConverterRustBuffer<
 
     override fun allocationSize(value: LegacyVideoRoomKickParams) = (
             FfiConverterTypeJanusId.allocationSize(value.`room`) +
-            FfiConverterTypeJanusId.allocationSize(value.`participant`) +
+            FfiConverterTypeJanusId.allocationSize(value.`id`) +
             FfiConverterOptionalString.allocationSize(value.`secret`)
     )
 
     override fun write(value: LegacyVideoRoomKickParams, buf: ByteBuffer) {
             FfiConverterTypeJanusId.write(value.`room`, buf)
-            FfiConverterTypeJanusId.write(value.`participant`, buf)
+            FfiConverterTypeJanusId.write(value.`id`, buf)
             FfiConverterOptionalString.write(value.`secret`, buf)
     }
 }

@@ -125,7 +125,7 @@ pub struct LegacyVideoRoomVideoCodecList {
 #[uniffi::remote(Record)]
 pub struct LegacyVideoRoomKickParams {
     room: JanusId,
-    participant: JanusId,
+    id: JanusId,
     secret: Option<String>,
 }
 

@@ -675,9 +675,9 @@ checksum = "49f1f14873335454500d59611f1cf4a4b0f786f9ac11f4312a78e4cf2566695b"
 
 [[package]]
 name = "jarust"
-version = "1.7.1"
+version = "1.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c9f6ae396940a49539525a0b985eb470b58d3d91d881fa2f4695d1c1798597d"
+checksum = "d05b5db3f43b4dacb6ee1f26cedf648b6991aabd176b1a6afe7e82145895de83"
 dependencies = [
  "jarust_core",
  "jarust_interface",
@@ -686,9 +686,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_core"
-version = "1.7.1"
+version = "1.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8dac4bd594f2d8af8c6f96d4ccae73ffc52b80e4a2d040d5480ef5a23fbfe84b"
+checksum = "981ac43468839a2abae4a6ce0283266c5eea192a1f104caa3d1e7f67acf3bc93"
 dependencies = [
  "async-trait",
  "jarust_interface",
@@ -701,9 +701,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_interface"
-version = "1.7.1"
+version = "1.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4864decfd816cdcdc204e12ee330339e85d268364977c9667b5e811d850a998d"
+checksum = "1b039686de2f0db1992c5fca899fecd0c585e54f24fac33d32e40cd02d386cfb"
 dependencies = [
  "async-trait",
  "bytes",
@@ -724,9 +724,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_plugins"
-version = "1.7.1"
+version = "1.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd7a424ae81b55bbbbaf2928ea302f76f62cbfa97ac7c19f1e728201d87650fc"
+checksum = "3dd7073afc6edd1b3a755ef006c340602e512a67e6566d26e84fdb4da70c93ae"
 dependencies = [
  "async-trait",
  "jarust_core",
@@ -741,9 +741,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_rt"
-version = "1.7.1"
+version = "1.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8c8bc4251eb5420336240a50f1c0a7f4430ae505ec03eda7f6ab5c29da506de"
+checksum = "c7d764f97c60250b90103de59bdcfbdbf02c193968932c4f154ef8a1e866265f"
 dependencies = [
  "futures-util",
  "tokio",
@@ -1198,7 +1198,7 @@ dependencies = [
 
 [[package]]
 name = "rslib"
-version = "0.15.1"
+version = "0.15.2"
 dependencies = [
  "android_logger",
  "apple-tracing-sub",
