@@ -163,6 +163,8 @@ pub struct VideoRoomPublisherConfigureParams {
     pub streams: Option<Vec<VideoRoomConfigurePublisherStream>>,
     #[uniffi(default = None)]
     pub descriptions: Option<Vec<VideoRoomPublishDescriptionParams>>,
+    #[uniffi(default = None)]
+    videocodec: Option<VideoRoomVideoCodec>,
 }
 
 #[uniffi::remote(Record)]

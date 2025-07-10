@@ -7382,7 +7382,8 @@ data class LegacyVideoRoomPublisherConfigureParams (
     val `audioActivePackets`: kotlin.ULong? = null, 
     val `audioLevelAverage`: kotlin.ULong? = null, 
     val `minDelay`: kotlin.ULong? = null, 
-    val `maxDelay`: kotlin.ULong? = null
+    val `maxDelay`: kotlin.ULong? = null, 
+    val `videocodec`: LegacyVideoRoomVideoCodec? = null
 ) {
     
     companion object
@@ -7406,6 +7407,7 @@ public object FfiConverterTypeLegacyVideoRoomPublisherConfigureParams: FfiConver
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalTypeLegacyVideoRoomVideoCodec.read(buf),
         )
     }
 
@@ -7421,7 +7423,8 @@ public object FfiConverterTypeLegacyVideoRoomPublisherConfigureParams: FfiConver
             FfiConverterOptionalULong.allocationSize(value.`audioActivePackets`) +
             FfiConverterOptionalULong.allocationSize(value.`audioLevelAverage`) +
             FfiConverterOptionalULong.allocationSize(value.`minDelay`) +
-            FfiConverterOptionalULong.allocationSize(value.`maxDelay`)
+            FfiConverterOptionalULong.allocationSize(value.`maxDelay`) +
+            FfiConverterOptionalTypeLegacyVideoRoomVideoCodec.allocationSize(value.`videocodec`)
     )
 
     override fun write(value: LegacyVideoRoomPublisherConfigureParams, buf: ByteBuffer) {
@@ -7437,6 +7440,7 @@ public object FfiConverterTypeLegacyVideoRoomPublisherConfigureParams: FfiConver
             FfiConverterOptionalULong.write(value.`audioLevelAverage`, buf)
             FfiConverterOptionalULong.write(value.`minDelay`, buf)
             FfiConverterOptionalULong.write(value.`maxDelay`, buf)
+            FfiConverterOptionalTypeLegacyVideoRoomVideoCodec.write(value.`videocodec`, buf)
     }
 }
 
@@ -8377,7 +8381,8 @@ data class VideoRoomPublisherConfigureParams (
     val `audioActivePackets`: kotlin.ULong? = null, 
     val `audioLevelAverage`: kotlin.ULong? = null, 
     val `streams`: List<VideoRoomConfigurePublisherStream>? = null, 
-    val `descriptions`: List<VideoRoomPublishDescriptionParams>? = null
+    val `descriptions`: List<VideoRoomPublishDescriptionParams>? = null, 
+    val `videocodec`: VideoRoomVideoCodec? = null
 ) {
     
     companion object
@@ -8400,6 +8405,7 @@ public object FfiConverterTypeVideoRoomPublisherConfigureParams: FfiConverterRus
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalSequenceTypeVideoRoomConfigurePublisherStream.read(buf),
             FfiConverterOptionalSequenceTypeVideoRoomPublishDescriptionParams.read(buf),
+            FfiConverterOptionalTypeVideoRoomVideoCodec.read(buf),
         )
     }
 
@@ -8414,7 +8420,8 @@ public object FfiConverterTypeVideoRoomPublisherConfigureParams: FfiConverterRus
             FfiConverterOptionalULong.allocationSize(value.`audioActivePackets`) +
             FfiConverterOptionalULong.allocationSize(value.`audioLevelAverage`) +
             FfiConverterOptionalSequenceTypeVideoRoomConfigurePublisherStream.allocationSize(value.`streams`) +
-            FfiConverterOptionalSequenceTypeVideoRoomPublishDescriptionParams.allocationSize(value.`descriptions`)
+            FfiConverterOptionalSequenceTypeVideoRoomPublishDescriptionParams.allocationSize(value.`descriptions`) +
+            FfiConverterOptionalTypeVideoRoomVideoCodec.allocationSize(value.`videocodec`)
     )
 
     override fun write(value: VideoRoomPublisherConfigureParams, buf: ByteBuffer) {
@@ -8429,6 +8436,7 @@ public object FfiConverterTypeVideoRoomPublisherConfigureParams: FfiConverterRus
             FfiConverterOptionalULong.write(value.`audioLevelAverage`, buf)
             FfiConverterOptionalSequenceTypeVideoRoomConfigurePublisherStream.write(value.`streams`, buf)
             FfiConverterOptionalSequenceTypeVideoRoomPublishDescriptionParams.write(value.`descriptions`, buf)
+            FfiConverterOptionalTypeVideoRoomVideoCodec.write(value.`videocodec`, buf)
     }
 }
 
@@ -10513,6 +10521,70 @@ public object FfiConverterOptionalTypeJanusId: FfiConverterRustBuffer<JanusId?> 
         } else {
             buf.put(1)
             FfiConverterTypeJanusId.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeLegacyVideoRoomVideoCodec: FfiConverterRustBuffer<LegacyVideoRoomVideoCodec?> {
+    override fun read(buf: ByteBuffer): LegacyVideoRoomVideoCodec? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeLegacyVideoRoomVideoCodec.read(buf)
+    }
+
+    override fun allocationSize(value: LegacyVideoRoomVideoCodec?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeLegacyVideoRoomVideoCodec.allocationSize(value)
+        }
+    }
+
+    override fun write(value: LegacyVideoRoomVideoCodec?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeLegacyVideoRoomVideoCodec.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeVideoRoomVideoCodec: FfiConverterRustBuffer<VideoRoomVideoCodec?> {
+    override fun read(buf: ByteBuffer): VideoRoomVideoCodec? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeVideoRoomVideoCodec.read(buf)
+    }
+
+    override fun allocationSize(value: VideoRoomVideoCodec?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeVideoRoomVideoCodec.allocationSize(value)
+        }
+    }
+
+    override fun write(value: VideoRoomVideoCodec?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeVideoRoomVideoCodec.write(value, buf)
         }
     }
 }
