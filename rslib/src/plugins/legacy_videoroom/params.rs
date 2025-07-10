@@ -171,6 +171,8 @@ pub struct LegacyVideoRoomPublisherConfigureParams {
     min_delay: Option<u64>,
     #[uniffi(default = None)]
     max_delay: Option<u64>,
+    #[uniffi(default = None)]
+    videocodec: Option<LegacyVideoRoomVideoCodec>,
 }
 
 #[uniffi::remote(Record)]

@@ -5418,10 +5418,11 @@ public struct LegacyVideoRoomPublisherConfigureParams {
     public let audioLevelAverage: UInt64?
     public let minDelay: UInt64?
     public let maxDelay: UInt64?
+    public let videocodec: LegacyVideoRoomVideoCodec?
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(audio: Bool? = nil, video: Bool? = nil, data: Bool? = nil, bitrate: UInt64? = nil, keyframe: Bool? = nil, record: Bool? = nil, filename: String? = nil, display: String? = nil, audioActivePackets: UInt64? = nil, audioLevelAverage: UInt64? = nil, minDelay: UInt64? = nil, maxDelay: UInt64? = nil) {
+    public init(audio: Bool? = nil, video: Bool? = nil, data: Bool? = nil, bitrate: UInt64? = nil, keyframe: Bool? = nil, record: Bool? = nil, filename: String? = nil, display: String? = nil, audioActivePackets: UInt64? = nil, audioLevelAverage: UInt64? = nil, minDelay: UInt64? = nil, maxDelay: UInt64? = nil, videocodec: LegacyVideoRoomVideoCodec? = nil) {
         self.audio = audio
         self.video = video
         self.data = data
@@ -5434,6 +5435,7 @@ public struct LegacyVideoRoomPublisherConfigureParams {
         self.audioLevelAverage = audioLevelAverage
         self.minDelay = minDelay
         self.maxDelay = maxDelay
+        self.videocodec = videocodec
     }
 }
 
@@ -5480,6 +5482,9 @@ extension LegacyVideoRoomPublisherConfigureParams: Equatable, Hashable {
         if lhs.maxDelay != rhs.maxDelay {
             return false
         }
+        if lhs.videocodec != rhs.videocodec {
+            return false
+        }
         return true
     }
 
@@ -5496,6 +5501,7 @@ extension LegacyVideoRoomPublisherConfigureParams: Equatable, Hashable {
         hasher.combine(audioLevelAverage)
         hasher.combine(minDelay)
         hasher.combine(maxDelay)
+        hasher.combine(videocodec)
     }
 }
 
@@ -5519,7 +5525,8 @@ public struct FfiConverterTypeLegacyVideoRoomPublisherConfigureParams: FfiConver
                 audioActivePackets: FfiConverterOptionUInt64.read(from: &buf), 
                 audioLevelAverage: FfiConverterOptionUInt64.read(from: &buf), 
                 minDelay: FfiConverterOptionUInt64.read(from: &buf), 
-                maxDelay: FfiConverterOptionUInt64.read(from: &buf)
+                maxDelay: FfiConverterOptionUInt64.read(from: &buf), 
+                videocodec: FfiConverterOptionTypeLegacyVideoRoomVideoCodec.read(from: &buf)
         )
     }
 
@@ -5536,6 +5543,7 @@ public struct FfiConverterTypeLegacyVideoRoomPublisherConfigureParams: FfiConver
         FfiConverterOptionUInt64.write(value.audioLevelAverage, into: &buf)
         FfiConverterOptionUInt64.write(value.minDelay, into: &buf)
         FfiConverterOptionUInt64.write(value.maxDelay, into: &buf)
+        FfiConverterOptionTypeLegacyVideoRoomVideoCodec.write(value.videocodec, into: &buf)
     }
 }
 
@@ -7523,10 +7531,11 @@ public struct VideoRoomPublisherConfigureParams {
     public let audioLevelAverage: UInt64?
     public let streams: [VideoRoomConfigurePublisherStream]?
     public let descriptions: [VideoRoomPublishDescriptionParams]?
+    public let videocodec: VideoRoomVideoCodec?
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(audio: Bool? = nil, video: Bool? = nil, bitrate: UInt64? = nil, keyframe: Bool? = nil, record: Bool? = nil, filename: String? = nil, display: String? = nil, audioActivePackets: UInt64? = nil, audioLevelAverage: UInt64? = nil, streams: [VideoRoomConfigurePublisherStream]? = nil, descriptions: [VideoRoomPublishDescriptionParams]? = nil) {
+    public init(audio: Bool? = nil, video: Bool? = nil, bitrate: UInt64? = nil, keyframe: Bool? = nil, record: Bool? = nil, filename: String? = nil, display: String? = nil, audioActivePackets: UInt64? = nil, audioLevelAverage: UInt64? = nil, streams: [VideoRoomConfigurePublisherStream]? = nil, descriptions: [VideoRoomPublishDescriptionParams]? = nil, videocodec: VideoRoomVideoCodec? = nil) {
         self.audio = audio
         self.video = video
         self.bitrate = bitrate
@@ -7538,6 +7547,7 @@ public struct VideoRoomPublisherConfigureParams {
         self.audioLevelAverage = audioLevelAverage
         self.streams = streams
         self.descriptions = descriptions
+        self.videocodec = videocodec
     }
 }
 
@@ -7581,6 +7591,9 @@ extension VideoRoomPublisherConfigureParams: Equatable, Hashable {
         if lhs.descriptions != rhs.descriptions {
             return false
         }
+        if lhs.videocodec != rhs.videocodec {
+            return false
+        }
         return true
     }
 
@@ -7596,6 +7609,7 @@ extension VideoRoomPublisherConfigureParams: Equatable, Hashable {
         hasher.combine(audioLevelAverage)
         hasher.combine(streams)
         hasher.combine(descriptions)
+        hasher.combine(videocodec)
     }
 }
 
@@ -7618,7 +7632,8 @@ public struct FfiConverterTypeVideoRoomPublisherConfigureParams: FfiConverterRus
                 audioActivePackets: FfiConverterOptionUInt64.read(from: &buf), 
                 audioLevelAverage: FfiConverterOptionUInt64.read(from: &buf), 
                 streams: FfiConverterOptionSequenceTypeVideoRoomConfigurePublisherStream.read(from: &buf), 
-                descriptions: FfiConverterOptionSequenceTypeVideoRoomPublishDescriptionParams.read(from: &buf)
+                descriptions: FfiConverterOptionSequenceTypeVideoRoomPublishDescriptionParams.read(from: &buf), 
+                videocodec: FfiConverterOptionTypeVideoRoomVideoCodec.read(from: &buf)
         )
     }
 
@@ -7634,6 +7649,7 @@ public struct FfiConverterTypeVideoRoomPublisherConfigureParams: FfiConverterRus
         FfiConverterOptionUInt64.write(value.audioLevelAverage, into: &buf)
         FfiConverterOptionSequenceTypeVideoRoomConfigurePublisherStream.write(value.streams, into: &buf)
         FfiConverterOptionSequenceTypeVideoRoomPublishDescriptionParams.write(value.descriptions, into: &buf)
+        FfiConverterOptionTypeVideoRoomVideoCodec.write(value.videocodec, into: &buf)
     }
 }
 
@@ -10782,6 +10798,54 @@ fileprivate struct FfiConverterOptionTypeJanusId: FfiConverterRustBuffer {
         switch try readInt(&buf) as Int8 {
         case 0: return nil
         case 1: return try FfiConverterTypeJanusId.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionTypeLegacyVideoRoomVideoCodec: FfiConverterRustBuffer {
+    typealias SwiftType = LegacyVideoRoomVideoCodec?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeLegacyVideoRoomVideoCodec.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeLegacyVideoRoomVideoCodec.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionTypeVideoRoomVideoCodec: FfiConverterRustBuffer {
+    typealias SwiftType = VideoRoomVideoCodec?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeVideoRoomVideoCodec.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeVideoRoomVideoCodec.read(from: &buf)
         default: throw UniffiInternalError.unexpectedOptionalTag
         }
     }

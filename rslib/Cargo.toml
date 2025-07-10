@@ -29,14 +29,14 @@ tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 uniffi = { workspace = true, features = ["tokio"] }
 
 [dependencies.jarust]
-version = "1.7.2"
+version = "1.8.0"
 features = [
     "echo-test-plugin",
     "audio-bridge-plugin",
     "video-room-plugin",
     "legacy-video-room-plugin",
     "ffi-compatible",
-    "__plugin-expiremental",
+    "__plugin-experimental",
 ]
 
 [target.'cfg(any(target_os = "ios", target_os = "macos"))'.dependencies]
