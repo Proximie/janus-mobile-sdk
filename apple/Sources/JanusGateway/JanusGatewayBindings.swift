@@ -4881,7 +4881,7 @@ public struct LegacyVideoRoomCreateParams {
     public let playoutdelayExt: Bool?
     public let transportWideCcExt: Bool?
     public let record: Bool?
-    public let recordDir: String?
+    public let recDir: String?
     public let lockRecord: Bool?
     public let permanent: Bool?
     public let notifyJoining: Bool?
@@ -4891,7 +4891,7 @@ public struct LegacyVideoRoomCreateParams {
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(adminKey: String? = nil, room: JanusId? = nil, description: String? = nil, isPrivate: Bool? = nil, allowed: [String]? = nil, secret: String? = nil, pin: String? = nil, requirePvtid: Bool? = nil, signedTokens: Bool? = nil, bitrate: UInt64? = nil, bitrateCap: Bool? = nil, firFreq: UInt64? = nil, publishers: UInt64? = nil, audiocodec: LegacyVideoRoomAudioCodecList? = nil, videocodec: LegacyVideoRoomVideoCodecList? = nil, vp9Profile: String? = nil, h264Profile: String? = nil, opusFec: Bool? = nil, opusDtx: Bool? = nil, audiolevelExt: Bool? = nil, audiolevelEvent: Bool? = nil, audioActivePackets: UInt64? = nil, audioLevelAverage: UInt64? = nil, videoorientExt: Bool? = nil, playoutdelayExt: Bool? = nil, transportWideCcExt: Bool? = nil, record: Bool? = nil, recordDir: String? = nil, lockRecord: Bool? = nil, permanent: Bool? = nil, notifyJoining: Bool? = nil, requireE2ee: Bool? = nil, dummyPublisher: Bool? = nil, dummyStreams: Bool? = nil) {
+    public init(adminKey: String? = nil, room: JanusId? = nil, description: String? = nil, isPrivate: Bool? = nil, allowed: [String]? = nil, secret: String? = nil, pin: String? = nil, requirePvtid: Bool? = nil, signedTokens: Bool? = nil, bitrate: UInt64? = nil, bitrateCap: Bool? = nil, firFreq: UInt64? = nil, publishers: UInt64? = nil, audiocodec: LegacyVideoRoomAudioCodecList? = nil, videocodec: LegacyVideoRoomVideoCodecList? = nil, vp9Profile: String? = nil, h264Profile: String? = nil, opusFec: Bool? = nil, opusDtx: Bool? = nil, audiolevelExt: Bool? = nil, audiolevelEvent: Bool? = nil, audioActivePackets: UInt64? = nil, audioLevelAverage: UInt64? = nil, videoorientExt: Bool? = nil, playoutdelayExt: Bool? = nil, transportWideCcExt: Bool? = nil, record: Bool? = nil, recDir: String? = nil, lockRecord: Bool? = nil, permanent: Bool? = nil, notifyJoining: Bool? = nil, requireE2ee: Bool? = nil, dummyPublisher: Bool? = nil, dummyStreams: Bool? = nil) {
         self.adminKey = adminKey
         self.room = room
         self.description = description
@@ -4919,7 +4919,7 @@ public struct LegacyVideoRoomCreateParams {
         self.playoutdelayExt = playoutdelayExt
         self.transportWideCcExt = transportWideCcExt
         self.record = record
-        self.recordDir = recordDir
+        self.recDir = recDir
         self.lockRecord = lockRecord
         self.permanent = permanent
         self.notifyJoining = notifyJoining
@@ -5017,7 +5017,7 @@ extension LegacyVideoRoomCreateParams: Equatable, Hashable {
         if lhs.record != rhs.record {
             return false
         }
-        if lhs.recordDir != rhs.recordDir {
+        if lhs.recDir != rhs.recDir {
             return false
         }
         if lhs.lockRecord != rhs.lockRecord {
@@ -5069,7 +5069,7 @@ extension LegacyVideoRoomCreateParams: Equatable, Hashable {
         hasher.combine(playoutdelayExt)
         hasher.combine(transportWideCcExt)
         hasher.combine(record)
-        hasher.combine(recordDir)
+        hasher.combine(recDir)
         hasher.combine(lockRecord)
         hasher.combine(permanent)
         hasher.combine(notifyJoining)
@@ -5115,7 +5115,7 @@ public struct FfiConverterTypeLegacyVideoRoomCreateParams: FfiConverterRustBuffe
                 playoutdelayExt: FfiConverterOptionBool.read(from: &buf), 
                 transportWideCcExt: FfiConverterOptionBool.read(from: &buf), 
                 record: FfiConverterOptionBool.read(from: &buf), 
-                recordDir: FfiConverterOptionString.read(from: &buf), 
+                recDir: FfiConverterOptionString.read(from: &buf), 
                 lockRecord: FfiConverterOptionBool.read(from: &buf), 
                 permanent: FfiConverterOptionBool.read(from: &buf), 
                 notifyJoining: FfiConverterOptionBool.read(from: &buf), 
@@ -5153,7 +5153,7 @@ public struct FfiConverterTypeLegacyVideoRoomCreateParams: FfiConverterRustBuffe
         FfiConverterOptionBool.write(value.playoutdelayExt, into: &buf)
         FfiConverterOptionBool.write(value.transportWideCcExt, into: &buf)
         FfiConverterOptionBool.write(value.record, into: &buf)
-        FfiConverterOptionString.write(value.recordDir, into: &buf)
+        FfiConverterOptionString.write(value.recDir, into: &buf)
         FfiConverterOptionBool.write(value.lockRecord, into: &buf)
         FfiConverterOptionBool.write(value.permanent, into: &buf)
         FfiConverterOptionBool.write(value.notifyJoining, into: &buf)
@@ -7081,7 +7081,7 @@ public struct VideoRoomCreateParams {
     public let playoutdelayExt: Bool?
     public let transportWideCcExt: Bool?
     public let record: Bool?
-    public let recordDir: String?
+    public let recDir: String?
     public let lockRecord: Bool?
     public let permanent: Bool?
     public let notifyJoining: Bool?
@@ -7091,7 +7091,7 @@ public struct VideoRoomCreateParams {
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(adminKey: String? = nil, room: JanusId? = nil, description: String? = nil, isPrivate: Bool? = nil, allowed: [String]? = nil, secret: String? = nil, pin: String? = nil, requirePvtid: Bool? = nil, signedTokens: Bool? = nil, bitrate: UInt64? = nil, bitrateCap: Bool? = nil, firFreq: UInt64? = nil, publishers: UInt64? = nil, audiocodec: VideoRoomAudioCodecList? = nil, videocodec: VideoRoomVideoCodecList? = nil, vp9Profile: String? = nil, h264Profile: String? = nil, opusFec: Bool? = nil, opusDtx: Bool? = nil, audiolevelExt: Bool? = nil, audiolevelEvent: Bool? = nil, audioActivePackets: UInt64? = nil, audioLevelAverage: UInt64? = nil, videoorientExt: Bool? = nil, playoutdelayExt: Bool? = nil, transportWideCcExt: Bool? = nil, record: Bool? = nil, recordDir: String? = nil, lockRecord: Bool? = nil, permanent: Bool? = nil, notifyJoining: Bool? = nil, requireE2ee: Bool? = nil, dummyPublisher: Bool? = nil, dummyStreams: Bool? = nil) {
+    public init(adminKey: String? = nil, room: JanusId? = nil, description: String? = nil, isPrivate: Bool? = nil, allowed: [String]? = nil, secret: String? = nil, pin: String? = nil, requirePvtid: Bool? = nil, signedTokens: Bool? = nil, bitrate: UInt64? = nil, bitrateCap: Bool? = nil, firFreq: UInt64? = nil, publishers: UInt64? = nil, audiocodec: VideoRoomAudioCodecList? = nil, videocodec: VideoRoomVideoCodecList? = nil, vp9Profile: String? = nil, h264Profile: String? = nil, opusFec: Bool? = nil, opusDtx: Bool? = nil, audiolevelExt: Bool? = nil, audiolevelEvent: Bool? = nil, audioActivePackets: UInt64? = nil, audioLevelAverage: UInt64? = nil, videoorientExt: Bool? = nil, playoutdelayExt: Bool? = nil, transportWideCcExt: Bool? = nil, record: Bool? = nil, recDir: String? = nil, lockRecord: Bool? = nil, permanent: Bool? = nil, notifyJoining: Bool? = nil, requireE2ee: Bool? = nil, dummyPublisher: Bool? = nil, dummyStreams: Bool? = nil) {
         self.adminKey = adminKey
         self.room = room
         self.description = description
@@ -7119,7 +7119,7 @@ public struct VideoRoomCreateParams {
         self.playoutdelayExt = playoutdelayExt
         self.transportWideCcExt = transportWideCcExt
         self.record = record
-        self.recordDir = recordDir
+        self.recDir = recDir
         self.lockRecord = lockRecord
         self.permanent = permanent
         self.notifyJoining = notifyJoining
@@ -7217,7 +7217,7 @@ extension VideoRoomCreateParams: Equatable, Hashable {
         if lhs.record != rhs.record {
             return false
         }
-        if lhs.recordDir != rhs.recordDir {
+        if lhs.recDir != rhs.recDir {
             return false
         }
         if lhs.lockRecord != rhs.lockRecord {
@@ -7269,7 +7269,7 @@ extension VideoRoomCreateParams: Equatable, Hashable {
         hasher.combine(playoutdelayExt)
         hasher.combine(transportWideCcExt)
         hasher.combine(record)
-        hasher.combine(recordDir)
+        hasher.combine(recDir)
         hasher.combine(lockRecord)
         hasher.combine(permanent)
         hasher.combine(notifyJoining)
@@ -7315,7 +7315,7 @@ public struct FfiConverterTypeVideoRoomCreateParams: FfiConverterRustBuffer {
                 playoutdelayExt: FfiConverterOptionBool.read(from: &buf), 
                 transportWideCcExt: FfiConverterOptionBool.read(from: &buf), 
                 record: FfiConverterOptionBool.read(from: &buf), 
-                recordDir: FfiConverterOptionString.read(from: &buf), 
+                recDir: FfiConverterOptionString.read(from: &buf), 
                 lockRecord: FfiConverterOptionBool.read(from: &buf), 
                 permanent: FfiConverterOptionBool.read(from: &buf), 
                 notifyJoining: FfiConverterOptionBool.read(from: &buf), 
@@ -7353,7 +7353,7 @@ public struct FfiConverterTypeVideoRoomCreateParams: FfiConverterRustBuffer {
         FfiConverterOptionBool.write(value.playoutdelayExt, into: &buf)
         FfiConverterOptionBool.write(value.transportWideCcExt, into: &buf)
         FfiConverterOptionBool.write(value.record, into: &buf)
-        FfiConverterOptionString.write(value.recordDir, into: &buf)
+        FfiConverterOptionString.write(value.recDir, into: &buf)
         FfiConverterOptionBool.write(value.lockRecord, into: &buf)
         FfiConverterOptionBool.write(value.permanent, into: &buf)
         FfiConverterOptionBool.write(value.notifyJoining, into: &buf)
