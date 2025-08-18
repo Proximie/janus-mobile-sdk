@@ -73,7 +73,7 @@ pub struct VideoRoomCreateParams {
     #[uniffi(default = None)]
     record: Option<bool>,
     #[uniffi(default = None)]
-    record_dir: Option<String>,
+    rec_dir: Option<String>,
     #[uniffi(default = None)]
     lock_record: Option<bool>,
     #[uniffi(default = None)]
