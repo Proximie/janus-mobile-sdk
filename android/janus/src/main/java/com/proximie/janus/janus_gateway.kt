@@ -7134,7 +7134,7 @@ data class LegacyVideoRoomCreateParams (
     val `playoutdelayExt`: kotlin.Boolean? = null, 
     val `transportWideCcExt`: kotlin.Boolean? = null, 
     val `record`: kotlin.Boolean? = null, 
-    val `recordDir`: kotlin.String? = null, 
+    val `recDir`: kotlin.String? = null, 
     val `lockRecord`: kotlin.Boolean? = null, 
     val `permanent`: kotlin.Boolean? = null, 
     val `notifyJoining`: kotlin.Boolean? = null, 
@@ -7217,7 +7217,7 @@ public object FfiConverterTypeLegacyVideoRoomCreateParams: FfiConverterRustBuffe
             FfiConverterOptionalBoolean.allocationSize(value.`playoutdelayExt`) +
             FfiConverterOptionalBoolean.allocationSize(value.`transportWideCcExt`) +
             FfiConverterOptionalBoolean.allocationSize(value.`record`) +
-            FfiConverterOptionalString.allocationSize(value.`recordDir`) +
+            FfiConverterOptionalString.allocationSize(value.`recDir`) +
             FfiConverterOptionalBoolean.allocationSize(value.`lockRecord`) +
             FfiConverterOptionalBoolean.allocationSize(value.`permanent`) +
             FfiConverterOptionalBoolean.allocationSize(value.`notifyJoining`) +
@@ -7254,7 +7254,7 @@ public object FfiConverterTypeLegacyVideoRoomCreateParams: FfiConverterRustBuffe
             FfiConverterOptionalBoolean.write(value.`playoutdelayExt`, buf)
             FfiConverterOptionalBoolean.write(value.`transportWideCcExt`, buf)
             FfiConverterOptionalBoolean.write(value.`record`, buf)
-            FfiConverterOptionalString.write(value.`recordDir`, buf)
+            FfiConverterOptionalString.write(value.`recDir`, buf)
             FfiConverterOptionalBoolean.write(value.`lockRecord`, buf)
             FfiConverterOptionalBoolean.write(value.`permanent`, buf)
             FfiConverterOptionalBoolean.write(value.`notifyJoining`, buf)
@@ -8174,7 +8174,7 @@ data class VideoRoomCreateParams (
     val `playoutdelayExt`: kotlin.Boolean? = null, 
     val `transportWideCcExt`: kotlin.Boolean? = null, 
     val `record`: kotlin.Boolean? = null, 
-    val `recordDir`: kotlin.String? = null, 
+    val `recDir`: kotlin.String? = null, 
     val `lockRecord`: kotlin.Boolean? = null, 
     val `permanent`: kotlin.Boolean? = null, 
     val `notifyJoining`: kotlin.Boolean? = null, 
@@ -8257,7 +8257,7 @@ public object FfiConverterTypeVideoRoomCreateParams: FfiConverterRustBuffer<Vide
             FfiConverterOptionalBoolean.allocationSize(value.`playoutdelayExt`) +
             FfiConverterOptionalBoolean.allocationSize(value.`transportWideCcExt`) +
             FfiConverterOptionalBoolean.allocationSize(value.`record`) +
-            FfiConverterOptionalString.allocationSize(value.`recordDir`) +
+            FfiConverterOptionalString.allocationSize(value.`recDir`) +
             FfiConverterOptionalBoolean.allocationSize(value.`lockRecord`) +
             FfiConverterOptionalBoolean.allocationSize(value.`permanent`) +
             FfiConverterOptionalBoolean.allocationSize(value.`notifyJoining`) +
@@ -8294,7 +8294,7 @@ public object FfiConverterTypeVideoRoomCreateParams: FfiConverterRustBuffer<Vide
             FfiConverterOptionalBoolean.write(value.`playoutdelayExt`, buf)
             FfiConverterOptionalBoolean.write(value.`transportWideCcExt`, buf)
             FfiConverterOptionalBoolean.write(value.`record`, buf)
-            FfiConverterOptionalString.write(value.`recordDir`, buf)
+            FfiConverterOptionalString.write(value.`recDir`, buf)
             FfiConverterOptionalBoolean.write(value.`lockRecord`, buf)
             FfiConverterOptionalBoolean.write(value.`permanent`, buf)
             FfiConverterOptionalBoolean.write(value.`notifyJoining`, buf)
