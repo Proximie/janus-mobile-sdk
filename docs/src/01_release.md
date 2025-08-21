@@ -4,10 +4,10 @@ The following steps give an outline of the process to create a new tagged releas
 1. Make changes to janus-mobile-sdk. This may include updating the jarust dependency version which can be done in `/rslib/Cargo.toml`
 2. After changes completed run locally:
 
-Create native Apple platforms bindings. Disregard any keychain alerts that may pop-up, they are not needed
+Create native Apple platforms bindings. Disregard any keychain alerts that may pop-up, they are not needed.
 `just apple`
 
-Create native Android platform bindings.
+Create native Android platform bindings:
 `just android`
 
 3. Check all these changes in on a new branch and raise a PR.
