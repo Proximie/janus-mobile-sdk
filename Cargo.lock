@@ -1257,7 +1257,7 @@ dependencies = [
 
 [[package]]
 name = "rslib"
-version = "0.16.1"
+version = "0.16.2"
 dependencies = [
  "android_logger",
  "apple-tracing-sub",
