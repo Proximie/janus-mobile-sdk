@@ -129,6 +129,7 @@ update-version version:
 
 # Validate version is semantic version and higher than latest tag
 [group: 'utils']
+[unix]
 [no-exit-message]
 validate-version version: (validate-semver-regex version) (version-compare-with-latest version)
 
@@ -142,6 +143,7 @@ validate-semver-regex version:
 	@echo "✓ Version {{version}} is a semver"
 
 [private]
+[unix]
 [no-exit-message]
 version-compare-with-latest version:
 	#!/bin/bash
