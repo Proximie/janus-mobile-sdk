@@ -32,7 +32,6 @@ apple-create-fat-simulator-lib:
 	@mkdir -p {{FAT_SIMULATOR_LIB_DIR}}
 	@lipo -create target/x86_64-apple-ios/release/lib{{LIBNAME}}.a target/aarch64-apple-ios-sim/release/lib{{LIBNAME}}.a -output {{FAT_SIMULATOR_LIB_DIR}}/lib{{LIBNAME}}.a
 
-
 # Generate Swift ffi
 [group: 'apple']
 apple-generate-ffi:
