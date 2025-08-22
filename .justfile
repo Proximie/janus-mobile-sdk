@@ -125,7 +125,7 @@ clean-all: apple-clean android-clean
 # Updates the janus-mobile-sdk version inside rslib/Cargo.toml and Package.swift
 [group: 'utils']
 [no-exit-message]
-update-version version:
+update-versions version:
 	@echo "Updating janus-mobile-sdk versions (rslib and Package.swift) to {{version}}"
 
 	@sed -i.bak 's/^version = ".*"/version = "'{{version}}'"/' rslib/Cargo.toml && rm rslib/Cargo.toml.bak
