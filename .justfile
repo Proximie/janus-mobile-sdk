@@ -11,7 +11,7 @@ LATEST_TAG := `git tag --sort=-version:refname | head -n 1 2>/dev/null || echo "
 help:
 	@just -l
 
-# Build library for apple platforms. Pass '-r` to build release version
+# Build library for apple platforms. Pass `-r` to build release version
 [group: 'apple']
 [macos]
 apple release="": \
@@ -51,7 +51,7 @@ apple-generate-ffi:
 	@mv target/uniffi-xcframework-staging/*.swift ./apple/Sources/JanusGateway/
 	@mv target/uniffi-xcframework-staging/{{MODULENAME}}FFI.modulemap target/uniffi-xcframework-staging/module.modulemap
 
-# Generate XCFramework that includes the static libs for apple platforms. When passing '-r' it will compute the zip checksum and modify the Package.swift accordingly
+# Generate XCFramework that includes the static libs for apple platforms. When passing `-r` it will compute the zip checksum and modify the Package.swift accordingly
 [group: 'apple']
 [macos]
 apple-build-xcframework release="":
@@ -69,7 +69,7 @@ apple-build-xcframework release="":
 		sed -i "" -E "s/(let releaseChecksum = \")[^\"]+(\")/\1$checksum\2/g" ./Package.swift; \
 	fi
 
-# Create a github release. Only works when '-r' is passed.
+# Create a github release. Only works when `-r` is passed.
 [group: 'apple']
 [macos]
 apple-gh-release release="":
@@ -95,7 +95,7 @@ apple-clean:
 	@rm -rf target/uniffi-xcframework-staging
 	@rm -rf {{FAT_SIMULATOR_LIB_DIR}}
 
-# Build library for android. Pass '-r` to build release version
+# Build library for android. Pass `-r` to build release version
 [group: 'android']
 android release="": android-clean (android-build release)
 
@@ -105,7 +105,7 @@ android release="": android-clean (android-build release)
 android-clean:
 	./gradlew clean
 
-# Build the Rust lib, generate kotlin bindings, then bundle them inside aar. Pass '-r` to build release version
+# Build the Rust lib, generate kotlin bindings, then bundle them inside aar. Pass `-r` to build release version
 [working-directory: 'android']
 [group: 'android']
 android-build release="":
@@ -117,6 +117,12 @@ android-build release="":
 		./gradlew assembleDebug; \
 	fi
 
+[group: 'utils']
+[confirm("Running this recipe will delete all cached file for Apple, Android, and Rust. Continue? [y/yes] [n/no]")]
+clean-all: apple-clean android-clean
+	@cargo clean
+
+# Updates the janus-mobile-sdk version inside rslib/Cargo.toml and Package.swift
 [group: 'utils']
 [no-exit-message]
 update-version version:
@@ -130,7 +136,6 @@ update-version version:
 # Validate version is semantic version and higher than latest tag
 [group: 'utils']
 [unix]
-[no-exit-message]
 validate-version version: (validate-semver-regex version) (version-compare-with-latest version)
 
 [private]
