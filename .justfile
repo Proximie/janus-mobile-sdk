@@ -11,14 +11,17 @@ help:
 
 # Build library for apple platforms. Pass '-r` to build release version
 [group: 'apple']
+[macos]
 apple release="": \
 	apple-clean apple-build apple-generate-ffi (apple-build-xcframework release) (apple-gh-release release)
 
 # Build the Rust library for apple platforms
 [group: 'apple']
+[macos]
 apple-build: apple-build-rslib apple-create-fat-simulator-lib
 
 [private]
+[macos]
 apple-build-rslib:
 	@echo "Building Rust lib"
 	@cargo build --lib --release --target x86_64-apple-ios
@@ -27,6 +30,7 @@ apple-build-rslib:
 
 # Combines two static libs to create the simulator fat lib
 [private]
+[macos]
 apple-create-fat-simulator-lib:
 	@echo "Creating a fat library for x86_64 and aarch64 simulators"
 	@mkdir -p {{FAT_SIMULATOR_LIB_DIR}}
@@ -34,6 +38,7 @@ apple-create-fat-simulator-lib:
 
 # Generate Swift ffi
 [group: 'apple']
+[macos]
 apple-generate-ffi:
 	@echo "Generating framework module mapping and FFI bindings"
 	@cargo run -p uniffi-bindgen generate \
@@ -46,6 +51,7 @@ apple-generate-ffi:
 
 # Generate XCFramework that includes the static libs for apple platforms. When passing '-r' it will compute the zip checksum and modify the Package.swift accordingly
 [group: 'apple']
+[macos]
 apple-build-xcframework release="":
 	@echo "Generating XCFramework"
 	@rm -rf target/ios
@@ -63,6 +69,7 @@ apple-build-xcframework release="":
 
 # Create a github release. Only works when '-r' is passed.
 [group: 'apple']
+[macos]
 apple-gh-release release="":
 	@if [ "{{release}}" = "-r" ]; then \
 		echo "Committing changes to Package.swift and tagging the release"; \
@@ -79,6 +86,7 @@ apple-gh-release release="":
 
 # Clean up the build artifacts
 [group: 'apple']
+[macos]
 apple-clean:
 	@echo "Cleaning up"
 	@rm -rf target/ios
@@ -106,3 +114,19 @@ android-build release="":
 		echo "Debug build for android"; \
 		./gradlew assembleDebug; \
 	fi
+
+[group: 'utils']
+[no-exit-message]
+update-version version:
+	@echo "Updating janus-mobile-sdk versions (rslib and Package.swift) to {{version}}"
+
+	@sed -i.bak 's/^version = ".*"/version = "'{{version}}'"/' rslib/Cargo.toml && rm rslib/Cargo.toml.bak
+	@sed -i.bak 's/^let releaseTag = ".*"/let releaseTag = "'{{version}}'"/' Package.swift && rm Package.swift.bak
+
+	@echo "✓ Updated all janus-mobile-sdk versions to {{version}}"
+
+# Validate version is semantic version and higher than previous tag
+[group: 'utils']
+[no-exit-message]
+validate-version version:
+	@./scripts/validate_version.sh {{version}}
