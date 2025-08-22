@@ -33,3 +33,12 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Setup just
+        uses: extractions/setup-just@v3
+
+      - name: Valide version
+        run: just validate-version "${{ github.event.inputs.version }}"
+
+      - name: Update versions
+        run: just update-versions "${{ github.event.inputs.version }}"
