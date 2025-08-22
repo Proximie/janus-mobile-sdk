@@ -5,6 +5,8 @@ MODULENAME := "JanusGateway"
 VERSION := `cargo metadata --format-version 1 | jq -r '.packages[] | select(.name=="rslib") .version'`
 SHORTCOMMIT := `git rev-parse --short HEAD`
 
+LATEST_TAG := `git tag --sort=-version:refname | head -n 1 2>/dev/null || echo "0.0.0"`
+
 # Displays the available recipes
 help:
 	@just -l
@@ -125,8 +127,50 @@ update-version version:
 
 	@echo "✓ Updated all janus-mobile-sdk versions to {{version}}"
 
-# Validate version is semantic version and higher than previous tag
+# Validate version is semantic version and higher than latest tag
 [group: 'utils']
 [no-exit-message]
-validate-version version:
-	@./scripts/validate_version.sh {{version}}
+validate-version version: (validate-semver-regex version) (version-compare-with-latest version)
+
+[private]
+[no-exit-message]
+validate-semver-regex version:
+	@if [[ ! "{{version}}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then \
+		echo "Error: Version must be semantic version major.minor.patch (e.g., 1.2.3)"; \
+		exit 1; \
+	fi
+	@echo "✓ Version {{version}} is a semver"
+
+[private]
+[no-exit-message]
+version-compare-with-latest version:
+	#!/bin/bash
+	latest_version=$(echo "{{LATEST_TAG}}" | sed 's/^v//')
+
+	latest_major=$(echo "$latest_version" | cut -d. -f1)
+	latest_minor=$(echo "$latest_version" | cut -d. -f2)
+	latest_patch=$(echo "$latest_version" | cut -d. -f3)
+	input_major=$(echo "{{version}}" | cut -d. -f1)
+	input_minor=$(echo "{{version}}" | cut -d. -f2)
+	input_patch=$(echo "{{version}}" | cut -d. -f3)
+
+	is_greater_than_latest=0
+
+	if [ "$input_major" -gt "$latest_major" ]; then
+		is_greater_than_latest=1
+	elif [ "$input_major" -eq "$latest_major" ]; then
+		if [ "$input_minor" -gt "$latest_minor" ]; then
+			is_greater_than_latest=1
+		elif [ "$input_minor" -eq "$latest_minor" ]; then
+			if [ "$input_patch" -gt "$latest_patch" ]; then
+				is_greater_than_latest=1
+			fi
+		fi
+	fi
+
+	if [ "$is_greater_than_latest" -eq 1 ]; then
+		echo "✓ Version {{version}} is higher than $latest_version (latest)"
+	else
+		echo "✗ Version {{version}} is not higher than $latest_version (latest)"
+		exit 1
+	fi
