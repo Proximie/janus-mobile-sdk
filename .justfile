@@ -88,7 +88,6 @@ apple-gh-release release="":
 
 # Clean up the build artifacts
 [group: 'apple']
-[macos]
 apple-clean:
 	@echo "Cleaning up"
 	@rm -rf target/ios
