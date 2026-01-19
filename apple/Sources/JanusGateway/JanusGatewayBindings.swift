@@ -395,7 +395,13 @@ fileprivate final class UniffiHandleMap<T>: @unchecked Sendable {
 
 
 // Public interface members begin here.
-
+// Magic number for the Rust proxy to call using the same mechanism as every other method,
+// to free the callback once it's dropped by Rust.
+private let IDX_CALLBACK_FREE: Int32 = 0
+// Callback return codes
+private let UNIFFI_CALLBACK_SUCCESS: Int32 = 0
+private let UNIFFI_CALLBACK_ERROR: Int32 = 1
+private let UNIFFI_CALLBACK_UNEXPECTED_ERROR: Int32 = 2
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -8028,6 +8034,9 @@ extension AudioBridgeCodec: Equatable, Hashable {}
 
 
 
+
+
+
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
@@ -8148,6 +8157,9 @@ extension GenericEvent: Equatable, Hashable {}
 
 
 
+
+
+
 public enum JanusGatewayCommunicationError: Swift.Error {
 
     
@@ -8223,11 +8235,14 @@ extension JanusGatewayCommunicationError: Equatable, Hashable {}
 
 
 
+
 extension JanusGatewayCommunicationError: Foundation.LocalizedError {
     public var errorDescription: String? {
         String(reflecting: self)
     }
 }
+
+
 
 
 
@@ -8296,11 +8311,14 @@ extension JanusGatewayConnectionError: Equatable, Hashable {}
 
 
 
+
 extension JanusGatewayConnectionError: Foundation.LocalizedError {
     public var errorDescription: String? {
         String(reflecting: self)
     }
 }
+
+
 
 
 
@@ -8371,11 +8389,14 @@ extension JanusGatewayHandleError: Equatable, Hashable {}
 
 
 
+
 extension JanusGatewayHandleError: Foundation.LocalizedError {
     public var errorDescription: String? {
         String(reflecting: self)
     }
 }
+
+
 
 
 
@@ -8444,11 +8465,14 @@ extension JanusGatewaySessionError: Equatable, Hashable {}
 
 
 
+
 extension JanusGatewaySessionError: Foundation.LocalizedError {
     public var errorDescription: String? {
         String(reflecting: self)
     }
 }
+
+
 
 
 // Note that we don't yet support `indirect` for enums.
@@ -8524,6 +8548,9 @@ extension JanusId: Equatable, Hashable {}
 
 
 
+
+
+
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
@@ -8588,6 +8615,9 @@ public func FfiConverterTypeJsepType_lower(_ value: JsepType) -> RustBuffer {
 
 
 extension JsepType: Equatable, Hashable {}
+
+
+
 
 
 
@@ -8686,6 +8716,9 @@ extension LegacyVideoRoomAudioCodec: Equatable, Hashable {}
 
 
 
+
+
+
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
@@ -8771,6 +8804,9 @@ public func FfiConverterTypeLegacyVideoRoomVideoCodec_lower(_ value: LegacyVideo
 
 
 extension LegacyVideoRoomVideoCodec: Equatable, Hashable {}
+
+
+
 
 
 
@@ -8869,6 +8905,9 @@ extension VideoRoomAudioCodec: Equatable, Hashable {}
 
 
 
+
+
+
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
@@ -8960,6 +8999,9 @@ extension VideoRoomVideoCodec: Equatable, Hashable {}
 
 
 
+
+
+
 public protocol AudioBridgeHandleCallback: AnyObject, Sendable {
     
     func onResult(transaction: String, result: String) 
@@ -8983,13 +9025,7 @@ public protocol AudioBridgeHandleCallback: AnyObject, Sendable {
     func onOther(data: Data) 
     
 }
-// Magic number for the Rust proxy to call using the same mechanism as every other method,
-// to free the callback once it's dropped by Rust.
-private let IDX_CALLBACK_FREE: Int32 = 0
-// Callback return codes
-private let UNIFFI_CALLBACK_SUCCESS: Int32 = 0
-private let UNIFFI_CALLBACK_ERROR: Int32 = 1
-private let UNIFFI_CALLBACK_UNEXPECTED_ERROR: Int32 = 2
+
 
 // Put the implementation in a struct so we don't pollute the top-level namespace
 fileprivate struct UniffiCallbackInterfaceAudioBridgeHandleCallback {
