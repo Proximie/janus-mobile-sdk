@@ -1,6 +1,6 @@
 [package]
 name = "rslib"
-version = "0.16.2"
+version = "0.16.3"
 edition = "2024"
 publish = false
 repository = "https://github.com/Proximie/janus-mobile-sdk"
@@ -19,13 +19,13 @@ strip = "symbols"
 
 [dependencies]
 log = "0.4.27"
-log-panics = "2.1.0"
+log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 serde = "1.0.217"
 serde_json = "1.0.140"
 thiserror = "2.0.12"
 tokio = "1.44.2"
 tracing = "0.1.41"
-tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
 uniffi = { workspace = true, features = ["tokio"] }
 jarust = { version = "1.8.2", features = [
     "echo-test-plugin",

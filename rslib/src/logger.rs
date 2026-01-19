@@ -15,7 +15,9 @@ pub fn init_janus_logger() {
             .with_tag("JanusGateway"),
     );
     tracing::info!("Logger started");
-    log_panics::init();
+    log_panics::Config::new()
+        .backtrace_mode(log_panics::BacktraceMode::Off)
+        .install_panic_hook();
 }
 
 #[cfg(any(target_os = "ios", target_os = "macos"))]
@@ -28,5 +30,7 @@ pub fn init_janus_logger(subsystem: &str, category: &str) {
         tracing_subscriber::registry().with(AppleTracingSubscriber::new(subsystem, category));
     _ = tracing::subscriber::set_global_default(subscriber);
     tracing::info!("Logger started");
-    log_panics::init();
+    log_panics::Config::new()
+        .backtrace_mode(log_panics::BacktraceMode::Off)
+        .install_panic_hook();
 }
