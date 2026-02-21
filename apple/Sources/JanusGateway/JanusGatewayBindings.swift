@@ -352,19 +352,29 @@ private func uniffiTraitInterfaceCallWithError<T, E>(
         callStatus.pointee.errorBuf = FfiConverterString.lower(String(describing: error))
     }
 }
+// Initial value and increment amount for handles. 
+// These ensure that SWIFT handles always have the lowest bit set
+fileprivate let UNIFFI_HANDLEMAP_INITIAL: UInt64 = 1
+fileprivate let UNIFFI_HANDLEMAP_DELTA: UInt64 = 2
+
 fileprivate final class UniffiHandleMap<T>: @unchecked Sendable {
     // All mutation happens with this lock held, which is why we implement @unchecked Sendable.
     private let lock = NSLock()
     private var map: [UInt64: T] = [:]
-    private var currentHandle: UInt64 = 1
+    private var currentHandle: UInt64 = UNIFFI_HANDLEMAP_INITIAL
 
     func insert(obj: T) -> UInt64 {
         lock.withLock {
-            let handle = currentHandle
-            currentHandle += 1
-            map[handle] = obj
-            return handle
+            return doInsert(obj)
         }
+    }
+
+    // Low-level insert function, this assumes `lock` is held.
+    private func doInsert(_ obj: T) -> UInt64 {
+        let handle = currentHandle
+        currentHandle += UNIFFI_HANDLEMAP_DELTA
+        map[handle] = obj
+        return handle
     }
 
      func get(handle: UInt64) throws -> T {
@@ -373,6 +383,15 @@ fileprivate final class UniffiHandleMap<T>: @unchecked Sendable {
                 throw UniffiInternalError.unexpectedStaleHandle
             }
             return obj
+        }
+    }
+
+     func clone(handle: UInt64) throws -> UInt64 {
+        try lock.withLock {
+            guard let obj = map[handle] else {
+                throw UniffiInternalError.unexpectedStaleHandle
+            }
+            return doInsert(obj)
         }
     }
 
@@ -637,13 +656,13 @@ public protocol AudioBridgeHandleProtocol: AnyObject, Sendable {
     
 }
 open class AudioBridgeHandle: AudioBridgeHandleProtocol, @unchecked Sendable {
-    fileprivate let pointer: UnsafeMutableRawPointer!
+    fileprivate let handle: UInt64
 
-    /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
+    /// Used to instantiate a [FFIObject] without an actual handle, for fakes in tests, mostly.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public struct NoPointer {
+    public struct NoHandle {
         public init() {}
     }
 
@@ -653,36 +672,37 @@ open class AudioBridgeHandle: AudioBridgeHandleProtocol, @unchecked Sendable {
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
-        self.pointer = pointer
+    required public init(unsafeFromHandle handle: UInt64) {
+        self.handle = handle
     }
 
     // This constructor can be used to instantiate a fake object.
-    // - Parameter noPointer: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    // - Parameter noHandle: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
     //
     // - Warning:
-    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing [Pointer] the FFI lower functions will crash.
+    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing handle the FFI lower functions will crash.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public init(noPointer: NoPointer) {
-        self.pointer = nil
+    public init(noHandle: NoHandle) {
+        self.handle = 0
     }
 
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public func uniffiClonePointer() -> UnsafeMutableRawPointer {
-        return try! rustCall { uniffi_janus_gateway_fn_clone_audiobridgehandle(self.pointer, $0) }
+    public func uniffiCloneHandle() -> UInt64 {
+        return try! rustCall { uniffi_janus_gateway_fn_clone_audiobridgehandle(self.handle, $0) }
     }
     // No primary constructor declared for this class.
 
     deinit {
-        guard let pointer = pointer else {
+        if handle == 0 {
+            // Mock objects have handle=0 don't try to free them
             return
         }
 
-        try! rustCall { uniffi_janus_gateway_fn_free_audiobridgehandle(pointer, $0) }
+        try! rustCall { uniffi_janus_gateway_fn_free_audiobridgehandle(handle, $0) }
     }
 
     
@@ -693,7 +713,7 @@ open func completeTrickle(timeout: TimeInterval)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_complete_trickle(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterDuration.lower(timeout)
                 )
             },
@@ -710,7 +730,7 @@ open func configure(params: AudioBridgeConfigureParams, jsep: Jsep?, timeout: Ti
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_configure(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeAudioBridgeConfigureParams_lower(params),FfiConverterOptionTypeJsep.lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -727,7 +747,7 @@ open func createRoom(params: AudioBridgeCreateParams, timeout: TimeInterval)asyn
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_create_room(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeAudioBridgeCreateParams_lower(params),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -744,7 +764,7 @@ open func detach()async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_detach(
-                    self.uniffiClonePointer()
+                    self.uniffiCloneHandle()
                     
                 )
             },
@@ -761,7 +781,7 @@ open func exist(roomId: JanusId, timeout: TimeInterval)async throws  -> Bool  {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_exist(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeJanusId_lower(roomId),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -778,7 +798,7 @@ open func fireAndForget(data: Data)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_fire_and_forget(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data)
                 )
             },
@@ -795,7 +815,7 @@ open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_fire_and_forget_with_jsep(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep)
                 )
             },
@@ -812,7 +832,7 @@ open func hangup()async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_hangup(
-                    self.uniffiClonePointer()
+                    self.uniffiCloneHandle()
                     
                 )
             },
@@ -829,7 +849,7 @@ open func joinRoom(params: AudioBridgeJoinParams, jsep: Jsep?, timeout: TimeInte
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_join_room(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeAudioBridgeJoinParams_lower(params),FfiConverterOptionTypeJsep.lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -846,7 +866,7 @@ open func listParticipants(roomId: JanusId, timeout: TimeInterval)async throws  
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_list_participants(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeJanusId_lower(roomId),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -863,7 +883,7 @@ open func mute(params: AudioBridgeMuteParams)async throws  -> String  {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_mute(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeAudioBridgeMuteParams_lower(params)
                 )
             },
@@ -880,7 +900,7 @@ open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  -> Strin
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_send_waiton_ack(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -897,7 +917,7 @@ open func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval)as
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_send_waiton_ack_with_jsep(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -914,7 +934,7 @@ open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Da
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_send_waiton_result(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -931,7 +951,7 @@ open func startEventLoop(cb: AudioBridgeHandleCallback)async   {
         try!  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_start_event_loop(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterCallbackInterfaceAudioBridgeHandleCallback_lower(cb)
                 )
             },
@@ -949,7 +969,7 @@ open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_trickle_candidates(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterSequenceTypeCandidate.lower(candidates),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -966,7 +986,7 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_trickle_single_candidate(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeCandidate_lower(candidate),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -983,7 +1003,7 @@ open func unmute(params: AudioBridgeMuteParams)async throws  -> String  {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_audiobridgehandle_unmute(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeAudioBridgeMuteParams_lower(params)
                 )
             },
@@ -996,6 +1016,7 @@ open func unmute(params: AudioBridgeMuteParams)async throws  -> String  {
 }
     
 
+    
 }
 
 
@@ -1003,33 +1024,24 @@ open func unmute(params: AudioBridgeMuteParams)async throws  -> String  {
 @_documentation(visibility: private)
 #endif
 public struct FfiConverterTypeAudioBridgeHandle: FfiConverter {
-
-    typealias FfiType = UnsafeMutableRawPointer
+    typealias FfiType = UInt64
     typealias SwiftType = AudioBridgeHandle
 
-    public static func lift(_ pointer: UnsafeMutableRawPointer) throws -> AudioBridgeHandle {
-        return AudioBridgeHandle(unsafeFromRawPointer: pointer)
+    public static func lift(_ handle: UInt64) throws -> AudioBridgeHandle {
+        return AudioBridgeHandle(unsafeFromHandle: handle)
     }
 
-    public static func lower(_ value: AudioBridgeHandle) -> UnsafeMutableRawPointer {
-        return value.uniffiClonePointer()
+    public static func lower(_ value: AudioBridgeHandle) -> UInt64 {
+        return value.uniffiCloneHandle()
     }
 
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AudioBridgeHandle {
-        let v: UInt64 = try readInt(&buf)
-        // The Rust code won't compile if a pointer won't fit in a UInt64.
-        // We have to go via `UInt` because that's the thing that's the size of a pointer.
-        let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: v))
-        if (ptr == nil) {
-            throw UniffiInternalError.unexpectedNullPointer
-        }
-        return try lift(ptr!)
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
     }
 
     public static func write(_ value: AudioBridgeHandle, into buf: inout [UInt8]) {
-        // This fiddling is because `Int` is the thing that's the same size as a pointer.
-        // The Rust code won't compile if a pointer won't fit in a `UInt64`.
-        writeInt(&buf, UInt64(bitPattern: Int64(Int(bitPattern: lower(value)))))
+        writeInt(&buf, lower(value))
     }
 }
 
@@ -1037,14 +1049,14 @@ public struct FfiConverterTypeAudioBridgeHandle: FfiConverter {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeAudioBridgeHandle_lift(_ pointer: UnsafeMutableRawPointer) throws -> AudioBridgeHandle {
-    return try FfiConverterTypeAudioBridgeHandle.lift(pointer)
+public func FfiConverterTypeAudioBridgeHandle_lift(_ handle: UInt64) throws -> AudioBridgeHandle {
+    return try FfiConverterTypeAudioBridgeHandle.lift(handle)
 }
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeAudioBridgeHandle_lower(_ value: AudioBridgeHandle) -> UnsafeMutableRawPointer {
+public func FfiConverterTypeAudioBridgeHandle_lower(_ value: AudioBridgeHandle) -> UInt64 {
     return FfiConverterTypeAudioBridgeHandle.lower(value)
 }
 
@@ -1061,13 +1073,13 @@ public protocol ConnectionProtocol: AnyObject, Sendable {
     
 }
 open class Connection: ConnectionProtocol, @unchecked Sendable {
-    fileprivate let pointer: UnsafeMutableRawPointer!
+    fileprivate let handle: UInt64
 
-    /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
+    /// Used to instantiate a [FFIObject] without an actual handle, for fakes in tests, mostly.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public struct NoPointer {
+    public struct NoHandle {
         public init() {}
     }
 
@@ -1077,36 +1089,37 @@ open class Connection: ConnectionProtocol, @unchecked Sendable {
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
-        self.pointer = pointer
+    required public init(unsafeFromHandle handle: UInt64) {
+        self.handle = handle
     }
 
     // This constructor can be used to instantiate a fake object.
-    // - Parameter noPointer: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    // - Parameter noHandle: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
     //
     // - Warning:
-    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing [Pointer] the FFI lower functions will crash.
+    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing handle the FFI lower functions will crash.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public init(noPointer: NoPointer) {
-        self.pointer = nil
+    public init(noHandle: NoHandle) {
+        self.handle = 0
     }
 
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public func uniffiClonePointer() -> UnsafeMutableRawPointer {
-        return try! rustCall { uniffi_janus_gateway_fn_clone_connection(self.pointer, $0) }
+    public func uniffiCloneHandle() -> UInt64 {
+        return try! rustCall { uniffi_janus_gateway_fn_clone_connection(self.handle, $0) }
     }
     // No primary constructor declared for this class.
 
     deinit {
-        guard let pointer = pointer else {
+        if handle == 0 {
+            // Mock objects have handle=0 don't try to free them
             return
         }
 
-        try! rustCall { uniffi_janus_gateway_fn_free_connection(pointer, $0) }
+        try! rustCall { uniffi_janus_gateway_fn_free_connection(handle, $0) }
     }
 
     
@@ -1117,13 +1130,13 @@ open func createSession(keepAliveIntervalInSecs: UInt32, timeout: TimeInterval)a
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_connection_create_session(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterUInt32.lower(keepAliveIntervalInSecs),FfiConverterDuration.lower(timeout)
                 )
             },
-            pollFunc: ffi_janus_gateway_rust_future_poll_pointer,
-            completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
-            freeFunc: ffi_janus_gateway_rust_future_free_pointer,
+            pollFunc: ffi_janus_gateway_rust_future_poll_u64,
+            completeFunc: ffi_janus_gateway_rust_future_complete_u64,
+            freeFunc: ffi_janus_gateway_rust_future_free_u64,
             liftFunc: FfiConverterTypeSession_lift,
             errorHandler: FfiConverterTypeJanusGatewaySessionError_lift
         )
@@ -1134,7 +1147,7 @@ open func serverInfo(timeout: TimeInterval)async throws  -> ServerInfoRsp  {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_connection_server_info(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterDuration.lower(timeout)
                 )
             },
@@ -1147,6 +1160,7 @@ open func serverInfo(timeout: TimeInterval)async throws  -> ServerInfoRsp  {
 }
     
 
+    
 }
 
 
@@ -1154,33 +1168,24 @@ open func serverInfo(timeout: TimeInterval)async throws  -> ServerInfoRsp  {
 @_documentation(visibility: private)
 #endif
 public struct FfiConverterTypeConnection: FfiConverter {
-
-    typealias FfiType = UnsafeMutableRawPointer
+    typealias FfiType = UInt64
     typealias SwiftType = Connection
 
-    public static func lift(_ pointer: UnsafeMutableRawPointer) throws -> Connection {
-        return Connection(unsafeFromRawPointer: pointer)
+    public static func lift(_ handle: UInt64) throws -> Connection {
+        return Connection(unsafeFromHandle: handle)
     }
 
-    public static func lower(_ value: Connection) -> UnsafeMutableRawPointer {
-        return value.uniffiClonePointer()
+    public static func lower(_ value: Connection) -> UInt64 {
+        return value.uniffiCloneHandle()
     }
 
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Connection {
-        let v: UInt64 = try readInt(&buf)
-        // The Rust code won't compile if a pointer won't fit in a UInt64.
-        // We have to go via `UInt` because that's the thing that's the size of a pointer.
-        let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: v))
-        if (ptr == nil) {
-            throw UniffiInternalError.unexpectedNullPointer
-        }
-        return try lift(ptr!)
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
     }
 
     public static func write(_ value: Connection, into buf: inout [UInt8]) {
-        // This fiddling is because `Int` is the thing that's the same size as a pointer.
-        // The Rust code won't compile if a pointer won't fit in a `UInt64`.
-        writeInt(&buf, UInt64(bitPattern: Int64(Int(bitPattern: lower(value)))))
+        writeInt(&buf, lower(value))
     }
 }
 
@@ -1188,14 +1193,14 @@ public struct FfiConverterTypeConnection: FfiConverter {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeConnection_lift(_ pointer: UnsafeMutableRawPointer) throws -> Connection {
-    return try FfiConverterTypeConnection.lift(pointer)
+public func FfiConverterTypeConnection_lift(_ handle: UInt64) throws -> Connection {
+    return try FfiConverterTypeConnection.lift(handle)
 }
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeConnection_lower(_ value: Connection) -> UnsafeMutableRawPointer {
+public func FfiConverterTypeConnection_lower(_ value: Connection) -> UInt64 {
     return FfiConverterTypeConnection.lower(value)
 }
 
@@ -1234,13 +1239,13 @@ public protocol EchotestHandleProtocol: AnyObject, Sendable {
     
 }
 open class EchotestHandle: EchotestHandleProtocol, @unchecked Sendable {
-    fileprivate let pointer: UnsafeMutableRawPointer!
+    fileprivate let handle: UInt64
 
-    /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
+    /// Used to instantiate a [FFIObject] without an actual handle, for fakes in tests, mostly.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public struct NoPointer {
+    public struct NoHandle {
         public init() {}
     }
 
@@ -1250,36 +1255,37 @@ open class EchotestHandle: EchotestHandleProtocol, @unchecked Sendable {
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
-        self.pointer = pointer
+    required public init(unsafeFromHandle handle: UInt64) {
+        self.handle = handle
     }
 
     // This constructor can be used to instantiate a fake object.
-    // - Parameter noPointer: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    // - Parameter noHandle: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
     //
     // - Warning:
-    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing [Pointer] the FFI lower functions will crash.
+    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing handle the FFI lower functions will crash.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public init(noPointer: NoPointer) {
-        self.pointer = nil
+    public init(noHandle: NoHandle) {
+        self.handle = 0
     }
 
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public func uniffiClonePointer() -> UnsafeMutableRawPointer {
-        return try! rustCall { uniffi_janus_gateway_fn_clone_echotesthandle(self.pointer, $0) }
+    public func uniffiCloneHandle() -> UInt64 {
+        return try! rustCall { uniffi_janus_gateway_fn_clone_echotesthandle(self.handle, $0) }
     }
     // No primary constructor declared for this class.
 
     deinit {
-        guard let pointer = pointer else {
+        if handle == 0 {
+            // Mock objects have handle=0 don't try to free them
             return
         }
 
-        try! rustCall { uniffi_janus_gateway_fn_free_echotesthandle(pointer, $0) }
+        try! rustCall { uniffi_janus_gateway_fn_free_echotesthandle(handle, $0) }
     }
 
     
@@ -1290,7 +1296,7 @@ open func completeTrickle(timeout: TimeInterval)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_complete_trickle(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterDuration.lower(timeout)
                 )
             },
@@ -1307,7 +1313,7 @@ open func detach()async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_detach(
-                    self.uniffiClonePointer()
+                    self.uniffiCloneHandle()
                     
                 )
             },
@@ -1324,7 +1330,7 @@ open func fireAndForget(data: Data)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_fire_and_forget(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data)
                 )
             },
@@ -1341,7 +1347,7 @@ open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_fire_and_forget_with_jsep(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep)
                 )
             },
@@ -1358,7 +1364,7 @@ open func hangup()async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_hangup(
-                    self.uniffiClonePointer()
+                    self.uniffiCloneHandle()
                     
                 )
             },
@@ -1375,7 +1381,7 @@ open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  -> Strin
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_send_waiton_ack(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -1392,7 +1398,7 @@ open func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval)as
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_send_waiton_ack_with_jsep(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -1409,7 +1415,7 @@ open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Da
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_send_waiton_result(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -1426,7 +1432,7 @@ open func start(params: EchoTestStartParams)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_start(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeEchoTestStartParams_lower(params)
                 )
             },
@@ -1443,7 +1449,7 @@ open func startEventLoop(cb: EchotestHandleCallback)async   {
         try!  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_start_event_loop(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterCallbackInterfaceEchotestHandleCallback_lower(cb)
                 )
             },
@@ -1461,7 +1467,7 @@ open func startWithJsep(params: EchoTestStartParams, jsep: Jsep, timeout: TimeIn
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_start_with_jsep(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeEchoTestStartParams_lower(params),FfiConverterTypeJsep_lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -1478,7 +1484,7 @@ open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_trickle_candidates(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterSequenceTypeCandidate.lower(candidates),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -1495,7 +1501,7 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_echotesthandle_trickle_single_candidate(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeCandidate_lower(candidate),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -1508,6 +1514,7 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
 }
     
 
+    
 }
 
 
@@ -1515,33 +1522,24 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
 @_documentation(visibility: private)
 #endif
 public struct FfiConverterTypeEchotestHandle: FfiConverter {
-
-    typealias FfiType = UnsafeMutableRawPointer
+    typealias FfiType = UInt64
     typealias SwiftType = EchotestHandle
 
-    public static func lift(_ pointer: UnsafeMutableRawPointer) throws -> EchotestHandle {
-        return EchotestHandle(unsafeFromRawPointer: pointer)
+    public static func lift(_ handle: UInt64) throws -> EchotestHandle {
+        return EchotestHandle(unsafeFromHandle: handle)
     }
 
-    public static func lower(_ value: EchotestHandle) -> UnsafeMutableRawPointer {
-        return value.uniffiClonePointer()
+    public static func lower(_ value: EchotestHandle) -> UInt64 {
+        return value.uniffiCloneHandle()
     }
 
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> EchotestHandle {
-        let v: UInt64 = try readInt(&buf)
-        // The Rust code won't compile if a pointer won't fit in a UInt64.
-        // We have to go via `UInt` because that's the thing that's the size of a pointer.
-        let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: v))
-        if (ptr == nil) {
-            throw UniffiInternalError.unexpectedNullPointer
-        }
-        return try lift(ptr!)
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
     }
 
     public static func write(_ value: EchotestHandle, into buf: inout [UInt8]) {
-        // This fiddling is because `Int` is the thing that's the same size as a pointer.
-        // The Rust code won't compile if a pointer won't fit in a `UInt64`.
-        writeInt(&buf, UInt64(bitPattern: Int64(Int(bitPattern: lower(value)))))
+        writeInt(&buf, lower(value))
     }
 }
 
@@ -1549,14 +1547,14 @@ public struct FfiConverterTypeEchotestHandle: FfiConverter {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeEchotestHandle_lift(_ pointer: UnsafeMutableRawPointer) throws -> EchotestHandle {
-    return try FfiConverterTypeEchotestHandle.lift(pointer)
+public func FfiConverterTypeEchotestHandle_lift(_ handle: UInt64) throws -> EchotestHandle {
+    return try FfiConverterTypeEchotestHandle.lift(handle)
 }
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeEchotestHandle_lower(_ value: EchotestHandle) -> UnsafeMutableRawPointer {
+public func FfiConverterTypeEchotestHandle_lower(_ value: EchotestHandle) -> UInt64 {
     return FfiConverterTypeEchotestHandle.lower(value)
 }
 
@@ -1591,13 +1589,13 @@ public protocol HandleProtocol: AnyObject, Sendable {
     
 }
 open class Handle: HandleProtocol, @unchecked Sendable {
-    fileprivate let pointer: UnsafeMutableRawPointer!
+    fileprivate let handle: UInt64
 
-    /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
+    /// Used to instantiate a [FFIObject] without an actual handle, for fakes in tests, mostly.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public struct NoPointer {
+    public struct NoHandle {
         public init() {}
     }
 
@@ -1607,36 +1605,37 @@ open class Handle: HandleProtocol, @unchecked Sendable {
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
-        self.pointer = pointer
+    required public init(unsafeFromHandle handle: UInt64) {
+        self.handle = handle
     }
 
     // This constructor can be used to instantiate a fake object.
-    // - Parameter noPointer: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    // - Parameter noHandle: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
     //
     // - Warning:
-    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing [Pointer] the FFI lower functions will crash.
+    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing handle the FFI lower functions will crash.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public init(noPointer: NoPointer) {
-        self.pointer = nil
+    public init(noHandle: NoHandle) {
+        self.handle = 0
     }
 
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public func uniffiClonePointer() -> UnsafeMutableRawPointer {
-        return try! rustCall { uniffi_janus_gateway_fn_clone_handle(self.pointer, $0) }
+    public func uniffiCloneHandle() -> UInt64 {
+        return try! rustCall { uniffi_janus_gateway_fn_clone_handle(self.handle, $0) }
     }
     // No primary constructor declared for this class.
 
     deinit {
-        guard let pointer = pointer else {
+        if handle == 0 {
+            // Mock objects have handle=0 don't try to free them
             return
         }
 
-        try! rustCall { uniffi_janus_gateway_fn_free_handle(pointer, $0) }
+        try! rustCall { uniffi_janus_gateway_fn_free_handle(handle, $0) }
     }
 
     
@@ -1647,7 +1646,7 @@ open func completeTrickle(timeout: TimeInterval)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_complete_trickle(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterDuration.lower(timeout)
                 )
             },
@@ -1664,7 +1663,7 @@ open func detach()async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_detach(
-                    self.uniffiClonePointer()
+                    self.uniffiCloneHandle()
                     
                 )
             },
@@ -1681,7 +1680,7 @@ open func fireAndForget(data: Data)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_fire_and_forget(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data)
                 )
             },
@@ -1698,7 +1697,7 @@ open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_fire_and_forget_with_jsep(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep)
                 )
             },
@@ -1715,7 +1714,7 @@ open func hangup()async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_hangup(
-                    self.uniffiClonePointer()
+                    self.uniffiCloneHandle()
                     
                 )
             },
@@ -1732,7 +1731,7 @@ open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  -> Strin
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_send_waiton_ack(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -1749,7 +1748,7 @@ open func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval)as
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_send_waiton_ack_with_jsep(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -1766,7 +1765,7 @@ open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Da
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_send_waiton_result(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -1783,7 +1782,7 @@ open func startEventLoop(cb: HandleCallback)async   {
         try!  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_start_event_loop(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterCallbackInterfaceHandleCallback_lower(cb)
                 )
             },
@@ -1801,7 +1800,7 @@ open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_trickle_candidates(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterSequenceTypeCandidate.lower(candidates),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -1818,7 +1817,7 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_handle_trickle_single_candidate(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeCandidate_lower(candidate),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -1831,6 +1830,7 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
 }
     
 
+    
 }
 
 
@@ -1838,33 +1838,24 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
 @_documentation(visibility: private)
 #endif
 public struct FfiConverterTypeHandle: FfiConverter {
-
-    typealias FfiType = UnsafeMutableRawPointer
+    typealias FfiType = UInt64
     typealias SwiftType = Handle
 
-    public static func lift(_ pointer: UnsafeMutableRawPointer) throws -> Handle {
-        return Handle(unsafeFromRawPointer: pointer)
+    public static func lift(_ handle: UInt64) throws -> Handle {
+        return Handle(unsafeFromHandle: handle)
     }
 
-    public static func lower(_ value: Handle) -> UnsafeMutableRawPointer {
-        return value.uniffiClonePointer()
+    public static func lower(_ value: Handle) -> UInt64 {
+        return value.uniffiCloneHandle()
     }
 
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Handle {
-        let v: UInt64 = try readInt(&buf)
-        // The Rust code won't compile if a pointer won't fit in a UInt64.
-        // We have to go via `UInt` because that's the thing that's the size of a pointer.
-        let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: v))
-        if (ptr == nil) {
-            throw UniffiInternalError.unexpectedNullPointer
-        }
-        return try lift(ptr!)
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
     }
 
     public static func write(_ value: Handle, into buf: inout [UInt8]) {
-        // This fiddling is because `Int` is the thing that's the same size as a pointer.
-        // The Rust code won't compile if a pointer won't fit in a `UInt64`.
-        writeInt(&buf, UInt64(bitPattern: Int64(Int(bitPattern: lower(value)))))
+        writeInt(&buf, lower(value))
     }
 }
 
@@ -1872,14 +1863,14 @@ public struct FfiConverterTypeHandle: FfiConverter {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeHandle_lift(_ pointer: UnsafeMutableRawPointer) throws -> Handle {
-    return try FfiConverterTypeHandle.lift(pointer)
+public func FfiConverterTypeHandle_lift(_ handle: UInt64) throws -> Handle {
+    return try FfiConverterTypeHandle.lift(handle)
 }
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeHandle_lower(_ value: Handle) -> UnsafeMutableRawPointer {
+public func FfiConverterTypeHandle_lower(_ value: Handle) -> UInt64 {
     return FfiConverterTypeHandle.lower(value)
 }
 
@@ -1932,13 +1923,13 @@ public protocol LegacyVideoRoomHandleProtocol: AnyObject, Sendable {
     
 }
 open class LegacyVideoRoomHandle: LegacyVideoRoomHandleProtocol, @unchecked Sendable {
-    fileprivate let pointer: UnsafeMutableRawPointer!
+    fileprivate let handle: UInt64
 
-    /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
+    /// Used to instantiate a [FFIObject] without an actual handle, for fakes in tests, mostly.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public struct NoPointer {
+    public struct NoHandle {
         public init() {}
     }
 
@@ -1948,36 +1939,37 @@ open class LegacyVideoRoomHandle: LegacyVideoRoomHandleProtocol, @unchecked Send
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
-        self.pointer = pointer
+    required public init(unsafeFromHandle handle: UInt64) {
+        self.handle = handle
     }
 
     // This constructor can be used to instantiate a fake object.
-    // - Parameter noPointer: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    // - Parameter noHandle: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
     //
     // - Warning:
-    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing [Pointer] the FFI lower functions will crash.
+    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing handle the FFI lower functions will crash.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public init(noPointer: NoPointer) {
-        self.pointer = nil
+    public init(noHandle: NoHandle) {
+        self.handle = 0
     }
 
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public func uniffiClonePointer() -> UnsafeMutableRawPointer {
-        return try! rustCall { uniffi_janus_gateway_fn_clone_legacyvideoroomhandle(self.pointer, $0) }
+    public func uniffiCloneHandle() -> UInt64 {
+        return try! rustCall { uniffi_janus_gateway_fn_clone_legacyvideoroomhandle(self.handle, $0) }
     }
     // No primary constructor declared for this class.
 
     deinit {
-        guard let pointer = pointer else {
+        if handle == 0 {
+            // Mock objects have handle=0 don't try to free them
             return
         }
 
-        try! rustCall { uniffi_janus_gateway_fn_free_legacyvideoroomhandle(pointer, $0) }
+        try! rustCall { uniffi_janus_gateway_fn_free_legacyvideoroomhandle(handle, $0) }
     }
 
     
@@ -1988,7 +1980,7 @@ open func completeTrickle(timeout: TimeInterval)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_complete_trickle(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2005,7 +1997,7 @@ open func createRoom(params: LegacyVideoRoomCreateParams, timeout: TimeInterval)
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_create_room(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeLegacyVideoRoomCreateParams_lower(params),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2022,7 +2014,7 @@ open func detach()async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_detach(
-                    self.uniffiClonePointer()
+                    self.uniffiCloneHandle()
                     
                 )
             },
@@ -2039,7 +2031,7 @@ open func exist(room: JanusId, timeout: TimeInterval)async throws  -> Bool  {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_exist(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeJanusId_lower(room),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2056,7 +2048,7 @@ open func fireAndForget(data: Data)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_fire_and_forget(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data)
                 )
             },
@@ -2073,7 +2065,7 @@ open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_fire_and_forget_with_jsep(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep)
                 )
             },
@@ -2090,7 +2082,7 @@ open func hangup()async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_hangup(
-                    self.uniffiClonePointer()
+                    self.uniffiCloneHandle()
                     
                 )
             },
@@ -2107,7 +2099,7 @@ open func kick(params: LegacyVideoRoomKickParams, timeout: TimeInterval)async th
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_kick(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeLegacyVideoRoomKickParams_lower(params),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2124,7 +2116,7 @@ open func publisherConfigure(params: LegacyVideoRoomPublisherConfigureParams, ti
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_publisher_configure(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeLegacyVideoRoomPublisherConfigureParams_lower(params),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2141,7 +2133,7 @@ open func publisherJoin(params: LegacyVideoRoomPublisherJoinParams, jsep: Jsep?,
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_publisher_join(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeLegacyVideoRoomPublisherJoinParams_lower(params),FfiConverterOptionTypeJsep.lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2158,7 +2150,7 @@ open func publisherJoinAndConfigure(params: LegacyVideoRoomPublisherJoinAndConfi
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_publisher_join_and_configure(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeLegacyVideoRoomPublisherJoinAndConfigureParams_lower(params),FfiConverterOptionTypeJsep.lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2175,7 +2167,7 @@ open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  -> Strin
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_send_waiton_ack(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2192,7 +2184,7 @@ open func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval)as
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_send_waiton_ack_with_jsep(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2209,7 +2201,7 @@ open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Da
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_send_waiton_result(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2226,7 +2218,7 @@ open func start(jsep: Jsep, timeout: TimeInterval)async throws  -> String  {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_start(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeJsep_lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2243,7 +2235,7 @@ open func startEventLoop(cb: LegacyVideoRoomHandleCallback)async   {
         try!  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_start_event_loop(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback_lower(cb)
                 )
             },
@@ -2261,7 +2253,7 @@ open func subscriberConfigure(params: LegacyVideoRoomSubscriberConfigureParams, 
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_subscriber_configure(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeLegacyVideoRoomSubscriberConfigureParams_lower(params),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2278,7 +2270,7 @@ open func subscriberJoin(params: LegacyVideoRoomSubscriberJoinParams, timeout: T
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_subscriber_join(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeLegacyVideoRoomSubscriberJoinParams_lower(params),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2295,7 +2287,7 @@ open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_trickle_candidates(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterSequenceTypeCandidate.lower(candidates),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2312,7 +2304,7 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_legacyvideoroomhandle_trickle_single_candidate(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeCandidate_lower(candidate),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2325,6 +2317,7 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
 }
     
 
+    
 }
 
 
@@ -2332,33 +2325,24 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
 @_documentation(visibility: private)
 #endif
 public struct FfiConverterTypeLegacyVideoRoomHandle: FfiConverter {
-
-    typealias FfiType = UnsafeMutableRawPointer
+    typealias FfiType = UInt64
     typealias SwiftType = LegacyVideoRoomHandle
 
-    public static func lift(_ pointer: UnsafeMutableRawPointer) throws -> LegacyVideoRoomHandle {
-        return LegacyVideoRoomHandle(unsafeFromRawPointer: pointer)
+    public static func lift(_ handle: UInt64) throws -> LegacyVideoRoomHandle {
+        return LegacyVideoRoomHandle(unsafeFromHandle: handle)
     }
 
-    public static func lower(_ value: LegacyVideoRoomHandle) -> UnsafeMutableRawPointer {
-        return value.uniffiClonePointer()
+    public static func lower(_ value: LegacyVideoRoomHandle) -> UInt64 {
+        return value.uniffiCloneHandle()
     }
 
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> LegacyVideoRoomHandle {
-        let v: UInt64 = try readInt(&buf)
-        // The Rust code won't compile if a pointer won't fit in a UInt64.
-        // We have to go via `UInt` because that's the thing that's the size of a pointer.
-        let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: v))
-        if (ptr == nil) {
-            throw UniffiInternalError.unexpectedNullPointer
-        }
-        return try lift(ptr!)
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
     }
 
     public static func write(_ value: LegacyVideoRoomHandle, into buf: inout [UInt8]) {
-        // This fiddling is because `Int` is the thing that's the same size as a pointer.
-        // The Rust code won't compile if a pointer won't fit in a `UInt64`.
-        writeInt(&buf, UInt64(bitPattern: Int64(Int(bitPattern: lower(value)))))
+        writeInt(&buf, lower(value))
     }
 }
 
@@ -2366,14 +2350,14 @@ public struct FfiConverterTypeLegacyVideoRoomHandle: FfiConverter {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeLegacyVideoRoomHandle_lift(_ pointer: UnsafeMutableRawPointer) throws -> LegacyVideoRoomHandle {
-    return try FfiConverterTypeLegacyVideoRoomHandle.lift(pointer)
+public func FfiConverterTypeLegacyVideoRoomHandle_lift(_ handle: UInt64) throws -> LegacyVideoRoomHandle {
+    return try FfiConverterTypeLegacyVideoRoomHandle.lift(handle)
 }
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeLegacyVideoRoomHandle_lower(_ value: LegacyVideoRoomHandle) -> UnsafeMutableRawPointer {
+public func FfiConverterTypeLegacyVideoRoomHandle_lower(_ value: LegacyVideoRoomHandle) -> UInt64 {
     return FfiConverterTypeLegacyVideoRoomHandle.lower(value)
 }
 
@@ -2398,13 +2382,13 @@ public protocol SessionProtocol: AnyObject, Sendable {
     
 }
 open class Session: SessionProtocol, @unchecked Sendable {
-    fileprivate let pointer: UnsafeMutableRawPointer!
+    fileprivate let handle: UInt64
 
-    /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
+    /// Used to instantiate a [FFIObject] without an actual handle, for fakes in tests, mostly.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public struct NoPointer {
+    public struct NoHandle {
         public init() {}
     }
 
@@ -2414,36 +2398,37 @@ open class Session: SessionProtocol, @unchecked Sendable {
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
-        self.pointer = pointer
+    required public init(unsafeFromHandle handle: UInt64) {
+        self.handle = handle
     }
 
     // This constructor can be used to instantiate a fake object.
-    // - Parameter noPointer: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    // - Parameter noHandle: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
     //
     // - Warning:
-    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing [Pointer] the FFI lower functions will crash.
+    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing handle the FFI lower functions will crash.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public init(noPointer: NoPointer) {
-        self.pointer = nil
+    public init(noHandle: NoHandle) {
+        self.handle = 0
     }
 
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public func uniffiClonePointer() -> UnsafeMutableRawPointer {
-        return try! rustCall { uniffi_janus_gateway_fn_clone_session(self.pointer, $0) }
+    public func uniffiCloneHandle() -> UInt64 {
+        return try! rustCall { uniffi_janus_gateway_fn_clone_session(self.handle, $0) }
     }
     // No primary constructor declared for this class.
 
     deinit {
-        guard let pointer = pointer else {
+        if handle == 0 {
+            // Mock objects have handle=0 don't try to free them
             return
         }
 
-        try! rustCall { uniffi_janus_gateway_fn_free_session(pointer, $0) }
+        try! rustCall { uniffi_janus_gateway_fn_free_session(handle, $0) }
     }
 
     
@@ -2454,13 +2439,13 @@ open func attach(pluginId: String, timeout: TimeInterval)async throws  -> Handle
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_session_attach(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterString.lower(pluginId),FfiConverterDuration.lower(timeout)
                 )
             },
-            pollFunc: ffi_janus_gateway_rust_future_poll_pointer,
-            completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
-            freeFunc: ffi_janus_gateway_rust_future_free_pointer,
+            pollFunc: ffi_janus_gateway_rust_future_poll_u64,
+            completeFunc: ffi_janus_gateway_rust_future_complete_u64,
+            freeFunc: ffi_janus_gateway_rust_future_free_u64,
             liftFunc: FfiConverterTypeHandle_lift,
             errorHandler: FfiConverterTypeJanusGatewayHandleError_lift
         )
@@ -2471,13 +2456,13 @@ open func attachAudioBridge(timeout: TimeInterval)async throws  -> AudioBridgeHa
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_session_attach_audio_bridge(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterDuration.lower(timeout)
                 )
             },
-            pollFunc: ffi_janus_gateway_rust_future_poll_pointer,
-            completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
-            freeFunc: ffi_janus_gateway_rust_future_free_pointer,
+            pollFunc: ffi_janus_gateway_rust_future_poll_u64,
+            completeFunc: ffi_janus_gateway_rust_future_complete_u64,
+            freeFunc: ffi_janus_gateway_rust_future_free_u64,
             liftFunc: FfiConverterTypeAudioBridgeHandle_lift,
             errorHandler: FfiConverterTypeJanusGatewayHandleError_lift
         )
@@ -2488,13 +2473,13 @@ open func attachEchoTest(timeout: TimeInterval)async throws  -> EchotestHandle  
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_session_attach_echo_test(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterDuration.lower(timeout)
                 )
             },
-            pollFunc: ffi_janus_gateway_rust_future_poll_pointer,
-            completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
-            freeFunc: ffi_janus_gateway_rust_future_free_pointer,
+            pollFunc: ffi_janus_gateway_rust_future_poll_u64,
+            completeFunc: ffi_janus_gateway_rust_future_complete_u64,
+            freeFunc: ffi_janus_gateway_rust_future_free_u64,
             liftFunc: FfiConverterTypeEchotestHandle_lift,
             errorHandler: FfiConverterTypeJanusGatewayHandleError_lift
         )
@@ -2505,13 +2490,13 @@ open func attachLegacyVideoRoom(timeout: TimeInterval)async throws  -> LegacyVid
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_session_attach_legacy_video_room(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterDuration.lower(timeout)
                 )
             },
-            pollFunc: ffi_janus_gateway_rust_future_poll_pointer,
-            completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
-            freeFunc: ffi_janus_gateway_rust_future_free_pointer,
+            pollFunc: ffi_janus_gateway_rust_future_poll_u64,
+            completeFunc: ffi_janus_gateway_rust_future_complete_u64,
+            freeFunc: ffi_janus_gateway_rust_future_free_u64,
             liftFunc: FfiConverterTypeLegacyVideoRoomHandle_lift,
             errorHandler: FfiConverterTypeJanusGatewayHandleError_lift
         )
@@ -2522,13 +2507,13 @@ open func attachVideoRoom(timeout: TimeInterval)async throws  -> VideoRoomHandle
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_session_attach_video_room(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterDuration.lower(timeout)
                 )
             },
-            pollFunc: ffi_janus_gateway_rust_future_poll_pointer,
-            completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
-            freeFunc: ffi_janus_gateway_rust_future_free_pointer,
+            pollFunc: ffi_janus_gateway_rust_future_poll_u64,
+            completeFunc: ffi_janus_gateway_rust_future_complete_u64,
+            freeFunc: ffi_janus_gateway_rust_future_free_u64,
             liftFunc: FfiConverterTypeVideoRoomHandle_lift,
             errorHandler: FfiConverterTypeJanusGatewayHandleError_lift
         )
@@ -2539,7 +2524,7 @@ open func destory(timeout: TimeInterval)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_session_destory(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2552,6 +2537,7 @@ open func destory(timeout: TimeInterval)async throws   {
 }
     
 
+    
 }
 
 
@@ -2559,33 +2545,24 @@ open func destory(timeout: TimeInterval)async throws   {
 @_documentation(visibility: private)
 #endif
 public struct FfiConverterTypeSession: FfiConverter {
-
-    typealias FfiType = UnsafeMutableRawPointer
+    typealias FfiType = UInt64
     typealias SwiftType = Session
 
-    public static func lift(_ pointer: UnsafeMutableRawPointer) throws -> Session {
-        return Session(unsafeFromRawPointer: pointer)
+    public static func lift(_ handle: UInt64) throws -> Session {
+        return Session(unsafeFromHandle: handle)
     }
 
-    public static func lower(_ value: Session) -> UnsafeMutableRawPointer {
-        return value.uniffiClonePointer()
+    public static func lower(_ value: Session) -> UInt64 {
+        return value.uniffiCloneHandle()
     }
 
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Session {
-        let v: UInt64 = try readInt(&buf)
-        // The Rust code won't compile if a pointer won't fit in a UInt64.
-        // We have to go via `UInt` because that's the thing that's the size of a pointer.
-        let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: v))
-        if (ptr == nil) {
-            throw UniffiInternalError.unexpectedNullPointer
-        }
-        return try lift(ptr!)
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
     }
 
     public static func write(_ value: Session, into buf: inout [UInt8]) {
-        // This fiddling is because `Int` is the thing that's the same size as a pointer.
-        // The Rust code won't compile if a pointer won't fit in a `UInt64`.
-        writeInt(&buf, UInt64(bitPattern: Int64(Int(bitPattern: lower(value)))))
+        writeInt(&buf, lower(value))
     }
 }
 
@@ -2593,14 +2570,14 @@ public struct FfiConverterTypeSession: FfiConverter {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeSession_lift(_ pointer: UnsafeMutableRawPointer) throws -> Session {
-    return try FfiConverterTypeSession.lift(pointer)
+public func FfiConverterTypeSession_lift(_ handle: UInt64) throws -> Session {
+    return try FfiConverterTypeSession.lift(handle)
 }
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeSession_lower(_ value: Session) -> UnsafeMutableRawPointer {
+public func FfiConverterTypeSession_lower(_ value: Session) -> UInt64 {
     return FfiConverterTypeSession.lower(value)
 }
 
@@ -2641,13 +2618,13 @@ public protocol VideoRoomHandleProtocol: AnyObject, Sendable {
     
 }
 open class VideoRoomHandle: VideoRoomHandleProtocol, @unchecked Sendable {
-    fileprivate let pointer: UnsafeMutableRawPointer!
+    fileprivate let handle: UInt64
 
-    /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
+    /// Used to instantiate a [FFIObject] without an actual handle, for fakes in tests, mostly.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public struct NoPointer {
+    public struct NoHandle {
         public init() {}
     }
 
@@ -2657,36 +2634,37 @@ open class VideoRoomHandle: VideoRoomHandleProtocol, @unchecked Sendable {
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
-        self.pointer = pointer
+    required public init(unsafeFromHandle handle: UInt64) {
+        self.handle = handle
     }
 
     // This constructor can be used to instantiate a fake object.
-    // - Parameter noPointer: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    // - Parameter noHandle: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
     //
     // - Warning:
-    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing [Pointer] the FFI lower functions will crash.
+    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing handle the FFI lower functions will crash.
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public init(noPointer: NoPointer) {
-        self.pointer = nil
+    public init(noHandle: NoHandle) {
+        self.handle = 0
     }
 
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-    public func uniffiClonePointer() -> UnsafeMutableRawPointer {
-        return try! rustCall { uniffi_janus_gateway_fn_clone_videoroomhandle(self.pointer, $0) }
+    public func uniffiCloneHandle() -> UInt64 {
+        return try! rustCall { uniffi_janus_gateway_fn_clone_videoroomhandle(self.handle, $0) }
     }
     // No primary constructor declared for this class.
 
     deinit {
-        guard let pointer = pointer else {
+        if handle == 0 {
+            // Mock objects have handle=0 don't try to free them
             return
         }
 
-        try! rustCall { uniffi_janus_gateway_fn_free_videoroomhandle(pointer, $0) }
+        try! rustCall { uniffi_janus_gateway_fn_free_videoroomhandle(handle, $0) }
     }
 
     
@@ -2697,7 +2675,7 @@ open func completeTrickle(timeout: TimeInterval)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_videoroomhandle_complete_trickle(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2714,7 +2692,7 @@ open func createRoom(params: VideoRoomCreateParams, timeout: TimeInterval)async 
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_videoroomhandle_create_room(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeVideoRoomCreateParams_lower(params),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2731,7 +2709,7 @@ open func detach()async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_videoroomhandle_detach(
-                    self.uniffiClonePointer()
+                    self.uniffiCloneHandle()
                     
                 )
             },
@@ -2748,7 +2726,7 @@ open func exist(roomId: JanusId, timeout: TimeInterval)async throws  -> Bool  {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_videoroomhandle_exist(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeJanusId_lower(roomId),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2765,7 +2743,7 @@ open func fireAndForget(data: Data)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_videoroomhandle_fire_and_forget(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data)
                 )
             },
@@ -2782,7 +2760,7 @@ open func fireAndForgetWithJsep(data: Data, jsep: Jsep)async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_videoroomhandle_fire_and_forget_with_jsep(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep)
                 )
             },
@@ -2799,7 +2777,7 @@ open func hangup()async throws   {
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_videoroomhandle_hangup(
-                    self.uniffiClonePointer()
+                    self.uniffiCloneHandle()
                     
                 )
             },
@@ -2816,7 +2794,7 @@ open func publisherJoinAndConfigure(params: VideoRoomPublisherJoinAndConfigurePa
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_videoroomhandle_publisher_join_and_configure(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeVideoRoomPublisherJoinAndConfigureParams_lower(params),FfiConverterOptionTypeJsep.lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2833,7 +2811,7 @@ open func sendWaitonAck(data: Data, timeout: TimeInterval)async throws  -> Strin
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_videoroomhandle_send_waiton_ack(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2850,7 +2828,7 @@ open func sendWaitonAckWithJsep(data: Data, jsep: Jsep, timeout: TimeInterval)as
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_videoroomhandle_send_waiton_ack_with_jsep(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterTypeJsep_lower(jsep),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2867,7 +2845,7 @@ open func sendWaitonResult(data: Data, timeout: TimeInterval)async throws  -> Da
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_videoroomhandle_send_waiton_result(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterData.lower(data),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2884,7 +2862,7 @@ open func startEventLoop(cb: VideoRoomHandleCallback)async   {
         try!  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_videoroomhandle_start_event_loop(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterCallbackInterfaceVideoRoomHandleCallback_lower(cb)
                 )
             },
@@ -2902,7 +2880,7 @@ open func trickleCandidates(candidates: [Candidate], timeout: TimeInterval)async
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_videoroomhandle_trickle_candidates(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterSequenceTypeCandidate.lower(candidates),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2919,7 +2897,7 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_method_videoroomhandle_trickle_single_candidate(
-                    self.uniffiClonePointer(),
+                    self.uniffiCloneHandle(),
                     FfiConverterTypeCandidate_lower(candidate),FfiConverterDuration.lower(timeout)
                 )
             },
@@ -2932,6 +2910,7 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
 }
     
 
+    
 }
 
 
@@ -2939,33 +2918,24 @@ open func trickleSingleCandidate(candidate: Candidate, timeout: TimeInterval)asy
 @_documentation(visibility: private)
 #endif
 public struct FfiConverterTypeVideoRoomHandle: FfiConverter {
-
-    typealias FfiType = UnsafeMutableRawPointer
+    typealias FfiType = UInt64
     typealias SwiftType = VideoRoomHandle
 
-    public static func lift(_ pointer: UnsafeMutableRawPointer) throws -> VideoRoomHandle {
-        return VideoRoomHandle(unsafeFromRawPointer: pointer)
+    public static func lift(_ handle: UInt64) throws -> VideoRoomHandle {
+        return VideoRoomHandle(unsafeFromHandle: handle)
     }
 
-    public static func lower(_ value: VideoRoomHandle) -> UnsafeMutableRawPointer {
-        return value.uniffiClonePointer()
+    public static func lower(_ value: VideoRoomHandle) -> UInt64 {
+        return value.uniffiCloneHandle()
     }
 
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> VideoRoomHandle {
-        let v: UInt64 = try readInt(&buf)
-        // The Rust code won't compile if a pointer won't fit in a UInt64.
-        // We have to go via `UInt` because that's the thing that's the size of a pointer.
-        let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: v))
-        if (ptr == nil) {
-            throw UniffiInternalError.unexpectedNullPointer
-        }
-        return try lift(ptr!)
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
     }
 
     public static func write(_ value: VideoRoomHandle, into buf: inout [UInt8]) {
-        // This fiddling is because `Int` is the thing that's the same size as a pointer.
-        // The Rust code won't compile if a pointer won't fit in a `UInt64`.
-        writeInt(&buf, UInt64(bitPattern: Int64(Int(bitPattern: lower(value)))))
+        writeInt(&buf, lower(value))
     }
 }
 
@@ -2973,21 +2943,21 @@ public struct FfiConverterTypeVideoRoomHandle: FfiConverter {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeVideoRoomHandle_lift(_ pointer: UnsafeMutableRawPointer) throws -> VideoRoomHandle {
-    return try FfiConverterTypeVideoRoomHandle.lift(pointer)
+public func FfiConverterTypeVideoRoomHandle_lift(_ handle: UInt64) throws -> VideoRoomHandle {
+    return try FfiConverterTypeVideoRoomHandle.lift(handle)
 }
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeVideoRoomHandle_lower(_ value: VideoRoomHandle) -> UnsafeMutableRawPointer {
+public func FfiConverterTypeVideoRoomHandle_lower(_ value: VideoRoomHandle) -> UInt64 {
     return FfiConverterTypeVideoRoomHandle.lower(value)
 }
 
 
 
 
-public struct AudioBridgeConfigureParams {
+public struct AudioBridgeConfigureParams: Equatable, Hashable {
     public let muted: Bool?
     public let display: String?
     public let bitrate: UInt64?
@@ -3015,67 +2985,15 @@ public struct AudioBridgeConfigureParams {
         self.filename = filename
         self.group = group
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension AudioBridgeConfigureParams: Sendable {}
 #endif
-
-
-extension AudioBridgeConfigureParams: Equatable, Hashable {
-    public static func ==(lhs: AudioBridgeConfigureParams, rhs: AudioBridgeConfigureParams) -> Bool {
-        if lhs.muted != rhs.muted {
-            return false
-        }
-        if lhs.display != rhs.display {
-            return false
-        }
-        if lhs.bitrate != rhs.bitrate {
-            return false
-        }
-        if lhs.quality != rhs.quality {
-            return false
-        }
-        if lhs.expectedLoss != rhs.expectedLoss {
-            return false
-        }
-        if lhs.volume != rhs.volume {
-            return false
-        }
-        if lhs.spatialPosition != rhs.spatialPosition {
-            return false
-        }
-        if lhs.denoise != rhs.denoise {
-            return false
-        }
-        if lhs.record != rhs.record {
-            return false
-        }
-        if lhs.filename != rhs.filename {
-            return false
-        }
-        if lhs.group != rhs.group {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(muted)
-        hasher.combine(display)
-        hasher.combine(bitrate)
-        hasher.combine(quality)
-        hasher.combine(expectedLoss)
-        hasher.combine(volume)
-        hasher.combine(spatialPosition)
-        hasher.combine(denoise)
-        hasher.combine(record)
-        hasher.combine(filename)
-        hasher.combine(group)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -3129,7 +3047,7 @@ public func FfiConverterTypeAudioBridgeConfigureParams_lower(_ value: AudioBridg
 }
 
 
-public struct AudioBridgeCreateParams {
+public struct AudioBridgeCreateParams: Equatable, Hashable {
     public let room: JanusId?
     public let permanent: Bool?
     public let description: String?
@@ -3177,107 +3095,15 @@ public struct AudioBridgeCreateParams {
         self.allowRtpParticipants = allowRtpParticipants
         self.groups = groups
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension AudioBridgeCreateParams: Sendable {}
 #endif
-
-
-extension AudioBridgeCreateParams: Equatable, Hashable {
-    public static func ==(lhs: AudioBridgeCreateParams, rhs: AudioBridgeCreateParams) -> Bool {
-        if lhs.room != rhs.room {
-            return false
-        }
-        if lhs.permanent != rhs.permanent {
-            return false
-        }
-        if lhs.description != rhs.description {
-            return false
-        }
-        if lhs.secret != rhs.secret {
-            return false
-        }
-        if lhs.pin != rhs.pin {
-            return false
-        }
-        if lhs.isPrivate != rhs.isPrivate {
-            return false
-        }
-        if lhs.allowed != rhs.allowed {
-            return false
-        }
-        if lhs.samplingRate != rhs.samplingRate {
-            return false
-        }
-        if lhs.spatialAudio != rhs.spatialAudio {
-            return false
-        }
-        if lhs.audiolevelExt != rhs.audiolevelExt {
-            return false
-        }
-        if lhs.audiolevelEvent != rhs.audiolevelEvent {
-            return false
-        }
-        if lhs.audioActivePackets != rhs.audioActivePackets {
-            return false
-        }
-        if lhs.defaultExpectedloss != rhs.defaultExpectedloss {
-            return false
-        }
-        if lhs.defaultBitrate != rhs.defaultBitrate {
-            return false
-        }
-        if lhs.record != rhs.record {
-            return false
-        }
-        if lhs.recordFile != rhs.recordFile {
-            return false
-        }
-        if lhs.recordDir != rhs.recordDir {
-            return false
-        }
-        if lhs.mjrs != rhs.mjrs {
-            return false
-        }
-        if lhs.mjrsDir != rhs.mjrsDir {
-            return false
-        }
-        if lhs.allowRtpParticipants != rhs.allowRtpParticipants {
-            return false
-        }
-        if lhs.groups != rhs.groups {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(room)
-        hasher.combine(permanent)
-        hasher.combine(description)
-        hasher.combine(secret)
-        hasher.combine(pin)
-        hasher.combine(isPrivate)
-        hasher.combine(allowed)
-        hasher.combine(samplingRate)
-        hasher.combine(spatialAudio)
-        hasher.combine(audiolevelExt)
-        hasher.combine(audiolevelEvent)
-        hasher.combine(audioActivePackets)
-        hasher.combine(defaultExpectedloss)
-        hasher.combine(defaultBitrate)
-        hasher.combine(record)
-        hasher.combine(recordFile)
-        hasher.combine(recordDir)
-        hasher.combine(mjrs)
-        hasher.combine(mjrsDir)
-        hasher.combine(allowRtpParticipants)
-        hasher.combine(groups)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -3351,7 +3177,7 @@ public func FfiConverterTypeAudioBridgeCreateParams_lower(_ value: AudioBridgeCr
 }
 
 
-public struct AudioBridgeJoinParams {
+public struct AudioBridgeJoinParams: Equatable, Hashable {
     public let room: JanusId
     public let optional: AudioBridgeJoinParamsOptional
 
@@ -3361,31 +3187,15 @@ public struct AudioBridgeJoinParams {
         self.room = room
         self.optional = optional
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension AudioBridgeJoinParams: Sendable {}
 #endif
-
-
-extension AudioBridgeJoinParams: Equatable, Hashable {
-    public static func ==(lhs: AudioBridgeJoinParams, rhs: AudioBridgeJoinParams) -> Bool {
-        if lhs.room != rhs.room {
-            return false
-        }
-        if lhs.optional != rhs.optional {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(room)
-        hasher.combine(optional)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -3421,7 +3231,7 @@ public func FfiConverterTypeAudioBridgeJoinParams_lower(_ value: AudioBridgeJoin
 }
 
 
-public struct AudioBridgeJoinParamsOptional {
+public struct AudioBridgeJoinParamsOptional: Equatable, Hashable {
     public let id: JanusId?
     public let group: String?
     public let pin: String?
@@ -3469,107 +3279,15 @@ public struct AudioBridgeJoinParamsOptional {
         self.generateOffer = generateOffer
         self.rtp = rtp
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension AudioBridgeJoinParamsOptional: Sendable {}
 #endif
-
-
-extension AudioBridgeJoinParamsOptional: Equatable, Hashable {
-    public static func ==(lhs: AudioBridgeJoinParamsOptional, rhs: AudioBridgeJoinParamsOptional) -> Bool {
-        if lhs.id != rhs.id {
-            return false
-        }
-        if lhs.group != rhs.group {
-            return false
-        }
-        if lhs.pin != rhs.pin {
-            return false
-        }
-        if lhs.display != rhs.display {
-            return false
-        }
-        if lhs.token != rhs.token {
-            return false
-        }
-        if lhs.muted != rhs.muted {
-            return false
-        }
-        if lhs.suspended != rhs.suspended {
-            return false
-        }
-        if lhs.pauseEvents != rhs.pauseEvents {
-            return false
-        }
-        if lhs.codec != rhs.codec {
-            return false
-        }
-        if lhs.bitrate != rhs.bitrate {
-            return false
-        }
-        if lhs.quality != rhs.quality {
-            return false
-        }
-        if lhs.expectedLoss != rhs.expectedLoss {
-            return false
-        }
-        if lhs.volume != rhs.volume {
-            return false
-        }
-        if lhs.spatialPosition != rhs.spatialPosition {
-            return false
-        }
-        if lhs.secret != rhs.secret {
-            return false
-        }
-        if lhs.audioLevelAverage != rhs.audioLevelAverage {
-            return false
-        }
-        if lhs.audioActivePackets != rhs.audioActivePackets {
-            return false
-        }
-        if lhs.record != rhs.record {
-            return false
-        }
-        if lhs.filename != rhs.filename {
-            return false
-        }
-        if lhs.generateOffer != rhs.generateOffer {
-            return false
-        }
-        if lhs.rtp != rhs.rtp {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-        hasher.combine(group)
-        hasher.combine(pin)
-        hasher.combine(display)
-        hasher.combine(token)
-        hasher.combine(muted)
-        hasher.combine(suspended)
-        hasher.combine(pauseEvents)
-        hasher.combine(codec)
-        hasher.combine(bitrate)
-        hasher.combine(quality)
-        hasher.combine(expectedLoss)
-        hasher.combine(volume)
-        hasher.combine(spatialPosition)
-        hasher.combine(secret)
-        hasher.combine(audioLevelAverage)
-        hasher.combine(audioActivePackets)
-        hasher.combine(record)
-        hasher.combine(filename)
-        hasher.combine(generateOffer)
-        hasher.combine(rtp)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -3643,7 +3361,7 @@ public func FfiConverterTypeAudioBridgeJoinParamsOptional_lower(_ value: AudioBr
 }
 
 
-public struct AudioBridgeListParticipantsRsp {
+public struct AudioBridgeListParticipantsRsp: Equatable, Hashable {
     public let room: JanusId
     public let participants: [AudioBridgeParticipant]
 
@@ -3653,31 +3371,15 @@ public struct AudioBridgeListParticipantsRsp {
         self.room = room
         self.participants = participants
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension AudioBridgeListParticipantsRsp: Sendable {}
 #endif
-
-
-extension AudioBridgeListParticipantsRsp: Equatable, Hashable {
-    public static func ==(lhs: AudioBridgeListParticipantsRsp, rhs: AudioBridgeListParticipantsRsp) -> Bool {
-        if lhs.room != rhs.room {
-            return false
-        }
-        if lhs.participants != rhs.participants {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(room)
-        hasher.combine(participants)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -3713,7 +3415,7 @@ public func FfiConverterTypeAudioBridgeListParticipantsRsp_lower(_ value: AudioB
 }
 
 
-public struct AudioBridgeMuteParams {
+public struct AudioBridgeMuteParams: Equatable, Hashable {
     public let id: JanusId
     public let room: JanusId
     public let secret: String?
@@ -3725,35 +3427,15 @@ public struct AudioBridgeMuteParams {
         self.room = room
         self.secret = secret
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension AudioBridgeMuteParams: Sendable {}
 #endif
-
-
-extension AudioBridgeMuteParams: Equatable, Hashable {
-    public static func ==(lhs: AudioBridgeMuteParams, rhs: AudioBridgeMuteParams) -> Bool {
-        if lhs.id != rhs.id {
-            return false
-        }
-        if lhs.room != rhs.room {
-            return false
-        }
-        if lhs.secret != rhs.secret {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-        hasher.combine(room)
-        hasher.combine(secret)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -3791,7 +3473,7 @@ public func FfiConverterTypeAudioBridgeMuteParams_lower(_ value: AudioBridgeMute
 }
 
 
-public struct AudioBridgeParticipant {
+public struct AudioBridgeParticipant: Equatable, Hashable {
     public let id: JanusId
     public let display: String?
     public let setup: Bool
@@ -3811,51 +3493,15 @@ public struct AudioBridgeParticipant {
         self.talking = talking
         self.spatialPosition = spatialPosition
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension AudioBridgeParticipant: Sendable {}
 #endif
-
-
-extension AudioBridgeParticipant: Equatable, Hashable {
-    public static func ==(lhs: AudioBridgeParticipant, rhs: AudioBridgeParticipant) -> Bool {
-        if lhs.id != rhs.id {
-            return false
-        }
-        if lhs.display != rhs.display {
-            return false
-        }
-        if lhs.setup != rhs.setup {
-            return false
-        }
-        if lhs.muted != rhs.muted {
-            return false
-        }
-        if lhs.suspended != rhs.suspended {
-            return false
-        }
-        if lhs.talking != rhs.talking {
-            return false
-        }
-        if lhs.spatialPosition != rhs.spatialPosition {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-        hasher.combine(display)
-        hasher.combine(setup)
-        hasher.combine(muted)
-        hasher.combine(suspended)
-        hasher.combine(talking)
-        hasher.combine(spatialPosition)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -3901,7 +3547,7 @@ public func FfiConverterTypeAudioBridgeParticipant_lower(_ value: AudioBridgePar
 }
 
 
-public struct AudioBridgeRtp {
+public struct AudioBridgeRtp: Equatable, Hashable {
     public let required: AudioBridgeRtpRequired
     public let optional: AudioBridgeRtpOptional
 
@@ -3911,31 +3557,15 @@ public struct AudioBridgeRtp {
         self.required = required
         self.optional = optional
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension AudioBridgeRtp: Sendable {}
 #endif
-
-
-extension AudioBridgeRtp: Equatable, Hashable {
-    public static func ==(lhs: AudioBridgeRtp, rhs: AudioBridgeRtp) -> Bool {
-        if lhs.required != rhs.required {
-            return false
-        }
-        if lhs.optional != rhs.optional {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(required)
-        hasher.combine(optional)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -3971,7 +3601,7 @@ public func FfiConverterTypeAudioBridgeRTP_lower(_ value: AudioBridgeRtp) -> Rus
 }
 
 
-public struct AudioBridgeRtpOptional {
+public struct AudioBridgeRtpOptional: Equatable, Hashable {
     public let payloadType: String?
     public let audiolevelExt: String?
     public let fec: Bool?
@@ -3983,35 +3613,15 @@ public struct AudioBridgeRtpOptional {
         self.audiolevelExt = audiolevelExt
         self.fec = fec
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension AudioBridgeRtpOptional: Sendable {}
 #endif
-
-
-extension AudioBridgeRtpOptional: Equatable, Hashable {
-    public static func ==(lhs: AudioBridgeRtpOptional, rhs: AudioBridgeRtpOptional) -> Bool {
-        if lhs.payloadType != rhs.payloadType {
-            return false
-        }
-        if lhs.audiolevelExt != rhs.audiolevelExt {
-            return false
-        }
-        if lhs.fec != rhs.fec {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(payloadType)
-        hasher.combine(audiolevelExt)
-        hasher.combine(fec)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -4049,7 +3659,7 @@ public func FfiConverterTypeAudioBridgeRTPOptional_lower(_ value: AudioBridgeRtp
 }
 
 
-public struct AudioBridgeRtpRequired {
+public struct AudioBridgeRtpRequired: Equatable, Hashable {
     public let ip: String
     public let port: UInt16
 
@@ -4059,31 +3669,15 @@ public struct AudioBridgeRtpRequired {
         self.ip = ip
         self.port = port
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension AudioBridgeRtpRequired: Sendable {}
 #endif
-
-
-extension AudioBridgeRtpRequired: Equatable, Hashable {
-    public static func ==(lhs: AudioBridgeRtpRequired, rhs: AudioBridgeRtpRequired) -> Bool {
-        if lhs.ip != rhs.ip {
-            return false
-        }
-        if lhs.port != rhs.port {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(ip)
-        hasher.combine(port)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -4119,7 +3713,7 @@ public func FfiConverterTypeAudioBridgeRTPRequired_lower(_ value: AudioBridgeRtp
 }
 
 
-public struct AudioBridgeRoomCreatedRsp {
+public struct AudioBridgeRoomCreatedRsp: Equatable, Hashable {
     public let room: JanusId
     public let permanent: Bool
 
@@ -4129,31 +3723,15 @@ public struct AudioBridgeRoomCreatedRsp {
         self.room = room
         self.permanent = permanent
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension AudioBridgeRoomCreatedRsp: Sendable {}
 #endif
-
-
-extension AudioBridgeRoomCreatedRsp: Equatable, Hashable {
-    public static func ==(lhs: AudioBridgeRoomCreatedRsp, rhs: AudioBridgeRoomCreatedRsp) -> Bool {
-        if lhs.room != rhs.room {
-            return false
-        }
-        if lhs.permanent != rhs.permanent {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(room)
-        hasher.combine(permanent)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -4189,7 +3767,7 @@ public func FfiConverterTypeAudioBridgeRoomCreatedRsp_lower(_ value: AudioBridge
 }
 
 
-public struct Candidate {
+public struct Candidate: Equatable, Hashable {
     public let candidate: String
     public let sdpMid: String
     public let sdpMlineIndex: UInt32
@@ -4201,35 +3779,15 @@ public struct Candidate {
         self.sdpMid = sdpMid
         self.sdpMlineIndex = sdpMlineIndex
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension Candidate: Sendable {}
 #endif
-
-
-extension Candidate: Equatable, Hashable {
-    public static func ==(lhs: Candidate, rhs: Candidate) -> Bool {
-        if lhs.candidate != rhs.candidate {
-            return false
-        }
-        if lhs.sdpMid != rhs.sdpMid {
-            return false
-        }
-        if lhs.sdpMlineIndex != rhs.sdpMlineIndex {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(candidate)
-        hasher.combine(sdpMid)
-        hasher.combine(sdpMlineIndex)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -4267,7 +3825,7 @@ public func FfiConverterTypeCandidate_lower(_ value: Candidate) -> RustBuffer {
 }
 
 
-public struct Config {
+public struct Config: Equatable, Hashable {
     /**
      * Server URL
      */
@@ -4299,39 +3857,15 @@ public struct Config {
         self.apisecret = apisecret
         self.serverRoot = serverRoot
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension Config: Sendable {}
 #endif
-
-
-extension Config: Equatable, Hashable {
-    public static func ==(lhs: Config, rhs: Config) -> Bool {
-        if lhs.url != rhs.url {
-            return false
-        }
-        if lhs.capacity != rhs.capacity {
-            return false
-        }
-        if lhs.apisecret != rhs.apisecret {
-            return false
-        }
-        if lhs.serverRoot != rhs.serverRoot {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(url)
-        hasher.combine(capacity)
-        hasher.combine(apisecret)
-        hasher.combine(serverRoot)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -4371,7 +3905,7 @@ public func FfiConverterTypeConfig_lower(_ value: Config) -> RustBuffer {
 }
 
 
-public struct ConfiguredStream {
+public struct ConfiguredStream: Equatable, Hashable {
     public let mediaType: String
     public let mindex: UInt64
     public let mid: String
@@ -4403,75 +3937,15 @@ public struct ConfiguredStream {
         self.simulcast = simulcast
         self.svc = svc
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension ConfiguredStream: Sendable {}
 #endif
-
-
-extension ConfiguredStream: Equatable, Hashable {
-    public static func ==(lhs: ConfiguredStream, rhs: ConfiguredStream) -> Bool {
-        if lhs.mediaType != rhs.mediaType {
-            return false
-        }
-        if lhs.mindex != rhs.mindex {
-            return false
-        }
-        if lhs.mid != rhs.mid {
-            return false
-        }
-        if lhs.disabled != rhs.disabled {
-            return false
-        }
-        if lhs.codec != rhs.codec {
-            return false
-        }
-        if lhs.stereo != rhs.stereo {
-            return false
-        }
-        if lhs.fec != rhs.fec {
-            return false
-        }
-        if lhs.dtx != rhs.dtx {
-            return false
-        }
-        if lhs.h264Profile != rhs.h264Profile {
-            return false
-        }
-        if lhs.vp9Profile != rhs.vp9Profile {
-            return false
-        }
-        if lhs.moderated != rhs.moderated {
-            return false
-        }
-        if lhs.simulcast != rhs.simulcast {
-            return false
-        }
-        if lhs.svc != rhs.svc {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(mediaType)
-        hasher.combine(mindex)
-        hasher.combine(mid)
-        hasher.combine(disabled)
-        hasher.combine(codec)
-        hasher.combine(stereo)
-        hasher.combine(fec)
-        hasher.combine(dtx)
-        hasher.combine(h264Profile)
-        hasher.combine(vp9Profile)
-        hasher.combine(moderated)
-        hasher.combine(simulcast)
-        hasher.combine(svc)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -4529,7 +4003,7 @@ public func FfiConverterTypeConfiguredStream_lower(_ value: ConfiguredStream) ->
 }
 
 
-public struct EchoTestStartParams {
+public struct EchoTestStartParams: Equatable, Hashable {
     public let audio: Bool?
     public let video: Bool?
     public let bitrate: UInt32?
@@ -4569,91 +4043,15 @@ public struct EchoTestStartParams {
         self.minDelay = minDelay
         self.maxDelay = maxDelay
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension EchoTestStartParams: Sendable {}
 #endif
-
-
-extension EchoTestStartParams: Equatable, Hashable {
-    public static func ==(lhs: EchoTestStartParams, rhs: EchoTestStartParams) -> Bool {
-        if lhs.audio != rhs.audio {
-            return false
-        }
-        if lhs.video != rhs.video {
-            return false
-        }
-        if lhs.bitrate != rhs.bitrate {
-            return false
-        }
-        if lhs.record != rhs.record {
-            return false
-        }
-        if lhs.filename != rhs.filename {
-            return false
-        }
-        if lhs.substream != rhs.substream {
-            return false
-        }
-        if lhs.temporal != rhs.temporal {
-            return false
-        }
-        if lhs.fallback != rhs.fallback {
-            return false
-        }
-        if lhs.svc != rhs.svc {
-            return false
-        }
-        if lhs.spatialLayer != rhs.spatialLayer {
-            return false
-        }
-        if lhs.temporalLayer != rhs.temporalLayer {
-            return false
-        }
-        if lhs.audiocodec != rhs.audiocodec {
-            return false
-        }
-        if lhs.videocodec != rhs.videocodec {
-            return false
-        }
-        if lhs.videoprofile != rhs.videoprofile {
-            return false
-        }
-        if lhs.opusred != rhs.opusred {
-            return false
-        }
-        if lhs.minDelay != rhs.minDelay {
-            return false
-        }
-        if lhs.maxDelay != rhs.maxDelay {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(audio)
-        hasher.combine(video)
-        hasher.combine(bitrate)
-        hasher.combine(record)
-        hasher.combine(filename)
-        hasher.combine(substream)
-        hasher.combine(temporal)
-        hasher.combine(fallback)
-        hasher.combine(svc)
-        hasher.combine(spatialLayer)
-        hasher.combine(temporalLayer)
-        hasher.combine(audiocodec)
-        hasher.combine(videocodec)
-        hasher.combine(videoprofile)
-        hasher.combine(opusred)
-        hasher.combine(minDelay)
-        hasher.combine(maxDelay)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -4719,7 +4117,7 @@ public func FfiConverterTypeEchoTestStartParams_lower(_ value: EchoTestStartPara
 }
 
 
-public struct Jsep {
+public struct Jsep: Equatable, Hashable {
     public let jsepType: JsepType
     public let trickle: Bool?
     public let sdp: String
@@ -4731,35 +4129,15 @@ public struct Jsep {
         self.trickle = trickle
         self.sdp = sdp
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension Jsep: Sendable {}
 #endif
-
-
-extension Jsep: Equatable, Hashable {
-    public static func ==(lhs: Jsep, rhs: Jsep) -> Bool {
-        if lhs.jsepType != rhs.jsepType {
-            return false
-        }
-        if lhs.trickle != rhs.trickle {
-            return false
-        }
-        if lhs.sdp != rhs.sdp {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(jsepType)
-        hasher.combine(trickle)
-        hasher.combine(sdp)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -4797,7 +4175,7 @@ public func FfiConverterTypeJsep_lower(_ value: Jsep) -> RustBuffer {
 }
 
 
-public struct LegacyVideoRoomAudioCodecList {
+public struct LegacyVideoRoomAudioCodecList: Equatable, Hashable {
     public let codecs: [LegacyVideoRoomAudioCodec]
 
     // Default memberwise initializers are never public by default, so we
@@ -4805,27 +4183,15 @@ public struct LegacyVideoRoomAudioCodecList {
     public init(codecs: [LegacyVideoRoomAudioCodec]) {
         self.codecs = codecs
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension LegacyVideoRoomAudioCodecList: Sendable {}
 #endif
-
-
-extension LegacyVideoRoomAudioCodecList: Equatable, Hashable {
-    public static func ==(lhs: LegacyVideoRoomAudioCodecList, rhs: LegacyVideoRoomAudioCodecList) -> Bool {
-        if lhs.codecs != rhs.codecs {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(codecs)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -4859,7 +4225,7 @@ public func FfiConverterTypeLegacyVideoRoomAudioCodecList_lower(_ value: LegacyV
 }
 
 
-public struct LegacyVideoRoomCreateParams {
+public struct LegacyVideoRoomCreateParams: Equatable, Hashable {
     public let adminKey: String?
     public let room: JanusId?
     public let description: String?
@@ -4933,159 +4299,15 @@ public struct LegacyVideoRoomCreateParams {
         self.dummyPublisher = dummyPublisher
         self.dummyStreams = dummyStreams
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension LegacyVideoRoomCreateParams: Sendable {}
 #endif
-
-
-extension LegacyVideoRoomCreateParams: Equatable, Hashable {
-    public static func ==(lhs: LegacyVideoRoomCreateParams, rhs: LegacyVideoRoomCreateParams) -> Bool {
-        if lhs.adminKey != rhs.adminKey {
-            return false
-        }
-        if lhs.room != rhs.room {
-            return false
-        }
-        if lhs.description != rhs.description {
-            return false
-        }
-        if lhs.isPrivate != rhs.isPrivate {
-            return false
-        }
-        if lhs.allowed != rhs.allowed {
-            return false
-        }
-        if lhs.secret != rhs.secret {
-            return false
-        }
-        if lhs.pin != rhs.pin {
-            return false
-        }
-        if lhs.requirePvtid != rhs.requirePvtid {
-            return false
-        }
-        if lhs.signedTokens != rhs.signedTokens {
-            return false
-        }
-        if lhs.bitrate != rhs.bitrate {
-            return false
-        }
-        if lhs.bitrateCap != rhs.bitrateCap {
-            return false
-        }
-        if lhs.firFreq != rhs.firFreq {
-            return false
-        }
-        if lhs.publishers != rhs.publishers {
-            return false
-        }
-        if lhs.audiocodec != rhs.audiocodec {
-            return false
-        }
-        if lhs.videocodec != rhs.videocodec {
-            return false
-        }
-        if lhs.vp9Profile != rhs.vp9Profile {
-            return false
-        }
-        if lhs.h264Profile != rhs.h264Profile {
-            return false
-        }
-        if lhs.opusFec != rhs.opusFec {
-            return false
-        }
-        if lhs.opusDtx != rhs.opusDtx {
-            return false
-        }
-        if lhs.audiolevelExt != rhs.audiolevelExt {
-            return false
-        }
-        if lhs.audiolevelEvent != rhs.audiolevelEvent {
-            return false
-        }
-        if lhs.audioActivePackets != rhs.audioActivePackets {
-            return false
-        }
-        if lhs.audioLevelAverage != rhs.audioLevelAverage {
-            return false
-        }
-        if lhs.videoorientExt != rhs.videoorientExt {
-            return false
-        }
-        if lhs.playoutdelayExt != rhs.playoutdelayExt {
-            return false
-        }
-        if lhs.transportWideCcExt != rhs.transportWideCcExt {
-            return false
-        }
-        if lhs.record != rhs.record {
-            return false
-        }
-        if lhs.recDir != rhs.recDir {
-            return false
-        }
-        if lhs.lockRecord != rhs.lockRecord {
-            return false
-        }
-        if lhs.permanent != rhs.permanent {
-            return false
-        }
-        if lhs.notifyJoining != rhs.notifyJoining {
-            return false
-        }
-        if lhs.requireE2ee != rhs.requireE2ee {
-            return false
-        }
-        if lhs.dummyPublisher != rhs.dummyPublisher {
-            return false
-        }
-        if lhs.dummyStreams != rhs.dummyStreams {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(adminKey)
-        hasher.combine(room)
-        hasher.combine(description)
-        hasher.combine(isPrivate)
-        hasher.combine(allowed)
-        hasher.combine(secret)
-        hasher.combine(pin)
-        hasher.combine(requirePvtid)
-        hasher.combine(signedTokens)
-        hasher.combine(bitrate)
-        hasher.combine(bitrateCap)
-        hasher.combine(firFreq)
-        hasher.combine(publishers)
-        hasher.combine(audiocodec)
-        hasher.combine(videocodec)
-        hasher.combine(vp9Profile)
-        hasher.combine(h264Profile)
-        hasher.combine(opusFec)
-        hasher.combine(opusDtx)
-        hasher.combine(audiolevelExt)
-        hasher.combine(audiolevelEvent)
-        hasher.combine(audioActivePackets)
-        hasher.combine(audioLevelAverage)
-        hasher.combine(videoorientExt)
-        hasher.combine(playoutdelayExt)
-        hasher.combine(transportWideCcExt)
-        hasher.combine(record)
-        hasher.combine(recDir)
-        hasher.combine(lockRecord)
-        hasher.combine(permanent)
-        hasher.combine(notifyJoining)
-        hasher.combine(requireE2ee)
-        hasher.combine(dummyPublisher)
-        hasher.combine(dummyStreams)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -5185,7 +4407,7 @@ public func FfiConverterTypeLegacyVideoRoomCreateParams_lower(_ value: LegacyVid
 }
 
 
-public struct LegacyVideoRoomCreatedRsp {
+public struct LegacyVideoRoomCreatedRsp: Equatable, Hashable {
     public let room: JanusId
     public let permanent: Bool
 
@@ -5195,31 +4417,15 @@ public struct LegacyVideoRoomCreatedRsp {
         self.room = room
         self.permanent = permanent
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension LegacyVideoRoomCreatedRsp: Sendable {}
 #endif
-
-
-extension LegacyVideoRoomCreatedRsp: Equatable, Hashable {
-    public static func ==(lhs: LegacyVideoRoomCreatedRsp, rhs: LegacyVideoRoomCreatedRsp) -> Bool {
-        if lhs.room != rhs.room {
-            return false
-        }
-        if lhs.permanent != rhs.permanent {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(room)
-        hasher.combine(permanent)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -5255,7 +4461,7 @@ public func FfiConverterTypeLegacyVideoRoomCreatedRsp_lower(_ value: LegacyVideo
 }
 
 
-public struct LegacyVideoRoomKickParams {
+public struct LegacyVideoRoomKickParams: Equatable, Hashable {
     public let room: JanusId
     public let id: JanusId
     public let secret: String?
@@ -5267,35 +4473,15 @@ public struct LegacyVideoRoomKickParams {
         self.id = id
         self.secret = secret
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension LegacyVideoRoomKickParams: Sendable {}
 #endif
-
-
-extension LegacyVideoRoomKickParams: Equatable, Hashable {
-    public static func ==(lhs: LegacyVideoRoomKickParams, rhs: LegacyVideoRoomKickParams) -> Bool {
-        if lhs.room != rhs.room {
-            return false
-        }
-        if lhs.id != rhs.id {
-            return false
-        }
-        if lhs.secret != rhs.secret {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(room)
-        hasher.combine(id)
-        hasher.combine(secret)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -5333,7 +4519,7 @@ public func FfiConverterTypeLegacyVideoRoomKickParams_lower(_ value: LegacyVideo
 }
 
 
-public struct LegacyVideoRoomPublisher {
+public struct LegacyVideoRoomPublisher: Equatable, Hashable {
     public let id: JanusId
     public let display: String?
     public let substream: UInt8?
@@ -5345,35 +4531,15 @@ public struct LegacyVideoRoomPublisher {
         self.display = display
         self.substream = substream
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension LegacyVideoRoomPublisher: Sendable {}
 #endif
-
-
-extension LegacyVideoRoomPublisher: Equatable, Hashable {
-    public static func ==(lhs: LegacyVideoRoomPublisher, rhs: LegacyVideoRoomPublisher) -> Bool {
-        if lhs.id != rhs.id {
-            return false
-        }
-        if lhs.display != rhs.display {
-            return false
-        }
-        if lhs.substream != rhs.substream {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-        hasher.combine(display)
-        hasher.combine(substream)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -5411,7 +4577,7 @@ public func FfiConverterTypeLegacyVideoRoomPublisher_lower(_ value: LegacyVideoR
 }
 
 
-public struct LegacyVideoRoomPublisherConfigureParams {
+public struct LegacyVideoRoomPublisherConfigureParams: Equatable, Hashable {
     public let audio: Bool?
     public let video: Bool?
     public let data: Bool?
@@ -5443,75 +4609,15 @@ public struct LegacyVideoRoomPublisherConfigureParams {
         self.maxDelay = maxDelay
         self.videocodec = videocodec
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension LegacyVideoRoomPublisherConfigureParams: Sendable {}
 #endif
-
-
-extension LegacyVideoRoomPublisherConfigureParams: Equatable, Hashable {
-    public static func ==(lhs: LegacyVideoRoomPublisherConfigureParams, rhs: LegacyVideoRoomPublisherConfigureParams) -> Bool {
-        if lhs.audio != rhs.audio {
-            return false
-        }
-        if lhs.video != rhs.video {
-            return false
-        }
-        if lhs.data != rhs.data {
-            return false
-        }
-        if lhs.bitrate != rhs.bitrate {
-            return false
-        }
-        if lhs.keyframe != rhs.keyframe {
-            return false
-        }
-        if lhs.record != rhs.record {
-            return false
-        }
-        if lhs.filename != rhs.filename {
-            return false
-        }
-        if lhs.display != rhs.display {
-            return false
-        }
-        if lhs.audioActivePackets != rhs.audioActivePackets {
-            return false
-        }
-        if lhs.audioLevelAverage != rhs.audioLevelAverage {
-            return false
-        }
-        if lhs.minDelay != rhs.minDelay {
-            return false
-        }
-        if lhs.maxDelay != rhs.maxDelay {
-            return false
-        }
-        if lhs.videocodec != rhs.videocodec {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(audio)
-        hasher.combine(video)
-        hasher.combine(data)
-        hasher.combine(bitrate)
-        hasher.combine(keyframe)
-        hasher.combine(record)
-        hasher.combine(filename)
-        hasher.combine(display)
-        hasher.combine(audioActivePackets)
-        hasher.combine(audioLevelAverage)
-        hasher.combine(minDelay)
-        hasher.combine(maxDelay)
-        hasher.combine(videocodec)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -5569,7 +4675,7 @@ public func FfiConverterTypeLegacyVideoRoomPublisherConfigureParams_lower(_ valu
 }
 
 
-public struct LegacyVideoRoomPublisherJoinAndConfigureParams {
+public struct LegacyVideoRoomPublisherJoinAndConfigureParams: Equatable, Hashable {
     public let joinParams: LegacyVideoRoomPublisherJoinParams
     public let configureParams: LegacyVideoRoomPublisherConfigureParams
 
@@ -5579,31 +4685,15 @@ public struct LegacyVideoRoomPublisherJoinAndConfigureParams {
         self.joinParams = joinParams
         self.configureParams = configureParams
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension LegacyVideoRoomPublisherJoinAndConfigureParams: Sendable {}
 #endif
-
-
-extension LegacyVideoRoomPublisherJoinAndConfigureParams: Equatable, Hashable {
-    public static func ==(lhs: LegacyVideoRoomPublisherJoinAndConfigureParams, rhs: LegacyVideoRoomPublisherJoinAndConfigureParams) -> Bool {
-        if lhs.joinParams != rhs.joinParams {
-            return false
-        }
-        if lhs.configureParams != rhs.configureParams {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(joinParams)
-        hasher.combine(configureParams)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -5639,7 +4729,7 @@ public func FfiConverterTypeLegacyVideoRoomPublisherJoinAndConfigureParams_lower
 }
 
 
-public struct LegacyVideoRoomPublisherJoinParams {
+public struct LegacyVideoRoomPublisherJoinParams: Equatable, Hashable {
     public let room: JanusId
     public let optional: LegacyVideoRoomPublisherJoinParamsOptional
 
@@ -5649,31 +4739,15 @@ public struct LegacyVideoRoomPublisherJoinParams {
         self.room = room
         self.optional = optional
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension LegacyVideoRoomPublisherJoinParams: Sendable {}
 #endif
-
-
-extension LegacyVideoRoomPublisherJoinParams: Equatable, Hashable {
-    public static func ==(lhs: LegacyVideoRoomPublisherJoinParams, rhs: LegacyVideoRoomPublisherJoinParams) -> Bool {
-        if lhs.room != rhs.room {
-            return false
-        }
-        if lhs.optional != rhs.optional {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(room)
-        hasher.combine(optional)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -5709,7 +4783,7 @@ public func FfiConverterTypeLegacyVideoRoomPublisherJoinParams_lower(_ value: Le
 }
 
 
-public struct LegacyVideoRoomPublisherJoinParamsOptional {
+public struct LegacyVideoRoomPublisherJoinParamsOptional: Equatable, Hashable {
     public let id: JanusId?
     public let display: String?
     public let token: String?
@@ -5721,35 +4795,15 @@ public struct LegacyVideoRoomPublisherJoinParamsOptional {
         self.display = display
         self.token = token
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension LegacyVideoRoomPublisherJoinParamsOptional: Sendable {}
 #endif
-
-
-extension LegacyVideoRoomPublisherJoinParamsOptional: Equatable, Hashable {
-    public static func ==(lhs: LegacyVideoRoomPublisherJoinParamsOptional, rhs: LegacyVideoRoomPublisherJoinParamsOptional) -> Bool {
-        if lhs.id != rhs.id {
-            return false
-        }
-        if lhs.display != rhs.display {
-            return false
-        }
-        if lhs.token != rhs.token {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-        hasher.combine(display)
-        hasher.combine(token)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -5787,7 +4841,7 @@ public func FfiConverterTypeLegacyVideoRoomPublisherJoinParamsOptional_lower(_ v
 }
 
 
-public struct LegacyVideoRoomSubscriberConfigureParams {
+public struct LegacyVideoRoomSubscriberConfigureParams: Equatable, Hashable {
     public let audio: Bool?
     public let video: Bool?
     public let data: Bool?
@@ -5817,71 +4871,15 @@ public struct LegacyVideoRoomSubscriberConfigureParams {
         self.minDelay = minDelay
         self.maxDelay = maxDelay
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension LegacyVideoRoomSubscriberConfigureParams: Sendable {}
 #endif
-
-
-extension LegacyVideoRoomSubscriberConfigureParams: Equatable, Hashable {
-    public static func ==(lhs: LegacyVideoRoomSubscriberConfigureParams, rhs: LegacyVideoRoomSubscriberConfigureParams) -> Bool {
-        if lhs.audio != rhs.audio {
-            return false
-        }
-        if lhs.video != rhs.video {
-            return false
-        }
-        if lhs.data != rhs.data {
-            return false
-        }
-        if lhs.substream != rhs.substream {
-            return false
-        }
-        if lhs.temporal != rhs.temporal {
-            return false
-        }
-        if lhs.fallback != rhs.fallback {
-            return false
-        }
-        if lhs.spatialLayer != rhs.spatialLayer {
-            return false
-        }
-        if lhs.temporalLayer != rhs.temporalLayer {
-            return false
-        }
-        if lhs.audioLevelAverage != rhs.audioLevelAverage {
-            return false
-        }
-        if lhs.audioActivePackets != rhs.audioActivePackets {
-            return false
-        }
-        if lhs.minDelay != rhs.minDelay {
-            return false
-        }
-        if lhs.maxDelay != rhs.maxDelay {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(audio)
-        hasher.combine(video)
-        hasher.combine(data)
-        hasher.combine(substream)
-        hasher.combine(temporal)
-        hasher.combine(fallback)
-        hasher.combine(spatialLayer)
-        hasher.combine(temporalLayer)
-        hasher.combine(audioLevelAverage)
-        hasher.combine(audioActivePackets)
-        hasher.combine(minDelay)
-        hasher.combine(maxDelay)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -5937,7 +4935,7 @@ public func FfiConverterTypeLegacyVideoRoomSubscriberConfigureParams_lower(_ val
 }
 
 
-public struct LegacyVideoRoomSubscriberJoinParams {
+public struct LegacyVideoRoomSubscriberJoinParams: Equatable, Hashable {
     public let required: LegacyVideoRoomSubscriberJoinParamsRequired
     public let optional: LegacyVideoRoomSubscriberJoinParamsOptional
 
@@ -5947,31 +4945,15 @@ public struct LegacyVideoRoomSubscriberJoinParams {
         self.required = required
         self.optional = optional
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension LegacyVideoRoomSubscriberJoinParams: Sendable {}
 #endif
-
-
-extension LegacyVideoRoomSubscriberJoinParams: Equatable, Hashable {
-    public static func ==(lhs: LegacyVideoRoomSubscriberJoinParams, rhs: LegacyVideoRoomSubscriberJoinParams) -> Bool {
-        if lhs.required != rhs.required {
-            return false
-        }
-        if lhs.optional != rhs.optional {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(required)
-        hasher.combine(optional)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -6007,7 +4989,7 @@ public func FfiConverterTypeLegacyVideoRoomSubscriberJoinParams_lower(_ value: L
 }
 
 
-public struct LegacyVideoRoomSubscriberJoinParamsOptional {
+public struct LegacyVideoRoomSubscriberJoinParamsOptional: Equatable, Hashable {
     public let privateId: UInt64?
     public let closePc: Bool?
     public let audio: Bool?
@@ -6039,75 +5021,15 @@ public struct LegacyVideoRoomSubscriberJoinParamsOptional {
         self.spatialLayer = spatialLayer
         self.temporalLayer = temporalLayer
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension LegacyVideoRoomSubscriberJoinParamsOptional: Sendable {}
 #endif
-
-
-extension LegacyVideoRoomSubscriberJoinParamsOptional: Equatable, Hashable {
-    public static func ==(lhs: LegacyVideoRoomSubscriberJoinParamsOptional, rhs: LegacyVideoRoomSubscriberJoinParamsOptional) -> Bool {
-        if lhs.privateId != rhs.privateId {
-            return false
-        }
-        if lhs.closePc != rhs.closePc {
-            return false
-        }
-        if lhs.audio != rhs.audio {
-            return false
-        }
-        if lhs.video != rhs.video {
-            return false
-        }
-        if lhs.data != rhs.data {
-            return false
-        }
-        if lhs.offerAudio != rhs.offerAudio {
-            return false
-        }
-        if lhs.offerVideo != rhs.offerVideo {
-            return false
-        }
-        if lhs.offerData != rhs.offerData {
-            return false
-        }
-        if lhs.substream != rhs.substream {
-            return false
-        }
-        if lhs.temporal != rhs.temporal {
-            return false
-        }
-        if lhs.fallback != rhs.fallback {
-            return false
-        }
-        if lhs.spatialLayer != rhs.spatialLayer {
-            return false
-        }
-        if lhs.temporalLayer != rhs.temporalLayer {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(privateId)
-        hasher.combine(closePc)
-        hasher.combine(audio)
-        hasher.combine(video)
-        hasher.combine(data)
-        hasher.combine(offerAudio)
-        hasher.combine(offerVideo)
-        hasher.combine(offerData)
-        hasher.combine(substream)
-        hasher.combine(temporal)
-        hasher.combine(fallback)
-        hasher.combine(spatialLayer)
-        hasher.combine(temporalLayer)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -6165,7 +5087,7 @@ public func FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsOptional_lower(_ 
 }
 
 
-public struct LegacyVideoRoomSubscriberJoinParamsRequired {
+public struct LegacyVideoRoomSubscriberJoinParamsRequired: Equatable, Hashable {
     public let room: JanusId
     public let feed: JanusId
 
@@ -6175,31 +5097,15 @@ public struct LegacyVideoRoomSubscriberJoinParamsRequired {
         self.room = room
         self.feed = feed
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension LegacyVideoRoomSubscriberJoinParamsRequired: Sendable {}
 #endif
-
-
-extension LegacyVideoRoomSubscriberJoinParamsRequired: Equatable, Hashable {
-    public static func ==(lhs: LegacyVideoRoomSubscriberJoinParamsRequired, rhs: LegacyVideoRoomSubscriberJoinParamsRequired) -> Bool {
-        if lhs.room != rhs.room {
-            return false
-        }
-        if lhs.feed != rhs.feed {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(room)
-        hasher.combine(feed)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -6235,7 +5141,7 @@ public func FfiConverterTypeLegacyVideoRoomSubscriberJoinParamsRequired_lower(_ 
 }
 
 
-public struct LegacyVideoRoomVideoCodecList {
+public struct LegacyVideoRoomVideoCodecList: Equatable, Hashable {
     public let codecs: [LegacyVideoRoomVideoCodec]
 
     // Default memberwise initializers are never public by default, so we
@@ -6243,27 +5149,15 @@ public struct LegacyVideoRoomVideoCodecList {
     public init(codecs: [LegacyVideoRoomVideoCodec]) {
         self.codecs = codecs
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension LegacyVideoRoomVideoCodecList: Sendable {}
 #endif
-
-
-extension LegacyVideoRoomVideoCodecList: Equatable, Hashable {
-    public static func ==(lhs: LegacyVideoRoomVideoCodecList, rhs: LegacyVideoRoomVideoCodecList) -> Bool {
-        if lhs.codecs != rhs.codecs {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(codecs)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -6297,7 +5191,7 @@ public func FfiConverterTypeLegacyVideoRoomVideoCodecList_lower(_ value: LegacyV
 }
 
 
-public struct MetaData {
+public struct MetaData: Equatable, Hashable {
     public let name: String
     public let author: String
     public let description: String
@@ -6313,43 +5207,15 @@ public struct MetaData {
         self.versionString = versionString
         self.version = version
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension MetaData: Sendable {}
 #endif
-
-
-extension MetaData: Equatable, Hashable {
-    public static func ==(lhs: MetaData, rhs: MetaData) -> Bool {
-        if lhs.name != rhs.name {
-            return false
-        }
-        if lhs.author != rhs.author {
-            return false
-        }
-        if lhs.description != rhs.description {
-            return false
-        }
-        if lhs.versionString != rhs.versionString {
-            return false
-        }
-        if lhs.version != rhs.version {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(name)
-        hasher.combine(author)
-        hasher.combine(description)
-        hasher.combine(versionString)
-        hasher.combine(version)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -6391,7 +5257,7 @@ public func FfiConverterTypeMetaData_lower(_ value: MetaData) -> RustBuffer {
 }
 
 
-public struct Publisher {
+public struct Publisher: Equatable, Hashable {
     public let id: JanusId
     public let display: String?
 
@@ -6401,31 +5267,15 @@ public struct Publisher {
         self.id = id
         self.display = display
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension Publisher: Sendable {}
 #endif
-
-
-extension Publisher: Equatable, Hashable {
-    public static func ==(lhs: Publisher, rhs: Publisher) -> Bool {
-        if lhs.id != rhs.id {
-            return false
-        }
-        if lhs.display != rhs.display {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-        hasher.combine(display)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -6461,7 +5311,7 @@ public func FfiConverterTypePublisher_lower(_ value: Publisher) -> RustBuffer {
 }
 
 
-public struct ServerInfoRsp {
+public struct ServerInfoRsp: Equatable, Hashable {
     public let name: String
     public let version: UInt64
     public let versionString: String
@@ -6533,155 +5383,15 @@ public struct ServerInfoRsp {
         self.transports = transports
         self.plugins = plugins
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension ServerInfoRsp: Sendable {}
 #endif
-
-
-extension ServerInfoRsp: Equatable, Hashable {
-    public static func ==(lhs: ServerInfoRsp, rhs: ServerInfoRsp) -> Bool {
-        if lhs.name != rhs.name {
-            return false
-        }
-        if lhs.version != rhs.version {
-            return false
-        }
-        if lhs.versionString != rhs.versionString {
-            return false
-        }
-        if lhs.author != rhs.author {
-            return false
-        }
-        if lhs.commitHash != rhs.commitHash {
-            return false
-        }
-        if lhs.compileTime != rhs.compileTime {
-            return false
-        }
-        if lhs.logToStdout != rhs.logToStdout {
-            return false
-        }
-        if lhs.logToFile != rhs.logToFile {
-            return false
-        }
-        if lhs.dataChannels != rhs.dataChannels {
-            return false
-        }
-        if lhs.acceptingNewSessions != rhs.acceptingNewSessions {
-            return false
-        }
-        if lhs.sessionTimeout != rhs.sessionTimeout {
-            return false
-        }
-        if lhs.reclaimSessionTimeout != rhs.reclaimSessionTimeout {
-            return false
-        }
-        if lhs.candidatesTimeout != rhs.candidatesTimeout {
-            return false
-        }
-        if lhs.serverName != rhs.serverName {
-            return false
-        }
-        if lhs.localIp != rhs.localIp {
-            return false
-        }
-        if lhs.ipv6 != rhs.ipv6 {
-            return false
-        }
-        if lhs.iceLite != rhs.iceLite {
-            return false
-        }
-        if lhs.iceTcp != rhs.iceTcp {
-            return false
-        }
-        if lhs.iceNomination != rhs.iceNomination {
-            return false
-        }
-        if lhs.iceKeepaliveConncheck != rhs.iceKeepaliveConncheck {
-            return false
-        }
-        if lhs.fullTrickle != rhs.fullTrickle {
-            return false
-        }
-        if lhs.mdnsEnabled != rhs.mdnsEnabled {
-            return false
-        }
-        if lhs.minNackQueue != rhs.minNackQueue {
-            return false
-        }
-        if lhs.twccPeriod != rhs.twccPeriod {
-            return false
-        }
-        if lhs.dtlsMtu != rhs.dtlsMtu {
-            return false
-        }
-        if lhs.staticEventLoops != rhs.staticEventLoops {
-            return false
-        }
-        if lhs.apiSecret != rhs.apiSecret {
-            return false
-        }
-        if lhs.authToken != rhs.authToken {
-            return false
-        }
-        if lhs.eventHandlers != rhs.eventHandlers {
-            return false
-        }
-        if lhs.opaqueidInApi != rhs.opaqueidInApi {
-            return false
-        }
-        if lhs.dependencies != rhs.dependencies {
-            return false
-        }
-        if lhs.transports != rhs.transports {
-            return false
-        }
-        if lhs.plugins != rhs.plugins {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(name)
-        hasher.combine(version)
-        hasher.combine(versionString)
-        hasher.combine(author)
-        hasher.combine(commitHash)
-        hasher.combine(compileTime)
-        hasher.combine(logToStdout)
-        hasher.combine(logToFile)
-        hasher.combine(dataChannels)
-        hasher.combine(acceptingNewSessions)
-        hasher.combine(sessionTimeout)
-        hasher.combine(reclaimSessionTimeout)
-        hasher.combine(candidatesTimeout)
-        hasher.combine(serverName)
-        hasher.combine(localIp)
-        hasher.combine(ipv6)
-        hasher.combine(iceLite)
-        hasher.combine(iceTcp)
-        hasher.combine(iceNomination)
-        hasher.combine(iceKeepaliveConncheck)
-        hasher.combine(fullTrickle)
-        hasher.combine(mdnsEnabled)
-        hasher.combine(minNackQueue)
-        hasher.combine(twccPeriod)
-        hasher.combine(dtlsMtu)
-        hasher.combine(staticEventLoops)
-        hasher.combine(apiSecret)
-        hasher.combine(authToken)
-        hasher.combine(eventHandlers)
-        hasher.combine(opaqueidInApi)
-        hasher.combine(dependencies)
-        hasher.combine(transports)
-        hasher.combine(plugins)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -6779,7 +5489,7 @@ public func FfiConverterTypeServerInfoRsp_lower(_ value: ServerInfoRsp) -> RustB
 }
 
 
-public struct U63 {
+public struct U63: Equatable, Hashable {
     public let inner: UInt64
 
     // Default memberwise initializers are never public by default, so we
@@ -6787,27 +5497,15 @@ public struct U63 {
     public init(inner: UInt64) {
         self.inner = inner
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension U63: Sendable {}
 #endif
-
-
-extension U63: Equatable, Hashable {
-    public static func ==(lhs: U63, rhs: U63) -> Bool {
-        if lhs.inner != rhs.inner {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(inner)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -6841,7 +5539,7 @@ public func FfiConverterTypeU63_lower(_ value: U63) -> RustBuffer {
 }
 
 
-public struct VideoRoomAudioCodecList {
+public struct VideoRoomAudioCodecList: Equatable, Hashable {
     public let codecs: [VideoRoomAudioCodec]
 
     // Default memberwise initializers are never public by default, so we
@@ -6849,27 +5547,15 @@ public struct VideoRoomAudioCodecList {
     public init(codecs: [VideoRoomAudioCodec]) {
         self.codecs = codecs
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension VideoRoomAudioCodecList: Sendable {}
 #endif
-
-
-extension VideoRoomAudioCodecList: Equatable, Hashable {
-    public static func ==(lhs: VideoRoomAudioCodecList, rhs: VideoRoomAudioCodecList) -> Bool {
-        if lhs.codecs != rhs.codecs {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(codecs)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -6903,7 +5589,7 @@ public func FfiConverterTypeVideoRoomAudioCodecList_lower(_ value: VideoRoomAudi
 }
 
 
-public struct VideoRoomConfigurePublisherStream {
+public struct VideoRoomConfigurePublisherStream: Equatable, Hashable {
     public let mid: String
     public let optional: VideoRoomConfigurePublisherStreamOptional
 
@@ -6913,31 +5599,15 @@ public struct VideoRoomConfigurePublisherStream {
         self.mid = mid
         self.optional = optional
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension VideoRoomConfigurePublisherStream: Sendable {}
 #endif
-
-
-extension VideoRoomConfigurePublisherStream: Equatable, Hashable {
-    public static func ==(lhs: VideoRoomConfigurePublisherStream, rhs: VideoRoomConfigurePublisherStream) -> Bool {
-        if lhs.mid != rhs.mid {
-            return false
-        }
-        if lhs.optional != rhs.optional {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(mid)
-        hasher.combine(optional)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -6973,7 +5643,7 @@ public func FfiConverterTypeVideoRoomConfigurePublisherStream_lower(_ value: Vid
 }
 
 
-public struct VideoRoomConfigurePublisherStreamOptional {
+public struct VideoRoomConfigurePublisherStreamOptional: Equatable, Hashable {
     public let keyframe: Bool?
     public let send: Bool?
     public let minDelay: UInt64?
@@ -6987,39 +5657,15 @@ public struct VideoRoomConfigurePublisherStreamOptional {
         self.minDelay = minDelay
         self.maxDelay = maxDelay
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension VideoRoomConfigurePublisherStreamOptional: Sendable {}
 #endif
-
-
-extension VideoRoomConfigurePublisherStreamOptional: Equatable, Hashable {
-    public static func ==(lhs: VideoRoomConfigurePublisherStreamOptional, rhs: VideoRoomConfigurePublisherStreamOptional) -> Bool {
-        if lhs.keyframe != rhs.keyframe {
-            return false
-        }
-        if lhs.send != rhs.send {
-            return false
-        }
-        if lhs.minDelay != rhs.minDelay {
-            return false
-        }
-        if lhs.maxDelay != rhs.maxDelay {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(keyframe)
-        hasher.combine(send)
-        hasher.combine(minDelay)
-        hasher.combine(maxDelay)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -7059,7 +5705,7 @@ public func FfiConverterTypeVideoRoomConfigurePublisherStreamOptional_lower(_ va
 }
 
 
-public struct VideoRoomCreateParams {
+public struct VideoRoomCreateParams: Equatable, Hashable {
     public let adminKey: String?
     public let room: JanusId?
     public let description: String?
@@ -7133,159 +5779,15 @@ public struct VideoRoomCreateParams {
         self.dummyPublisher = dummyPublisher
         self.dummyStreams = dummyStreams
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension VideoRoomCreateParams: Sendable {}
 #endif
-
-
-extension VideoRoomCreateParams: Equatable, Hashable {
-    public static func ==(lhs: VideoRoomCreateParams, rhs: VideoRoomCreateParams) -> Bool {
-        if lhs.adminKey != rhs.adminKey {
-            return false
-        }
-        if lhs.room != rhs.room {
-            return false
-        }
-        if lhs.description != rhs.description {
-            return false
-        }
-        if lhs.isPrivate != rhs.isPrivate {
-            return false
-        }
-        if lhs.allowed != rhs.allowed {
-            return false
-        }
-        if lhs.secret != rhs.secret {
-            return false
-        }
-        if lhs.pin != rhs.pin {
-            return false
-        }
-        if lhs.requirePvtid != rhs.requirePvtid {
-            return false
-        }
-        if lhs.signedTokens != rhs.signedTokens {
-            return false
-        }
-        if lhs.bitrate != rhs.bitrate {
-            return false
-        }
-        if lhs.bitrateCap != rhs.bitrateCap {
-            return false
-        }
-        if lhs.firFreq != rhs.firFreq {
-            return false
-        }
-        if lhs.publishers != rhs.publishers {
-            return false
-        }
-        if lhs.audiocodec != rhs.audiocodec {
-            return false
-        }
-        if lhs.videocodec != rhs.videocodec {
-            return false
-        }
-        if lhs.vp9Profile != rhs.vp9Profile {
-            return false
-        }
-        if lhs.h264Profile != rhs.h264Profile {
-            return false
-        }
-        if lhs.opusFec != rhs.opusFec {
-            return false
-        }
-        if lhs.opusDtx != rhs.opusDtx {
-            return false
-        }
-        if lhs.audiolevelExt != rhs.audiolevelExt {
-            return false
-        }
-        if lhs.audiolevelEvent != rhs.audiolevelEvent {
-            return false
-        }
-        if lhs.audioActivePackets != rhs.audioActivePackets {
-            return false
-        }
-        if lhs.audioLevelAverage != rhs.audioLevelAverage {
-            return false
-        }
-        if lhs.videoorientExt != rhs.videoorientExt {
-            return false
-        }
-        if lhs.playoutdelayExt != rhs.playoutdelayExt {
-            return false
-        }
-        if lhs.transportWideCcExt != rhs.transportWideCcExt {
-            return false
-        }
-        if lhs.record != rhs.record {
-            return false
-        }
-        if lhs.recDir != rhs.recDir {
-            return false
-        }
-        if lhs.lockRecord != rhs.lockRecord {
-            return false
-        }
-        if lhs.permanent != rhs.permanent {
-            return false
-        }
-        if lhs.notifyJoining != rhs.notifyJoining {
-            return false
-        }
-        if lhs.requireE2ee != rhs.requireE2ee {
-            return false
-        }
-        if lhs.dummyPublisher != rhs.dummyPublisher {
-            return false
-        }
-        if lhs.dummyStreams != rhs.dummyStreams {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(adminKey)
-        hasher.combine(room)
-        hasher.combine(description)
-        hasher.combine(isPrivate)
-        hasher.combine(allowed)
-        hasher.combine(secret)
-        hasher.combine(pin)
-        hasher.combine(requirePvtid)
-        hasher.combine(signedTokens)
-        hasher.combine(bitrate)
-        hasher.combine(bitrateCap)
-        hasher.combine(firFreq)
-        hasher.combine(publishers)
-        hasher.combine(audiocodec)
-        hasher.combine(videocodec)
-        hasher.combine(vp9Profile)
-        hasher.combine(h264Profile)
-        hasher.combine(opusFec)
-        hasher.combine(opusDtx)
-        hasher.combine(audiolevelExt)
-        hasher.combine(audiolevelEvent)
-        hasher.combine(audioActivePackets)
-        hasher.combine(audioLevelAverage)
-        hasher.combine(videoorientExt)
-        hasher.combine(playoutdelayExt)
-        hasher.combine(transportWideCcExt)
-        hasher.combine(record)
-        hasher.combine(recDir)
-        hasher.combine(lockRecord)
-        hasher.combine(permanent)
-        hasher.combine(notifyJoining)
-        hasher.combine(requireE2ee)
-        hasher.combine(dummyPublisher)
-        hasher.combine(dummyStreams)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -7385,7 +5887,7 @@ public func FfiConverterTypeVideoRoomCreateParams_lower(_ value: VideoRoomCreate
 }
 
 
-public struct VideoRoomCreatedRsp {
+public struct VideoRoomCreatedRsp: Equatable, Hashable {
     public let room: JanusId
     public let permanent: Bool
 
@@ -7395,31 +5897,15 @@ public struct VideoRoomCreatedRsp {
         self.room = room
         self.permanent = permanent
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension VideoRoomCreatedRsp: Sendable {}
 #endif
-
-
-extension VideoRoomCreatedRsp: Equatable, Hashable {
-    public static func ==(lhs: VideoRoomCreatedRsp, rhs: VideoRoomCreatedRsp) -> Bool {
-        if lhs.room != rhs.room {
-            return false
-        }
-        if lhs.permanent != rhs.permanent {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(room)
-        hasher.combine(permanent)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -7455,7 +5941,7 @@ public func FfiConverterTypeVideoRoomCreatedRsp_lower(_ value: VideoRoomCreatedR
 }
 
 
-public struct VideoRoomPublishDescriptionParams {
+public struct VideoRoomPublishDescriptionParams: Equatable, Hashable {
     public let mid: String
     public let description: String
 
@@ -7465,31 +5951,15 @@ public struct VideoRoomPublishDescriptionParams {
         self.mid = mid
         self.description = description
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension VideoRoomPublishDescriptionParams: Sendable {}
 #endif
-
-
-extension VideoRoomPublishDescriptionParams: Equatable, Hashable {
-    public static func ==(lhs: VideoRoomPublishDescriptionParams, rhs: VideoRoomPublishDescriptionParams) -> Bool {
-        if lhs.mid != rhs.mid {
-            return false
-        }
-        if lhs.description != rhs.description {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(mid)
-        hasher.combine(description)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -7525,7 +5995,7 @@ public func FfiConverterTypeVideoRoomPublishDescriptionParams_lower(_ value: Vid
 }
 
 
-public struct VideoRoomPublisherConfigureParams {
+public struct VideoRoomPublisherConfigureParams: Equatable, Hashable {
     public let audio: Bool?
     public let video: Bool?
     public let bitrate: UInt64?
@@ -7555,71 +6025,15 @@ public struct VideoRoomPublisherConfigureParams {
         self.descriptions = descriptions
         self.videocodec = videocodec
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension VideoRoomPublisherConfigureParams: Sendable {}
 #endif
-
-
-extension VideoRoomPublisherConfigureParams: Equatable, Hashable {
-    public static func ==(lhs: VideoRoomPublisherConfigureParams, rhs: VideoRoomPublisherConfigureParams) -> Bool {
-        if lhs.audio != rhs.audio {
-            return false
-        }
-        if lhs.video != rhs.video {
-            return false
-        }
-        if lhs.bitrate != rhs.bitrate {
-            return false
-        }
-        if lhs.keyframe != rhs.keyframe {
-            return false
-        }
-        if lhs.record != rhs.record {
-            return false
-        }
-        if lhs.filename != rhs.filename {
-            return false
-        }
-        if lhs.display != rhs.display {
-            return false
-        }
-        if lhs.audioActivePackets != rhs.audioActivePackets {
-            return false
-        }
-        if lhs.audioLevelAverage != rhs.audioLevelAverage {
-            return false
-        }
-        if lhs.streams != rhs.streams {
-            return false
-        }
-        if lhs.descriptions != rhs.descriptions {
-            return false
-        }
-        if lhs.videocodec != rhs.videocodec {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(audio)
-        hasher.combine(video)
-        hasher.combine(bitrate)
-        hasher.combine(keyframe)
-        hasher.combine(record)
-        hasher.combine(filename)
-        hasher.combine(display)
-        hasher.combine(audioActivePackets)
-        hasher.combine(audioLevelAverage)
-        hasher.combine(streams)
-        hasher.combine(descriptions)
-        hasher.combine(videocodec)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -7675,7 +6089,7 @@ public func FfiConverterTypeVideoRoomPublisherConfigureParams_lower(_ value: Vid
 }
 
 
-public struct VideoRoomPublisherJoinAndConfigureParams {
+public struct VideoRoomPublisherJoinAndConfigureParams: Equatable, Hashable {
     public let joinParams: VideoRoomPublisherJoinParams
     public let configureParams: VideoRoomPublisherConfigureParams
 
@@ -7685,31 +6099,15 @@ public struct VideoRoomPublisherJoinAndConfigureParams {
         self.joinParams = joinParams
         self.configureParams = configureParams
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension VideoRoomPublisherJoinAndConfigureParams: Sendable {}
 #endif
-
-
-extension VideoRoomPublisherJoinAndConfigureParams: Equatable, Hashable {
-    public static func ==(lhs: VideoRoomPublisherJoinAndConfigureParams, rhs: VideoRoomPublisherJoinAndConfigureParams) -> Bool {
-        if lhs.joinParams != rhs.joinParams {
-            return false
-        }
-        if lhs.configureParams != rhs.configureParams {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(joinParams)
-        hasher.combine(configureParams)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -7745,7 +6143,7 @@ public func FfiConverterTypeVideoRoomPublisherJoinAndConfigureParams_lower(_ val
 }
 
 
-public struct VideoRoomPublisherJoinParams {
+public struct VideoRoomPublisherJoinParams: Equatable, Hashable {
     public let room: JanusId
     public let optional: VideoRoomPublisherJoinParamsOptional
 
@@ -7755,31 +6153,15 @@ public struct VideoRoomPublisherJoinParams {
         self.room = room
         self.optional = optional
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension VideoRoomPublisherJoinParams: Sendable {}
 #endif
-
-
-extension VideoRoomPublisherJoinParams: Equatable, Hashable {
-    public static func ==(lhs: VideoRoomPublisherJoinParams, rhs: VideoRoomPublisherJoinParams) -> Bool {
-        if lhs.room != rhs.room {
-            return false
-        }
-        if lhs.optional != rhs.optional {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(room)
-        hasher.combine(optional)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -7815,7 +6197,7 @@ public func FfiConverterTypeVideoRoomPublisherJoinParams_lower(_ value: VideoRoo
 }
 
 
-public struct VideoRoomPublisherJoinParamsOptional {
+public struct VideoRoomPublisherJoinParamsOptional: Equatable, Hashable {
     public let id: JanusId?
     public let display: String?
     public let token: String?
@@ -7827,35 +6209,15 @@ public struct VideoRoomPublisherJoinParamsOptional {
         self.display = display
         self.token = token
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension VideoRoomPublisherJoinParamsOptional: Sendable {}
 #endif
-
-
-extension VideoRoomPublisherJoinParamsOptional: Equatable, Hashable {
-    public static func ==(lhs: VideoRoomPublisherJoinParamsOptional, rhs: VideoRoomPublisherJoinParamsOptional) -> Bool {
-        if lhs.id != rhs.id {
-            return false
-        }
-        if lhs.display != rhs.display {
-            return false
-        }
-        if lhs.token != rhs.token {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-        hasher.combine(display)
-        hasher.combine(token)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -7893,7 +6255,7 @@ public func FfiConverterTypeVideoRoomPublisherJoinParamsOptional_lower(_ value: 
 }
 
 
-public struct VideoRoomVideoCodecList {
+public struct VideoRoomVideoCodecList: Equatable, Hashable {
     public let codecs: [VideoRoomVideoCodec]
 
     // Default memberwise initializers are never public by default, so we
@@ -7901,27 +6263,15 @@ public struct VideoRoomVideoCodecList {
     public init(codecs: [VideoRoomVideoCodec]) {
         self.codecs = codecs
     }
+
+    
+
+    
 }
 
 #if compiler(>=6)
 extension VideoRoomVideoCodecList: Sendable {}
 #endif
-
-
-extension VideoRoomVideoCodecList: Equatable, Hashable {
-    public static func ==(lhs: VideoRoomVideoCodecList, rhs: VideoRoomVideoCodecList) -> Bool {
-        if lhs.codecs != rhs.codecs {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(codecs)
-    }
-}
-
-
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -7957,7 +6307,7 @@ public func FfiConverterTypeVideoRoomVideoCodecList_lower(_ value: VideoRoomVide
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
-public enum AudioBridgeCodec {
+public enum AudioBridgeCodec: Equatable, Hashable {
     
     case opus
     /**
@@ -7968,8 +6318,12 @@ public enum AudioBridgeCodec {
      * mu-Law
      */
     case pcmu
-}
 
+
+
+
+
+}
 
 #if compiler(>=6)
 extension AudioBridgeCodec: Sendable {}
@@ -8030,17 +6384,10 @@ public func FfiConverterTypeAudioBridgeCodec_lower(_ value: AudioBridgeCodec) ->
 }
 
 
-extension AudioBridgeCodec: Equatable, Hashable {}
-
-
-
-
-
-
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
-public enum GenericEvent {
+public enum GenericEvent: Equatable, Hashable {
     
     case detached
     /**
@@ -8062,8 +6409,12 @@ public enum GenericEvent {
     case slowlink(uplink: Bool, media: String, lost: UInt32
     )
     case trickle
-}
 
+
+
+
+
+}
 
 #if compiler(>=6)
 extension GenericEvent: Sendable {}
@@ -8152,15 +6503,8 @@ public func FfiConverterTypeGenericEvent_lower(_ value: GenericEvent) -> RustBuf
 }
 
 
-extension GenericEvent: Equatable, Hashable {}
 
-
-
-
-
-
-
-public enum JanusGatewayCommunicationError: Swift.Error {
+public enum JanusGatewayCommunicationError: Swift.Error, Equatable, Hashable, Foundation.LocalizedError {
 
     
     
@@ -8168,8 +6512,21 @@ public enum JanusGatewayCommunicationError: Swift.Error {
     )
     case SendFailure(reason: String
     )
+
+    
+
+    
+
+    
+    public var errorDescription: String? {
+        String(reflecting: self)
+    }
+    
 }
 
+#if compiler(>=6)
+extension JanusGatewayCommunicationError: Sendable {}
+#endif
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -8231,29 +6588,27 @@ public func FfiConverterTypeJanusGatewayCommunicationError_lower(_ value: JanusG
 }
 
 
-extension JanusGatewayCommunicationError: Equatable, Hashable {}
-
-
-
-
-extension JanusGatewayCommunicationError: Foundation.LocalizedError {
-    public var errorDescription: String? {
-        String(reflecting: self)
-    }
-}
-
-
-
-
-
-public enum JanusGatewayConnectionError: Swift.Error {
+public enum JanusGatewayConnectionError: Swift.Error, Equatable, Hashable, Foundation.LocalizedError {
 
     
     
     case ConnectionFailure(reason: String
     )
+
+    
+
+    
+
+    
+    public var errorDescription: String? {
+        String(reflecting: self)
+    }
+    
 }
 
+#if compiler(>=6)
+extension JanusGatewayConnectionError: Sendable {}
+#endif
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -8307,29 +6662,27 @@ public func FfiConverterTypeJanusGatewayConnectionError_lower(_ value: JanusGate
 }
 
 
-extension JanusGatewayConnectionError: Equatable, Hashable {}
-
-
-
-
-extension JanusGatewayConnectionError: Foundation.LocalizedError {
-    public var errorDescription: String? {
-        String(reflecting: self)
-    }
-}
-
-
-
-
-
-public enum JanusGatewayHandleError: Swift.Error {
+public enum JanusGatewayHandleError: Swift.Error, Equatable, Hashable, Foundation.LocalizedError {
 
     
     
     case HandleCreationFailure(plugin: String, reason: String
     )
+
+    
+
+    
+
+    
+    public var errorDescription: String? {
+        String(reflecting: self)
+    }
+    
 }
 
+#if compiler(>=6)
+extension JanusGatewayHandleError: Sendable {}
+#endif
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -8385,29 +6738,27 @@ public func FfiConverterTypeJanusGatewayHandleError_lower(_ value: JanusGatewayH
 }
 
 
-extension JanusGatewayHandleError: Equatable, Hashable {}
-
-
-
-
-extension JanusGatewayHandleError: Foundation.LocalizedError {
-    public var errorDescription: String? {
-        String(reflecting: self)
-    }
-}
-
-
-
-
-
-public enum JanusGatewaySessionError: Swift.Error {
+public enum JanusGatewaySessionError: Swift.Error, Equatable, Hashable, Foundation.LocalizedError {
 
     
     
     case SessionCreationFailure(reason: String
     )
+
+    
+
+    
+
+    
+    public var errorDescription: String? {
+        String(reflecting: self)
+    }
+    
 }
 
+#if compiler(>=6)
+extension JanusGatewaySessionError: Sendable {}
+#endif
 
 #if swift(>=5.8)
 @_documentation(visibility: private)
@@ -8460,32 +6811,21 @@ public func FfiConverterTypeJanusGatewaySessionError_lower(_ value: JanusGateway
     return FfiConverterTypeJanusGatewaySessionError.lower(value)
 }
 
-
-extension JanusGatewaySessionError: Equatable, Hashable {}
-
-
-
-
-extension JanusGatewaySessionError: Foundation.LocalizedError {
-    public var errorDescription: String? {
-        String(reflecting: self)
-    }
-}
-
-
-
-
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
-public enum JanusId {
+public enum JanusId: Equatable, Hashable {
     
     case string(String
     )
     case uint(U63
     )
-}
 
+
+
+
+
+}
 
 #if compiler(>=6)
 extension JanusId: Sendable {}
@@ -8544,22 +6884,19 @@ public func FfiConverterTypeJanusId_lower(_ value: JanusId) -> RustBuffer {
 }
 
 
-extension JanusId: Equatable, Hashable {}
-
-
-
-
-
-
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
-public enum JsepType {
+public enum JsepType: Equatable, Hashable {
     
     case offer
     case answer
-}
 
+
+
+
+
+}
 
 #if compiler(>=6)
 extension JsepType: Sendable {}
@@ -8614,17 +6951,10 @@ public func FfiConverterTypeJsepType_lower(_ value: JsepType) -> RustBuffer {
 }
 
 
-extension JsepType: Equatable, Hashable {}
-
-
-
-
-
-
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
-public enum LegacyVideoRoomAudioCodec {
+public enum LegacyVideoRoomAudioCodec: Equatable, Hashable {
     
     case opus
     case g722
@@ -8632,8 +6962,12 @@ public enum LegacyVideoRoomAudioCodec {
     case pcma
     case isac32
     case isac16
-}
 
+
+
+
+
+}
 
 #if compiler(>=6)
 extension LegacyVideoRoomAudioCodec: Sendable {}
@@ -8712,25 +7046,22 @@ public func FfiConverterTypeLegacyVideoRoomAudioCodec_lower(_ value: LegacyVideo
 }
 
 
-extension LegacyVideoRoomAudioCodec: Equatable, Hashable {}
-
-
-
-
-
-
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
-public enum LegacyVideoRoomVideoCodec {
+public enum LegacyVideoRoomVideoCodec: Equatable, Hashable {
     
     case vp8
     case vp9
     case h264
     case av1
     case h265
-}
 
+
+
+
+
+}
 
 #if compiler(>=6)
 extension LegacyVideoRoomVideoCodec: Sendable {}
@@ -8803,17 +7134,10 @@ public func FfiConverterTypeLegacyVideoRoomVideoCodec_lower(_ value: LegacyVideo
 }
 
 
-extension LegacyVideoRoomVideoCodec: Equatable, Hashable {}
-
-
-
-
-
-
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
-public enum VideoRoomAudioCodec {
+public enum VideoRoomAudioCodec: Equatable, Hashable {
     
     case opus
     case g722
@@ -8821,8 +7145,12 @@ public enum VideoRoomAudioCodec {
     case pcma
     case isac32
     case isac16
-}
 
+
+
+
+
+}
 
 #if compiler(>=6)
 extension VideoRoomAudioCodec: Sendable {}
@@ -8901,25 +7229,22 @@ public func FfiConverterTypeVideoRoomAudioCodec_lower(_ value: VideoRoomAudioCod
 }
 
 
-extension VideoRoomAudioCodec: Equatable, Hashable {}
-
-
-
-
-
-
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
-public enum VideoRoomVideoCodec {
+public enum VideoRoomVideoCodec: Equatable, Hashable {
     
     case vp8
     case vp9
     case h264
     case av1
     case h265
-}
 
+
+
+
+
+}
 
 #if compiler(>=6)
 extension VideoRoomVideoCodec: Sendable {}
@@ -8992,13 +7317,6 @@ public func FfiConverterTypeVideoRoomVideoCodec_lower(_ value: VideoRoomVideoCod
 }
 
 
-extension VideoRoomVideoCodec: Equatable, Hashable {}
-
-
-
-
-
-
 
 
 
@@ -9036,6 +7354,20 @@ fileprivate struct UniffiCallbackInterfaceAudioBridgeHandleCallback {
     // This creates 1-element array, since this seems to be the only way to construct a const
     // pointer that we can pass to the Rust code.
     static let vtable: [UniffiVTableCallbackInterfaceAudioBridgeHandleCallback] = [UniffiVTableCallbackInterfaceAudioBridgeHandleCallback(
+        uniffiFree: { (uniffiHandle: UInt64) -> () in
+            do {
+                try FfiConverterCallbackInterfaceAudioBridgeHandleCallback.handleMap.remove(handle: uniffiHandle)
+            } catch {
+                print("Uniffi callback interface AudioBridgeHandleCallback: handle missing in uniffiFree")
+            }
+        },
+        uniffiClone: { (uniffiHandle: UInt64) -> UInt64 in
+            do {
+                return try FfiConverterCallbackInterfaceAudioBridgeHandleCallback.handleMap.clone(handle: uniffiHandle)
+            } catch {
+                fatalError("Uniffi callback interface AudioBridgeHandleCallback: handle missing in uniffiClone")
+            }
+        },
         onResult: { (
             uniffiHandle: UInt64,
             transaction: RustBuffer,
@@ -9299,12 +7631,6 @@ fileprivate struct UniffiCallbackInterfaceAudioBridgeHandleCallback {
                 makeCall: makeCall,
                 writeReturn: writeReturn
             )
-        },
-        uniffiFree: { (uniffiHandle: UInt64) -> () in
-            let result = try? FfiConverterCallbackInterfaceAudioBridgeHandleCallback.handleMap.remove(handle: uniffiHandle)
-            if result == nil {
-                print("Uniffi callback interface AudioBridgeHandleCallback: handle missing in uniffiFree")
-            }
         }
     )]
 }
@@ -9400,6 +7726,20 @@ fileprivate struct UniffiCallbackInterfaceEchotestHandleCallback {
     // This creates 1-element array, since this seems to be the only way to construct a const
     // pointer that we can pass to the Rust code.
     static let vtable: [UniffiVTableCallbackInterfaceEchotestHandleCallback] = [UniffiVTableCallbackInterfaceEchotestHandleCallback(
+        uniffiFree: { (uniffiHandle: UInt64) -> () in
+            do {
+                try FfiConverterCallbackInterfaceEchotestHandleCallback.handleMap.remove(handle: uniffiHandle)
+            } catch {
+                print("Uniffi callback interface EchotestHandleCallback: handle missing in uniffiFree")
+            }
+        },
+        uniffiClone: { (uniffiHandle: UInt64) -> UInt64 in
+            do {
+                return try FfiConverterCallbackInterfaceEchotestHandleCallback.handleMap.clone(handle: uniffiHandle)
+            } catch {
+                fatalError("Uniffi callback interface EchotestHandleCallback: handle missing in uniffiClone")
+            }
+        },
         onResult: { (
             uniffiHandle: UInt64,
             echotest: RustBuffer,
@@ -9527,12 +7867,6 @@ fileprivate struct UniffiCallbackInterfaceEchotestHandleCallback {
                 makeCall: makeCall,
                 writeReturn: writeReturn
             )
-        },
-        uniffiFree: { (uniffiHandle: UInt64) -> () in
-            let result = try? FfiConverterCallbackInterfaceEchotestHandleCallback.handleMap.remove(handle: uniffiHandle)
-            if result == nil {
-                print("Uniffi callback interface EchotestHandleCallback: handle missing in uniffiFree")
-            }
         }
     )]
 }
@@ -9622,6 +7956,20 @@ fileprivate struct UniffiCallbackInterfaceHandleCallback {
     // This creates 1-element array, since this seems to be the only way to construct a const
     // pointer that we can pass to the Rust code.
     static let vtable: [UniffiVTableCallbackInterfaceHandleCallback] = [UniffiVTableCallbackInterfaceHandleCallback(
+        uniffiFree: { (uniffiHandle: UInt64) -> () in
+            do {
+                try FfiConverterCallbackInterfaceHandleCallback.handleMap.remove(handle: uniffiHandle)
+            } catch {
+                print("Uniffi callback interface HandleCallback: handle missing in uniffiFree")
+            }
+        },
+        uniffiClone: { (uniffiHandle: UInt64) -> UInt64 in
+            do {
+                return try FfiConverterCallbackInterfaceHandleCallback.handleMap.clone(handle: uniffiHandle)
+            } catch {
+                fatalError("Uniffi callback interface HandleCallback: handle missing in uniffiClone")
+            }
+        },
         onPluginEvent: { (
             uniffiHandle: UInt64,
             event: RustBuffer,
@@ -9669,12 +8017,6 @@ fileprivate struct UniffiCallbackInterfaceHandleCallback {
                 makeCall: makeCall,
                 writeReturn: writeReturn
             )
-        },
-        uniffiFree: { (uniffiHandle: UInt64) -> () in
-            let result = try? FfiConverterCallbackInterfaceHandleCallback.handleMap.remove(handle: uniffiHandle)
-            if result == nil {
-                print("Uniffi callback interface HandleCallback: handle missing in uniffiFree")
-            }
         }
     )]
 }
@@ -9784,6 +8126,20 @@ fileprivate struct UniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
     // This creates 1-element array, since this seems to be the only way to construct a const
     // pointer that we can pass to the Rust code.
     static let vtable: [UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback] = [UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback(
+        uniffiFree: { (uniffiHandle: UInt64) -> () in
+            do {
+                try FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.remove(handle: uniffiHandle)
+            } catch {
+                print("Uniffi callback interface LegacyVideoRoomHandleCallback: handle missing in uniffiFree")
+            }
+        },
+        uniffiClone: { (uniffiHandle: UInt64) -> UInt64 in
+            do {
+                return try FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.clone(handle: uniffiHandle)
+            } catch {
+                fatalError("Uniffi callback interface LegacyVideoRoomHandleCallback: handle missing in uniffiClone")
+            }
+        },
         onLegacyVideoRoomOther: { (
             uniffiHandle: UInt64,
             data: RustBuffer,
@@ -10099,12 +8455,6 @@ fileprivate struct UniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
                 makeCall: makeCall,
                 writeReturn: writeReturn
             )
-        },
-        uniffiFree: { (uniffiHandle: UInt64) -> () in
-            let result = try? FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.remove(handle: uniffiHandle)
-            if result == nil {
-                print("Uniffi callback interface LegacyVideoRoomHandleCallback: handle missing in uniffiFree")
-            }
         }
     )]
 }
@@ -10206,6 +8556,20 @@ fileprivate struct UniffiCallbackInterfaceVideoRoomHandleCallback {
     // This creates 1-element array, since this seems to be the only way to construct a const
     // pointer that we can pass to the Rust code.
     static let vtable: [UniffiVTableCallbackInterfaceVideoRoomHandleCallback] = [UniffiVTableCallbackInterfaceVideoRoomHandleCallback(
+        uniffiFree: { (uniffiHandle: UInt64) -> () in
+            do {
+                try FfiConverterCallbackInterfaceVideoRoomHandleCallback.handleMap.remove(handle: uniffiHandle)
+            } catch {
+                print("Uniffi callback interface VideoRoomHandleCallback: handle missing in uniffiFree")
+            }
+        },
+        uniffiClone: { (uniffiHandle: UInt64) -> UInt64 in
+            do {
+                return try FfiConverterCallbackInterfaceVideoRoomHandleCallback.handleMap.clone(handle: uniffiHandle)
+            } catch {
+                fatalError("Uniffi callback interface VideoRoomHandleCallback: handle missing in uniffiClone")
+            }
+        },
         onHandleEvent: { (
             uniffiHandle: UInt64,
             event: RustBuffer,
@@ -10429,12 +8793,6 @@ fileprivate struct UniffiCallbackInterfaceVideoRoomHandleCallback {
                 makeCall: makeCall,
                 writeReturn: writeReturn
             )
-        },
-        uniffiFree: { (uniffiHandle: UInt64) -> () in
-            let result = try? FfiConverterCallbackInterfaceVideoRoomHandleCallback.handleMap.remove(handle: uniffiHandle)
-            if result == nil {
-                print("Uniffi callback interface VideoRoomHandleCallback: handle missing in uniffiFree")
-            }
         }
     )]
 }
@@ -11335,7 +9693,7 @@ fileprivate struct FfiConverterDictionaryStringTypeMetaData: FfiConverterRustBuf
     }
 }
 private let UNIFFI_RUST_FUTURE_POLL_READY: Int8 = 0
-private let UNIFFI_RUST_FUTURE_POLL_MAYBE_READY: Int8 = 1
+private let UNIFFI_RUST_FUTURE_POLL_WAKE: Int8 = 1
 
 fileprivate let uniffiContinuationHandleMap = UniffiHandleMap<UnsafeContinuation<Int8, Never>>()
 
@@ -11359,7 +9717,9 @@ fileprivate func uniffiRustCallAsync<F, T>(
         pollResult = await withUnsafeContinuation {
             pollFunc(
                 rustFuture,
-                uniffiFutureContinuationCallback,
+                { handle, pollResult in
+                    uniffiFutureContinuationCallback(handle: handle, pollResult: pollResult)
+                },
                 uniffiContinuationHandleMap.insert(obj: $0)
             )
         }
@@ -11380,13 +9740,6 @@ fileprivate func uniffiFutureContinuationCallback(handle: UInt64, pollResult: In
         print("uniffiFutureContinuationCallback invalid handle")
     }
 }
-public func initJanusLogger(subsystem: String, category: String)  {try! rustCall() {
-    uniffi_janus_gateway_fn_func_init_janus_logger(
-        FfiConverterString.lower(subsystem),
-        FfiConverterString.lower(category),$0
-    )
-}
-}
 public func janusConnect(config: Config)async throws  -> Connection  {
     return
         try  await uniffiRustCallAsync(
@@ -11394,12 +9747,19 @@ public func janusConnect(config: Config)async throws  -> Connection  {
                 uniffi_janus_gateway_fn_func_janus_connect(FfiConverterTypeConfig_lower(config)
                 )
             },
-            pollFunc: ffi_janus_gateway_rust_future_poll_pointer,
-            completeFunc: ffi_janus_gateway_rust_future_complete_pointer,
-            freeFunc: ffi_janus_gateway_rust_future_free_pointer,
+            pollFunc: ffi_janus_gateway_rust_future_poll_u64,
+            completeFunc: ffi_janus_gateway_rust_future_complete_u64,
+            freeFunc: ffi_janus_gateway_rust_future_free_u64,
             liftFunc: FfiConverterTypeConnection_lift,
             errorHandler: FfiConverterTypeJanusGatewayConnectionError_lift
         )
+}
+public func initJanusLogger(subsystem: String, category: String)  {try! rustCall() {
+    uniffi_janus_gateway_fn_func_init_janus_logger(
+        FfiConverterString.lower(subsystem),
+        FfiConverterString.lower(category),$0
+    )
+}
 }
 
 private enum InitializationResult {
@@ -11411,379 +9771,379 @@ private enum InitializationResult {
 // the code inside is only computed once.
 private let initializationResult: InitializationResult = {
     // Get the bindings contract version from our ComponentInterface
-    let bindings_contract_version = 29
+    let bindings_contract_version = 30
     // Get the scaffolding contract version by calling the into the dylib
     let scaffolding_contract_version = ffi_janus_gateway_uniffi_contract_version()
     if bindings_contract_version != scaffolding_contract_version {
         return InitializationResult.contractVersionMismatch
     }
-    if (uniffi_janus_gateway_checksum_func_init_janus_logger() != 56827) {
+    if (uniffi_janus_gateway_checksum_func_janus_connect() != 48656) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_func_janus_connect() != 27438) {
+    if (uniffi_janus_gateway_checksum_func_init_janus_logger() != 52103) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_complete_trickle() != 64327) {
+    if (uniffi_janus_gateway_checksum_method_connection_create_session() != 64417) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_configure() != 39928) {
+    if (uniffi_janus_gateway_checksum_method_connection_server_info() != 59970) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_create_room() != 56852) {
+    if (uniffi_janus_gateway_checksum_method_handle_complete_trickle() != 27204) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_detach() != 13604) {
+    if (uniffi_janus_gateway_checksum_method_handle_detach() != 20220) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_exist() != 55415) {
+    if (uniffi_janus_gateway_checksum_method_handle_fire_and_forget() != 5420) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_fire_and_forget() != 33585) {
+    if (uniffi_janus_gateway_checksum_method_handle_fire_and_forget_with_jsep() != 11711) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_fire_and_forget_with_jsep() != 6039) {
+    if (uniffi_janus_gateway_checksum_method_handle_hangup() != 12320) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_hangup() != 62093) {
+    if (uniffi_janus_gateway_checksum_method_handle_send_waiton_ack() != 31216) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_join_room() != 62884) {
+    if (uniffi_janus_gateway_checksum_method_handle_send_waiton_ack_with_jsep() != 8378) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_list_participants() != 7752) {
+    if (uniffi_janus_gateway_checksum_method_handle_send_waiton_result() != 1394) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_mute() != 55698) {
+    if (uniffi_janus_gateway_checksum_method_handle_start_event_loop() != 44139) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_send_waiton_ack() != 34307) {
+    if (uniffi_janus_gateway_checksum_method_handle_trickle_candidates() != 14159) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_send_waiton_ack_with_jsep() != 25960) {
+    if (uniffi_janus_gateway_checksum_method_handle_trickle_single_candidate() != 5180) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_send_waiton_result() != 47125) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_complete_trickle() != 61341) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_start_event_loop() != 16772) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_configure() != 3143) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_trickle_candidates() != 5622) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_create_room() != 34703) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_trickle_single_candidate() != 56691) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_detach() != 55034) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_unmute() != 10529) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_exist() != 17082) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_connection_create_session() != 38721) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_fire_and_forget() != 38494) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_connection_server_info() != 18308) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_fire_and_forget_with_jsep() != 29989) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_complete_trickle() != 25982) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_hangup() != 34475) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_detach() != 10964) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_join_room() != 28311) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_fire_and_forget() != 6820) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_list_participants() != 59641) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_fire_and_forget_with_jsep() != 31372) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_mute() != 29183) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_hangup() != 48274) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_send_waiton_ack() != 59209) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_send_waiton_ack() != 9815) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_send_waiton_ack_with_jsep() != 22237) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_send_waiton_ack_with_jsep() != 40255) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_send_waiton_result() != 30285) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_send_waiton_result() != 15964) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_start_event_loop() != 47097) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_start() != 6138) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_trickle_candidates() != 5198) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_start_event_loop() != 42772) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_trickle_single_candidate() != 53792) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_start_with_jsep() != 58592) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandle_unmute() != 36868) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_trickle_candidates() != 101) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_complete_trickle() != 33512) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandle_trickle_single_candidate() != 3746) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_detach() != 6504) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handle_complete_trickle() != 24960) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_fire_and_forget() != 6797) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handle_detach() != 49762) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_fire_and_forget_with_jsep() != 35030) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handle_fire_and_forget() != 43989) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_hangup() != 52270) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handle_fire_and_forget_with_jsep() != 28005) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_send_waiton_ack() != 6912) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handle_hangup() != 2958) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_send_waiton_ack_with_jsep() != 22029) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handle_send_waiton_ack() != 21432) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_send_waiton_result() != 11762) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handle_send_waiton_ack_with_jsep() != 24357) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_start() != 25746) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handle_send_waiton_result() != 24292) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_start_event_loop() != 38771) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handle_start_event_loop() != 781) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_start_with_jsep() != 16841) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handle_trickle_candidates() != 17041) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_trickle_candidates() != 47303) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handle_trickle_single_candidate() != 48289) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandle_trickle_single_candidate() != 23653) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_complete_trickle() != 53978) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_complete_trickle() != 42625) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_create_room() != 35272) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_create_room() != 13380) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_detach() != 7403) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_detach() != 37091) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_exist() != 53200) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_exist() != 50357) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_fire_and_forget() != 43483) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_fire_and_forget() != 27705) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_fire_and_forget_with_jsep() != 46681) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_fire_and_forget_with_jsep() != 43564) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_hangup() != 43624) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_hangup() != 55048) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_kick() != 30177) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_kick() != 21580) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_publisher_configure() != 56682) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_publisher_configure() != 43963) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_publisher_join() != 10072) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_publisher_join() != 31946) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_publisher_join_and_configure() != 61577) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_publisher_join_and_configure() != 38928) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_send_waiton_ack() != 40893) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_send_waiton_ack() != 52771) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_send_waiton_ack_with_jsep() != 64898) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_send_waiton_ack_with_jsep() != 37323) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_send_waiton_result() != 60224) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_send_waiton_result() != 33182) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_start() != 38038) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_start() != 39373) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_start_event_loop() != 2051) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_start_event_loop() != 4687) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_subscriber_configure() != 52781) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_subscriber_configure() != 55697) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_subscriber_join() != 51090) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_subscriber_join() != 24874) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_trickle_candidates() != 23169) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_trickle_candidates() != 24872) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_trickle_single_candidate() != 64622) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandle_trickle_single_candidate() != 84) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_session_attach() != 16557) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_complete_trickle() != 30613) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_session_attach_audio_bridge() != 17158) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_create_room() != 22289) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_session_attach_echo_test() != 28942) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_detach() != 35113) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_session_attach_legacy_video_room() != 63300) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_exist() != 32971) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_session_attach_video_room() != 2521) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_fire_and_forget() != 50902) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_session_destory() != 62073) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_fire_and_forget_with_jsep() != 24342) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandle_complete_trickle() != 33029) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_hangup() != 62917) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandle_create_room() != 14249) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_publisher_join_and_configure() != 44892) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandle_detach() != 19085) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_send_waiton_ack() != 46884) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandle_exist() != 35301) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_send_waiton_ack_with_jsep() != 51136) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandle_fire_and_forget() != 22601) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_send_waiton_result() != 11269) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandle_fire_and_forget_with_jsep() != 54355) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_start_event_loop() != 25479) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandle_hangup() != 22972) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_trickle_candidates() != 792) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandle_publisher_join_and_configure() != 39661) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandle_trickle_single_candidate() != 43926) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandle_send_waiton_ack() != 5152) {
+    if (uniffi_janus_gateway_checksum_method_session_attach() != 57807) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandle_send_waiton_ack_with_jsep() != 47447) {
+    if (uniffi_janus_gateway_checksum_method_session_attach_audio_bridge() != 37184) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandle_send_waiton_result() != 26883) {
+    if (uniffi_janus_gateway_checksum_method_session_attach_echo_test() != 45183) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandle_start_event_loop() != 36856) {
+    if (uniffi_janus_gateway_checksum_method_session_attach_legacy_video_room() != 15865) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandle_trickle_candidates() != 32955) {
+    if (uniffi_janus_gateway_checksum_method_session_attach_video_room() != 17770) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandle_trickle_single_candidate() != 42668) {
+    if (uniffi_janus_gateway_checksum_method_session_destory() != 9784) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_result() != 50231) {
+    if (uniffi_janus_gateway_checksum_method_handlecallback_on_plugin_event() != 4431) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_result_with_jsep() != 23251) {
+    if (uniffi_janus_gateway_checksum_method_handlecallback_on_handle_event() != 55160) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_room_joined_with_jsep() != 60229) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_result() != 55932) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_room_joined() != 39663) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_result_with_jsep() != 8860) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_participants_joined() != 41973) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_room_joined_with_jsep() != 26045) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_participants_updated() != 13991) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_room_joined() != 31522) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_participant_left() != 5069) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_participants_joined() != 57527) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_handle_event() != 6243) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_participants_updated() != 28612) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_audio_bridge_error() != 45190) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_participant_left() != 30395) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_other() != 2276) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_handle_event() != 50796) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_result() != 12927) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_audio_bridge_error() != 15002) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_result_with_jsep() != 57945) {
+    if (uniffi_janus_gateway_checksum_method_audiobridgehandlecallback_on_other() != 15054) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_echo_test_error() != 12056) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_result() != 7237) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_handle_event() != 49029) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_result_with_jsep() != 16604) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_other() != 50197) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_echo_test_error() != 50740) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handlecallback_on_plugin_event() != 21699) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_handle_event() != 28406) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_handlecallback_on_handle_event() != 1626) {
+    if (uniffi_janus_gateway_checksum_method_echotesthandlecallback_on_other() != 29312) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_other() != 27677) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_other() != 51665) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_handle_event() != 17605) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_handle_event() != 26909) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_error() != 11633) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_error() != 2432) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_joined() != 45081) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_joined() != 41147) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_configured() != 3953) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_configured() != 16499) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_new_publishers() != 55055) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_new_publishers() != 60522) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_attached() != 27716) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_attached() != 62119) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_slow_link() != 29634) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_slow_link() != 59623) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_unpublished() != 45917) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_unpublished() != 52119) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_started() != 3683) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_subscriber_started() != 55536) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_leaving() != 40337) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_leaving() != 23023) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_kicked() != 2902) {
+    if (uniffi_janus_gateway_checksum_method_legacyvideoroomhandlecallback_on_legacy_video_room_kicked() != 7344) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_handle_event() != 12084) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_handle_event() != 25512) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_video_room_error() != 25079) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_video_room_error() != 13233) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_other() != 28224) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_other() != 44316) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_configure_with_jsep() != 32059) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_configure_with_jsep() != 56653) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_room_joined() != 7821) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_room_joined() != 19427) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_room_joined_with_jsep() != 63756) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_room_joined_with_jsep() != 12366) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_kicked() != 15552) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_kicked() != 31810) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_leaving() != 46877) {
+    if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_leaving() != 59680) {
         return InitializationResult.apiChecksumMismatch
     }
 
