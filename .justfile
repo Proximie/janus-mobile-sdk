@@ -1,6 +1,7 @@
 FAT_SIMULATOR_LIB_DIR := "target" / "ios-simulator-fat" / "release"
 LIBNAME := "janus_gateway"
 MODULENAME := "JanusGateway"
+TYPESCRIPT_OUT_DIR := "typescript"
 
 VERSION := `cargo metadata --format-version 1 | jq -r '.packages[] | select(.name=="rslib") .version'`
 SHORTCOMMIT := `git rev-parse --short HEAD`
@@ -94,6 +95,29 @@ apple-clean:
 	@rm -rf target/uniffi-xcframework-staging
 	@rm -rf {{FAT_SIMULATOR_LIB_DIR}}
 
+# Build TypeScript (WASM) bindings for web. Requires uniffi-bindgen-react-native: npm install -g uniffi-bindgen-react-native
+[group: 'web']
+web: web-clean web-build web-generate-ts
+
+# Build the Rust library as WebAssembly
+[group: 'web']
+web-build:
+	@echo "Building Rust lib for WebAssembly"
+	@ubrn build web
+
+# Generate TypeScript bindings from the built WASM library
+[group: 'web']
+web-generate-ts:
+	@echo "Generating TypeScript bindings for web"
+	@ubrn generate ts
+
+# Clean up the web build artifacts
+[group: 'web']
+web-clean:
+	@echo "Cleaning web build artifacts"
+	@rm -rf {{TYPESCRIPT_OUT_DIR}}
+	@rm -rf rust_modules
+
 # Build library for android. Pass `-r` to build release version
 [group: 'android']
 android release="": android-clean (android-build release)
@@ -117,8 +141,8 @@ android-build release="":
 	fi
 
 [group: 'utils']
-[confirm("Running this recipe will delete all cached file for Apple, Android, and Rust. Continue? [y/yes] [n/no]")]
-clean-all: apple-clean android-clean
+[confirm("Running this recipe will delete all cached file for Apple, Android, Web, and Rust. Continue? [y/yes] [n/no]")]
+clean-all: apple-clean android-clean web-clean
 	@cargo clean
 
 # Updates the janus-mobile-sdk version inside rslib/Cargo.toml and Package.swift

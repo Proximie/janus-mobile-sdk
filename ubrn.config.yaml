@@ -1,0 +1,13 @@
+---
+rust:
+  manifestPath: rslib/Cargo.toml
+
+web:
+  workspace: false
+  target: web
+  wasmCrateName: janus-gateway-web
+  tsBindings: typescript/bindings
+
+bindings:
+  ts: typescript/bindings
+  uniffiToml: rslib/uniffi.toml

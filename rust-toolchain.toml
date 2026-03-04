@@ -24,4 +24,7 @@ targets = [
     "i686-linux-android",
     "aarch64-linux-android",
     "x86_64-linux-android",
+
+    # Web (WASM)
+    "wasm32-unknown-unknown",
 ]
