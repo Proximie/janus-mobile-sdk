@@ -116,9 +116,39 @@ android-build release="":
 		./gradlew assembleDebug; \
 	fi
 
+# Install npm dependencies required for web tooling (uniffi-bindgen-react-native)
+[group: 'web']
+web-install:
+	@echo "Installing npm dependencies"
+	@npm install
+
+# Build the WASM binary and generate TypeScript bindings for web
+[group: 'web']
+web: web-install
+	@echo "Building WASM and generating TypeScript bindings"
+	@npx ubrn build web --config ubrn.config.yaml --and-generate
+
+# Build the WASM binary only (skip TypeScript generation)
+[group: 'web']
+web-build: web-install
+	@echo "Building WASM binary"
+	@npx ubrn build web --config ubrn.config.yaml
+
+# Generate TypeScript bindings from an already-built WASM binary
+[group: 'web']
+web-generate: web-install
+	@echo "Generating TypeScript bindings for web"
+	@npx ubrn generate --config ubrn.config.yaml --platform web
+
+# Clean web build artifacts
+[group: 'web']
+web-clean:
+	@echo "Cleaning web build artifacts"
+	@rm -rf ts/ dist/ wasm-crate/ node_modules/
+
 [group: 'utils']
 [confirm("Running this recipe will delete all cached file for Apple, Android, and Rust. Continue? [y/yes] [n/no]")]
-clean-all: apple-clean android-clean
+clean-all: apple-clean android-clean web-clean
 	@cargo clean
 
 # Updates the janus-mobile-sdk version inside rslib/Cargo.toml and Package.swift

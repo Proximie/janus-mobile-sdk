@@ -1,0 +1,12 @@
+{
+  "name": "janus-mobile-sdk",
+  "version": "0.16.4",
+  "description": "TypeScript/WASM bindings for Janus Gateway (web)",
+  "private": true,
+  "scripts": {
+    "build:web": "ubrn build web --config ubrn.config.yaml --and-generate"
+  },
+  "devDependencies": {
+    "uniffi-bindgen-react-native": "*"
+  }
+}

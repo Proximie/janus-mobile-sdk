@@ -79,3 +79,10 @@ xcuserdata/
 
 # Android (cargo-ndk outputs; they end up in the Android source tree)
 *.so
+
+# Web / WASM build artifacts
+ts/
+dist/
+wasm-crate/
+node_modules/
+package-lock.json

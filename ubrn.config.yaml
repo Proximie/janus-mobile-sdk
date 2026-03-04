@@ -1,0 +1,20 @@
+# uniffi-bindgen-react-native configuration
+# https://jhugman.github.io/uniffi-bindgen-react-native/reference/config-yaml.html
+#
+# Web-only configuration: generates TypeScript bindings and WASM binary.
+# React Native (iOS/Android) bindings are generated via the existing justfile
+# recipes using uniffi-bindgen directly.
+
+crates:
+  - manifestPath: rslib/Cargo.toml
+    libraryName: janus_gateway
+
+bindings:
+  # Directory where TypeScript bindings are generated
+  outDir: ts
+
+web:
+  # Directory where wasm-bindgen outputs the WASM binary and JS glue code
+  outDir: dist
+  # wasm-bindgen target (web = ES module with top-level init)
+  target: web
