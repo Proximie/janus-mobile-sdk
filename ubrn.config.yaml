@@ -1,9 +1,5 @@
 # uniffi-bindgen-react-native configuration
 # https://jhugman.github.io/uniffi-bindgen-react-native/reference/config-yaml.html
-#
-# Web-only configuration: generates TypeScript bindings and WASM binary.
-# React Native (iOS/Android) bindings are generated via the existing justfile
-# recipes using uniffi-bindgen directly.
 
 crates:
   - manifestPath: rslib/Cargo.toml

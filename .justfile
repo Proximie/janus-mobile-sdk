@@ -144,7 +144,7 @@ web-generate: web-install
 [group: 'web']
 web-clean:
 	@echo "Cleaning web build artifacts"
-	@rm -rf ts/ dist/ wasm-crate/ node_modules/
+	@rm -rf ts/ dist/ wasm-crate/
 
 [group: 'utils']
 [confirm("Running this recipe will delete all cached file for Apple, Android, and Rust. Continue? [y/yes] [n/no]")]
