@@ -1,0 +1,3 @@
+# Pass -dead_strip to the Apple linker for additional unused-symbol removal.
+[target.'cfg(target_vendor = "apple")']
+rustflags = ["-C", "link-arg=-dead_strip"]
