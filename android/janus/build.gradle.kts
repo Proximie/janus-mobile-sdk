@@ -53,6 +53,22 @@ dependencies {
 cargoNdk {
     module = ".."
     librariesNames = arrayListOf("libjanus_gateway.so")
+
+    // Recompile `std` with `panic=immediate-abort` for the release `.so` only,
+    // mirroring the Apple build-std recipe in `.justfile`. `-Zbuild-std` needs a
+    // nightly cargo, selected via RUSTUP_TOOLCHAIN (rustup honours it over
+    // rust-toolchain.toml). Debug builds stay on stable for fast iteration.
+    // The "release"/"debug" build types are pre-created by the plugin, so we
+    // configure the existing one rather than creating a new one.
+    buildTypes {
+        getByName("release") {
+            extraCargoBuildArguments = arrayListOf("-Z", "build-std=std,panic_abort")
+            extraCargoEnv = mapOf(
+                "RUSTUP_TOOLCHAIN" to "nightly",
+                "RUSTFLAGS" to "-Zunstable-options -Cpanic=immediate-abort"
+            )
+        }
+    }
 }
 
 afterEvaluate {

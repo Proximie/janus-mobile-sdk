@@ -8,7 +8,12 @@
 
 [toolchain]
 channel = "stable"
-components = ["clippy", "rustfmt"]
+# `rust-src` is required by the `-Zbuild-std` release builds (see `.justfile` for
+# Apple and `android/janus/build.gradle.kts` for Android), which recompile `std`
+# with `panic=immediate-abort` to shrink the shipped libs. Those builds invoke
+# nightly explicitly (`cargo +nightly` / `RUSTUP_TOOLCHAIN=nightly`); the rest of
+# the project (dev, CI, debug) stays on stable.
+components = ["clippy", "rustfmt", "rust-src"]
 targets = [
     # iOS
     "aarch64-apple-ios",

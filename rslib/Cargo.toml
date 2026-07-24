@@ -13,9 +13,11 @@ crate-type = ["cdylib", "staticlib", "lib"]
 # didn't work. https://github.com/rust-lang/cargo/issues/15262
 [profile.release]
 opt-level = "z"
-lto = "thin"
+lto = "fat"
+codegen-units = 1
 panic = "abort"
 strip = "symbols"
+overflow-checks = false
 
 [dependencies]
 log = "0.4.29"

@@ -7,6 +7,15 @@ SHORTCOMMIT := `git rev-parse --short HEAD`
 
 LATEST_TAG := `git tag --sort=-version:refname | head -n 1 2>/dev/null || echo "0.0.0"`
 
+# `-Zbuild-std` recompiles `std` with `panic=immediate-abort` (matching the
+# crate's `panic = "abort"` profile), dropping unwinding/backtrace/formatting
+# machinery that bloats the static archive. Requires nightly + `rust-src`, so
+# these recipes invoke `cargo +nightly` explicitly; the rest of the project
+# stays on stable. `-dead_strip` mirrors .cargo/config.toml (env RUSTFLAGS
+# overrides the config file, so it must be repeated here).
+BUILD_STD_FLAGS := "-Z build-std=std,panic_abort"
+BUILD_STD_RUSTFLAGS := "-Zunstable-options -Cpanic=immediate-abort -Clink-arg=-dead_strip"
+
 # Displays the available recipes
 help:
 	@just -l
@@ -25,10 +34,10 @@ apple-build: apple-build-rslib apple-create-fat-simulator-lib
 [private]
 [macos]
 apple-build-rslib:
-	@echo "Building Rust lib"
-	@cargo build --lib --release --target x86_64-apple-ios
-	@cargo build --lib --release --target aarch64-apple-ios-sim
-	@cargo build --lib --release --target aarch64-apple-ios
+	@echo "Building Rust lib (build-std, panic=immediate-abort)"
+	RUSTFLAGS="{{BUILD_STD_RUSTFLAGS}}" cargo +nightly build --lib --release --target x86_64-apple-ios {{BUILD_STD_FLAGS}}
+	RUSTFLAGS="{{BUILD_STD_RUSTFLAGS}}" cargo +nightly build --lib --release --target aarch64-apple-ios-sim {{BUILD_STD_FLAGS}}
+	RUSTFLAGS="{{BUILD_STD_RUSTFLAGS}}" cargo +nightly build --lib --release --target aarch64-apple-ios {{BUILD_STD_FLAGS}}
 
 # Combines two static libs to create the simulator fat lib
 [private]
