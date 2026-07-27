@@ -1,3 +1,11 @@
 # Pass -dead_strip to the Apple linker for additional unused-symbol removal.
 [target.'cfg(target_vendor = "apple")']
 rustflags = ["-C", "link-arg=-dead_strip"]
+
+# rustc still defaults `aarch64-apple-ios` to iOS 10.0, but `aws-lc-sys`'s arm64
+# asm references `___chkstk_darwin` (a compiler-rt stack-probe builtin only
+# provided for modern deployment targets), so the iOS 10.0 link fails with
+# "Undefined symbols ... ___chkstk_darwin". Pin a modern minimum (iOS 13, the
+# floor aws-lc-rs supports) so that builtin is linked in.
+[env]
+IPHONEOS_DEPLOYMENT_TARGET = "13.0"
