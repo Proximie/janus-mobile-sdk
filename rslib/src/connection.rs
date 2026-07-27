@@ -2,11 +2,11 @@ use crate::config::Config;
 use crate::error::JanusGatewayCommunicationError;
 use crate::error::JanusGatewayConnectionError;
 use crate::error::JanusGatewaySessionError;
+use crate::protocol::JanusAPI;
 use crate::protocol::ServerInfoRsp;
 use crate::session::Session;
 use jarust::core::connect;
 use jarust::core::jaconfig::JaConfig;
-use jarust::core::jaconfig::JanusAPI;
 use jarust::core::jaconnection::JaConnection;
 use jarust::interface::tgenerator::RandomTransactionGenerator;
 use std::time::Duration;
@@ -17,7 +17,10 @@ pub struct Connection {
 }
 
 #[uniffi::export(async_runtime = "tokio")]
-pub async fn janus_connect(config: Config) -> Result<Connection, JanusGatewayConnectionError> {
+pub async fn janus_connect(
+    config: Config,
+    api: JanusAPI,
+) -> Result<Connection, JanusGatewayConnectionError> {
     let config = JaConfig {
         url: config.url,
         capacity: config.capacity.into(),
@@ -25,7 +28,7 @@ pub async fn janus_connect(config: Config) -> Result<Connection, JanusGatewayCon
         server_root: config.server_root,
     };
 
-    let connection = match connect(config, JanusAPI::WebSocket, RandomTransactionGenerator).await {
+    let connection = match connect(config, api, RandomTransactionGenerator).await {
         Ok(connection) => connection,
         Err(why) => {
             return Err(JanusGatewayConnectionError::ConnectionFailure {

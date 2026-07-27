@@ -36,6 +36,7 @@ jarust = { version = "1.9.0", features = [
     "legacy-video-room-plugin",
     "ffi-compatible",
     "__plugin-experimental",
+    "socketio",
 ] }
 
 [target.'cfg(any(target_os = "ios", target_os = "macos"))'.dependencies]
