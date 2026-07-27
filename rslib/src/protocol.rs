@@ -1,6 +1,15 @@
 use jarust::interface::japrotocol;
 use std::collections::HashMap;
 
+pub type JanusAPI = jarust::core::jaconfig::JanusAPI;
+
+#[uniffi::remote(Enum)]
+pub enum JanusAPI {
+    WebSocket,
+    Restful,
+    SocketIo,
+}
+
 pub type Candidate = japrotocol::Candidate;
 pub type GenericEvent = japrotocol::GenericEvent;
 pub type Jsep = japrotocol::Jsep;
