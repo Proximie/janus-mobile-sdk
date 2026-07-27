@@ -541,7 +541,11 @@ fileprivate struct FfiConverterString: FfiConverter {
             return String()
         }
         let bytes = UnsafeBufferPointer<UInt8>(start: value.data!, count: Int(value.len))
-        return String(bytes: bytes, encoding: String.Encoding.utf8)!
+        // Use Swift's native UTF-8 decoder; `String(bytes:encoding:.utf8)` goes
+        // through Foundation's NSString and silently strips a leading U+FEFF BOM.
+        // Invalid UTF-8 substitutes U+FFFD instead of trapping (unreachable
+        // given Rust's `String` invariant).
+        return String(decoding: bytes, as: UTF8.self)
     }
 
     public static func lower(_ value: String) -> RustBuffer {
@@ -557,7 +561,8 @@ fileprivate struct FfiConverterString: FfiConverter {
 
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> String {
         let len: Int32 = try readInt(&buf)
-        return String(bytes: try readBytes(&buf, count: Int(len)), encoding: String.Encoding.utf8)!
+        // See `lift` above for why we avoid Foundation's NSString-backed decoder here.
+        return String(decoding: try readBytes(&buf, count: Int(len)), as: UTF8.self)
     }
 
     public static func write(_ value: String, into buf: inout [UInt8]) {
@@ -6503,6 +6508,80 @@ public func FfiConverterTypeGenericEvent_lower(_ value: GenericEvent) -> RustBuf
 }
 
 
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+
+public enum JanusApi: Equatable, Hashable {
+    
+    case webSocket
+    case restful
+    case socketIo
+
+
+
+
+
+}
+
+#if compiler(>=6)
+extension JanusApi: Sendable {}
+#endif
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeJanusAPI: FfiConverterRustBuffer {
+    typealias SwiftType = JanusApi
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> JanusApi {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .webSocket
+        
+        case 2: return .restful
+        
+        case 3: return .socketIo
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: JanusApi, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .webSocket:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .restful:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .socketIo:
+            writeInt(&buf, Int32(3))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeJanusAPI_lift(_ buf: RustBuffer) throws -> JanusApi {
+    return try FfiConverterTypeJanusAPI.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeJanusAPI_lower(_ value: JanusApi) -> RustBuffer {
+    return FfiConverterTypeJanusAPI.lower(value)
+}
+
+
 
 public enum JanusGatewayCommunicationError: Swift.Error, Equatable, Hashable, Foundation.LocalizedError {
 
@@ -7351,9 +7430,8 @@ fileprivate struct UniffiCallbackInterfaceAudioBridgeHandleCallback {
     // Create the VTable using a series of closures.
     // Swift automatically converts these into C callback functions.
     //
-    // This creates 1-element array, since this seems to be the only way to construct a const
-    // pointer that we can pass to the Rust code.
-    static let vtable: [UniffiVTableCallbackInterfaceAudioBridgeHandleCallback] = [UniffiVTableCallbackInterfaceAudioBridgeHandleCallback(
+    // Store the vtable directly.
+    static let vtable: UniffiVTableCallbackInterfaceAudioBridgeHandleCallback = UniffiVTableCallbackInterfaceAudioBridgeHandleCallback(
         uniffiFree: { (uniffiHandle: UInt64) -> () in
             do {
                 try FfiConverterCallbackInterfaceAudioBridgeHandleCallback.handleMap.remove(handle: uniffiHandle)
@@ -7632,11 +7710,23 @@ fileprivate struct UniffiCallbackInterfaceAudioBridgeHandleCallback {
                 writeReturn: writeReturn
             )
         }
-    )]
+    )
+
+    // Rust stores this pointer for future callback invocations, so it must live
+    // for the process lifetime (not just for the init function call).
+    //
+    // `nonisolated(unsafe)` is needed under Swift 6 strict concurrency.
+    // This is safe because the pointee is initialized once during static init
+    // and never mutated by either side of the FFI.  Its fields are C function pointers.
+    nonisolated(unsafe) static let vtablePtr: UnsafePointer<UniffiVTableCallbackInterfaceAudioBridgeHandleCallback> = {
+        let ptr = UnsafeMutablePointer<UniffiVTableCallbackInterfaceAudioBridgeHandleCallback>.allocate(capacity: 1)
+        ptr.initialize(to: vtable)
+        return UnsafePointer(ptr)
+    }()
 }
 
 private func uniffiCallbackInitAudioBridgeHandleCallback() {
-    uniffi_janus_gateway_fn_init_callback_vtable_audiobridgehandlecallback(UniffiCallbackInterfaceAudioBridgeHandleCallback.vtable)
+    uniffi_janus_gateway_fn_init_callback_vtable_audiobridgehandlecallback(UniffiCallbackInterfaceAudioBridgeHandleCallback.vtablePtr)
 }
 
 // FfiConverter protocol for callback interfaces
@@ -7723,9 +7813,8 @@ fileprivate struct UniffiCallbackInterfaceEchotestHandleCallback {
     // Create the VTable using a series of closures.
     // Swift automatically converts these into C callback functions.
     //
-    // This creates 1-element array, since this seems to be the only way to construct a const
-    // pointer that we can pass to the Rust code.
-    static let vtable: [UniffiVTableCallbackInterfaceEchotestHandleCallback] = [UniffiVTableCallbackInterfaceEchotestHandleCallback(
+    // Store the vtable directly.
+    static let vtable: UniffiVTableCallbackInterfaceEchotestHandleCallback = UniffiVTableCallbackInterfaceEchotestHandleCallback(
         uniffiFree: { (uniffiHandle: UInt64) -> () in
             do {
                 try FfiConverterCallbackInterfaceEchotestHandleCallback.handleMap.remove(handle: uniffiHandle)
@@ -7868,11 +7957,23 @@ fileprivate struct UniffiCallbackInterfaceEchotestHandleCallback {
                 writeReturn: writeReturn
             )
         }
-    )]
+    )
+
+    // Rust stores this pointer for future callback invocations, so it must live
+    // for the process lifetime (not just for the init function call).
+    //
+    // `nonisolated(unsafe)` is needed under Swift 6 strict concurrency.
+    // This is safe because the pointee is initialized once during static init
+    // and never mutated by either side of the FFI.  Its fields are C function pointers.
+    nonisolated(unsafe) static let vtablePtr: UnsafePointer<UniffiVTableCallbackInterfaceEchotestHandleCallback> = {
+        let ptr = UnsafeMutablePointer<UniffiVTableCallbackInterfaceEchotestHandleCallback>.allocate(capacity: 1)
+        ptr.initialize(to: vtable)
+        return UnsafePointer(ptr)
+    }()
 }
 
 private func uniffiCallbackInitEchotestHandleCallback() {
-    uniffi_janus_gateway_fn_init_callback_vtable_echotesthandlecallback(UniffiCallbackInterfaceEchotestHandleCallback.vtable)
+    uniffi_janus_gateway_fn_init_callback_vtable_echotesthandlecallback(UniffiCallbackInterfaceEchotestHandleCallback.vtablePtr)
 }
 
 // FfiConverter protocol for callback interfaces
@@ -7953,9 +8054,8 @@ fileprivate struct UniffiCallbackInterfaceHandleCallback {
     // Create the VTable using a series of closures.
     // Swift automatically converts these into C callback functions.
     //
-    // This creates 1-element array, since this seems to be the only way to construct a const
-    // pointer that we can pass to the Rust code.
-    static let vtable: [UniffiVTableCallbackInterfaceHandleCallback] = [UniffiVTableCallbackInterfaceHandleCallback(
+    // Store the vtable directly.
+    static let vtable: UniffiVTableCallbackInterfaceHandleCallback = UniffiVTableCallbackInterfaceHandleCallback(
         uniffiFree: { (uniffiHandle: UInt64) -> () in
             do {
                 try FfiConverterCallbackInterfaceHandleCallback.handleMap.remove(handle: uniffiHandle)
@@ -8018,11 +8118,23 @@ fileprivate struct UniffiCallbackInterfaceHandleCallback {
                 writeReturn: writeReturn
             )
         }
-    )]
+    )
+
+    // Rust stores this pointer for future callback invocations, so it must live
+    // for the process lifetime (not just for the init function call).
+    //
+    // `nonisolated(unsafe)` is needed under Swift 6 strict concurrency.
+    // This is safe because the pointee is initialized once during static init
+    // and never mutated by either side of the FFI.  Its fields are C function pointers.
+    nonisolated(unsafe) static let vtablePtr: UnsafePointer<UniffiVTableCallbackInterfaceHandleCallback> = {
+        let ptr = UnsafeMutablePointer<UniffiVTableCallbackInterfaceHandleCallback>.allocate(capacity: 1)
+        ptr.initialize(to: vtable)
+        return UnsafePointer(ptr)
+    }()
 }
 
 private func uniffiCallbackInitHandleCallback() {
-    uniffi_janus_gateway_fn_init_callback_vtable_handlecallback(UniffiCallbackInterfaceHandleCallback.vtable)
+    uniffi_janus_gateway_fn_init_callback_vtable_handlecallback(UniffiCallbackInterfaceHandleCallback.vtablePtr)
 }
 
 // FfiConverter protocol for callback interfaces
@@ -8123,9 +8235,8 @@ fileprivate struct UniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
     // Create the VTable using a series of closures.
     // Swift automatically converts these into C callback functions.
     //
-    // This creates 1-element array, since this seems to be the only way to construct a const
-    // pointer that we can pass to the Rust code.
-    static let vtable: [UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback] = [UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback(
+    // Store the vtable directly.
+    static let vtable: UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback = UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback(
         uniffiFree: { (uniffiHandle: UInt64) -> () in
             do {
                 try FfiConverterCallbackInterfaceLegacyVideoRoomHandleCallback.handleMap.remove(handle: uniffiHandle)
@@ -8456,11 +8567,23 @@ fileprivate struct UniffiCallbackInterfaceLegacyVideoRoomHandleCallback {
                 writeReturn: writeReturn
             )
         }
-    )]
+    )
+
+    // Rust stores this pointer for future callback invocations, so it must live
+    // for the process lifetime (not just for the init function call).
+    //
+    // `nonisolated(unsafe)` is needed under Swift 6 strict concurrency.
+    // This is safe because the pointee is initialized once during static init
+    // and never mutated by either side of the FFI.  Its fields are C function pointers.
+    nonisolated(unsafe) static let vtablePtr: UnsafePointer<UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback> = {
+        let ptr = UnsafeMutablePointer<UniffiVTableCallbackInterfaceLegacyVideoRoomHandleCallback>.allocate(capacity: 1)
+        ptr.initialize(to: vtable)
+        return UnsafePointer(ptr)
+    }()
 }
 
 private func uniffiCallbackInitLegacyVideoRoomHandleCallback() {
-    uniffi_janus_gateway_fn_init_callback_vtable_legacyvideoroomhandlecallback(UniffiCallbackInterfaceLegacyVideoRoomHandleCallback.vtable)
+    uniffi_janus_gateway_fn_init_callback_vtable_legacyvideoroomhandlecallback(UniffiCallbackInterfaceLegacyVideoRoomHandleCallback.vtablePtr)
 }
 
 // FfiConverter protocol for callback interfaces
@@ -8553,9 +8676,8 @@ fileprivate struct UniffiCallbackInterfaceVideoRoomHandleCallback {
     // Create the VTable using a series of closures.
     // Swift automatically converts these into C callback functions.
     //
-    // This creates 1-element array, since this seems to be the only way to construct a const
-    // pointer that we can pass to the Rust code.
-    static let vtable: [UniffiVTableCallbackInterfaceVideoRoomHandleCallback] = [UniffiVTableCallbackInterfaceVideoRoomHandleCallback(
+    // Store the vtable directly.
+    static let vtable: UniffiVTableCallbackInterfaceVideoRoomHandleCallback = UniffiVTableCallbackInterfaceVideoRoomHandleCallback(
         uniffiFree: { (uniffiHandle: UInt64) -> () in
             do {
                 try FfiConverterCallbackInterfaceVideoRoomHandleCallback.handleMap.remove(handle: uniffiHandle)
@@ -8794,11 +8916,23 @@ fileprivate struct UniffiCallbackInterfaceVideoRoomHandleCallback {
                 writeReturn: writeReturn
             )
         }
-    )]
+    )
+
+    // Rust stores this pointer for future callback invocations, so it must live
+    // for the process lifetime (not just for the init function call).
+    //
+    // `nonisolated(unsafe)` is needed under Swift 6 strict concurrency.
+    // This is safe because the pointee is initialized once during static init
+    // and never mutated by either side of the FFI.  Its fields are C function pointers.
+    nonisolated(unsafe) static let vtablePtr: UnsafePointer<UniffiVTableCallbackInterfaceVideoRoomHandleCallback> = {
+        let ptr = UnsafeMutablePointer<UniffiVTableCallbackInterfaceVideoRoomHandleCallback>.allocate(capacity: 1)
+        ptr.initialize(to: vtable)
+        return UnsafePointer(ptr)
+    }()
 }
 
 private func uniffiCallbackInitVideoRoomHandleCallback() {
-    uniffi_janus_gateway_fn_init_callback_vtable_videoroomhandlecallback(UniffiCallbackInterfaceVideoRoomHandleCallback.vtable)
+    uniffi_janus_gateway_fn_init_callback_vtable_videoroomhandlecallback(UniffiCallbackInterfaceVideoRoomHandleCallback.vtablePtr)
 }
 
 // FfiConverter protocol for callback interfaces
@@ -9740,11 +9874,11 @@ fileprivate func uniffiFutureContinuationCallback(handle: UInt64, pollResult: In
         print("uniffiFutureContinuationCallback invalid handle")
     }
 }
-public func janusConnect(config: Config)async throws  -> Connection  {
+public func janusConnect(config: Config, api: JanusApi)async throws  -> Connection  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
-                uniffi_janus_gateway_fn_func_janus_connect(FfiConverterTypeConfig_lower(config)
+                uniffi_janus_gateway_fn_func_janus_connect(FfiConverterTypeConfig_lower(config),FfiConverterTypeJanusAPI_lower(api)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_u64,
@@ -9777,7 +9911,7 @@ private let initializationResult: InitializationResult = {
     if bindings_contract_version != scaffolding_contract_version {
         return InitializationResult.contractVersionMismatch
     }
-    if (uniffi_janus_gateway_checksum_func_janus_connect() != 48656) {
+    if (uniffi_janus_gateway_checksum_func_janus_connect() != 60772) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_func_init_janus_logger() != 52103) {
