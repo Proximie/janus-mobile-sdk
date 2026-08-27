@@ -1026,9 +1026,9 @@ checksum = "92ecc6618181def0457392ccd0ee51198e065e016d1d527a7ac1b6dc7c1f09d2"
 
 [[package]]
 name = "jarust"
-version = "1.9.0"
+version = "1.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "775fd17f40aac707108deabc638b1b95bfc22a091534bf280b891f21dfc7e0d8"
+checksum = "e3de4fc5eb73c1de01633d3c526e17a1041565e516dc24b774dde38af33823b8"
 dependencies = [
  "jarust_core",
  "jarust_interface",
@@ -1037,9 +1037,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_core"
-version = "1.9.0"
+version = "1.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "37d15ee4134a9876c282180f30d7ab4fdd6b71f4eadae0f08fa8f8d0aa902df8"
+checksum = "282a6e53efbeb885c5225892018448c696053da720d2717243e6084920c4926d"
 dependencies = [
  "async-trait",
  "jarust_interface",
@@ -1052,9 +1052,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_interface"
-version = "1.9.0"
+version = "1.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f09aa76d675fecdfc0cb950ed14f5cb5b2db612a054f90655ebc17e645380731"
+checksum = "df4ce4d9ea63bd784f2e071028f5d950b046883a9994dd192b9dffe0162db623"
 dependencies = [
  "async-trait",
  "bytes",
@@ -1077,9 +1077,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_plugins"
-version = "1.9.0"
+version = "1.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "40970f53778d5ca54b19aead8165fa100618fb7adc82465ab1ea8d89b6745ab5"
+checksum = "0c68787b52ebc20a7d12499003844c7f2fb60812e3f5c02c7b9feb01bc211ec4"
 dependencies = [
  "async-trait",
  "jarust_core",
@@ -1094,9 +1094,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_rt"
-version = "1.9.0"
+version = "1.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b8dc6aff8d7c3d39144845e78bf414af097736027206026d535ef6d371eae1f4"
+checksum = "9e7f1f26f58706152130f3773a4170e38fbab7bd79f17cdc43173a960a8b044a"
 dependencies = [
  "futures-util",
  "gloo-timers",
@@ -1733,7 +1733,7 @@ dependencies = [
 
 [[package]]
 name = "rslib"
-version = "0.17.1"
+version = "0.17.2"
 dependencies = [
  "android_logger",
  "apple-tracing-sub",

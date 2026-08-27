@@ -1,6 +1,6 @@
 [package]
 name = "rslib"
-version = "0.17.1"
+version = "0.17.2"
 edition = "2024"
 publish = false
 repository = "https://github.com/Proximie/janus-mobile-sdk"
@@ -29,7 +29,7 @@ tokio = "1.53.1"
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 uniffi = { workspace = true, features = ["tokio"] }
-jarust = { version = "1.9.0", features = [
+jarust = { version = "1.9.1", features = [
     "echo-test-plugin",
     "audio-bridge-plugin",
     "video-room-plugin",
