@@ -309,7 +309,7 @@ dependencies = [
  "semver",
  "serde",
  "serde_json",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
 ]
 
 [[package]]
@@ -1026,9 +1026,9 @@ checksum = "92ecc6618181def0457392ccd0ee51198e065e016d1d527a7ac1b6dc7c1f09d2"
 
 [[package]]
 name = "jarust"
-version = "1.9.1"
+version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3de4fc5eb73c1de01633d3c526e17a1041565e516dc24b774dde38af33823b8"
+checksum = "8f2e840ad418e470daf7b6434e818ab602eefdeb7509abababae1ba5cf924f4f"
 dependencies = [
  "jarust_core",
  "jarust_interface",
@@ -1037,9 +1037,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_core"
-version = "1.9.1"
+version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "282a6e53efbeb885c5225892018448c696053da720d2717243e6084920c4926d"
+checksum = "c5d5b4883103eeaa80bf4ddf95953b6b08c84c7bc72e236e2a8ec26c2b7f577e"
 dependencies = [
  "async-trait",
  "jarust_interface",
@@ -1052,9 +1052,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_interface"
-version = "1.9.1"
+version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df4ce4d9ea63bd784f2e071028f5d950b046883a9994dd192b9dffe0162db623"
+checksum = "c728dadbb025c81bdf7a03558221f6549add667d68e08f0247f5cf0b62579c43"
 dependencies = [
  "async-trait",
  "bytes",
@@ -1077,9 +1077,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_plugins"
-version = "1.9.1"
+version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c68787b52ebc20a7d12499003844c7f2fb60812e3f5c02c7b9feb01bc211ec4"
+checksum = "2fd84c13b6223ec14ba86dfab1deb33e4e2b640c7605049922189bf9d8b76ade"
 dependencies = [
  "async-trait",
  "jarust_core",
@@ -1094,9 +1094,9 @@ dependencies = [
 
 [[package]]
 name = "jarust_rt"
-version = "1.9.1"
+version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e7f1f26f58706152130f3773a4170e38fbab7bd79f17cdc43173a960a8b044a"
+checksum = "b1c1089da138bca31a8d625a19c370ed2c66c72f26cce77ade4514b6ffc8f703"
 dependencies = [
  "futures-util",
  "gloo-timers",
@@ -1117,7 +1117,7 @@ dependencies = [
  "jni-sys",
  "log",
  "simd_cesu8",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "walkdir",
  "windows-link",
 ]
@@ -1455,7 +1455,7 @@ dependencies = [
  "rustc-hash",
  "rustls",
  "socket2",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "tokio",
  "tracing",
  "web-time",
@@ -1478,7 +1478,7 @@ dependencies = [
  "rustls",
  "rustls-pki-types",
  "slab",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "tinyvec",
  "tracing",
  "web-time",
@@ -1733,7 +1733,7 @@ dependencies = [
 
 [[package]]
 name = "rslib"
-version = "0.17.2"
+version = "0.17.3"
 dependencies = [
  "android_logger",
  "apple-tracing-sub",
@@ -1743,7 +1743,7 @@ dependencies = [
  "openssl-sys",
  "serde",
  "serde_json",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "tokio",
  "tracing",
  "tracing-subscriber",
@@ -2262,11 +2262,11 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "2.0.19"
+version = "2.0.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09a43598840e33d5b0331f38c5e30d13bb11c11210a4b58f0d9b18a5a5eefcd9"
+checksum = "ec86235f5fcc2a73650310756d2ac5b138a5780bbbdfae3eeccec992c435ba4f"
 dependencies = [
- "thiserror-impl 2.0.19",
+ "thiserror-impl 2.0.20",
 ]
 
 [[package]]
@@ -2282,9 +2282,9 @@ dependencies = [
 
 [[package]]
 name = "thiserror-impl"
-version = "2.0.19"
+version = "2.0.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43cbfe0cf76104d42a574802844187e84a305e531ed54455f11fbde0f10541cd"
+checksum = "bc04cd3e1236dd4a98afca4569f2deb3f120e5422a4023be2cb683f8486292af"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2399,7 +2399,7 @@ dependencies = [
  "http",
  "httparse",
  "js-sys",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "tokio",
  "tokio-tungstenite 0.28.0",
  "wasm-bindgen",
@@ -2604,7 +2604,7 @@ dependencies = [
  "native-tls",
  "rand 0.9.2",
  "sha1",
- "thiserror 2.0.19",
+ "thiserror 2.0.20",
  "utf-8",
 ]
 
