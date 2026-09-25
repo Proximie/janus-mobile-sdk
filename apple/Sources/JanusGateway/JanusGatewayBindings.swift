@@ -2591,6 +2591,136 @@ public func FfiConverterTypeSession_lower(_ value: Session) -> UInt64 {
 
 
 
+/**
+ * Rust-owned sink the host pushes inbound Janus payloads into. Each `receive` call
+ * must carry the bytes of exactly one `{"janus": ...}` JSON message.
+ */
+public protocol TransportInboundProtocol: AnyObject, Sendable {
+    
+    /**
+     * Forwards one raw Janus payload from the host into jarust's demultiplexer.
+     */
+    func receive(data: Data) 
+    
+}
+/**
+ * Rust-owned sink the host pushes inbound Janus payloads into. Each `receive` call
+ * must carry the bytes of exactly one `{"janus": ...}` JSON message.
+ */
+open class TransportInbound: TransportInboundProtocol, @unchecked Sendable {
+    fileprivate let handle: UInt64
+
+    /// Used to instantiate a [FFIObject] without an actual handle, for fakes in tests, mostly.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public struct NoHandle {
+        public init() {}
+    }
+
+    // TODO: We'd like this to be `private` but for Swifty reasons,
+    // we can't implement `FfiConverter` without making this `required` and we can't
+    // make it `required` without making it `public`.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    required public init(unsafeFromHandle handle: UInt64) {
+        self.handle = handle
+    }
+
+    // This constructor can be used to instantiate a fake object.
+    // - Parameter noHandle: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    //
+    // - Warning:
+    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing handle the FFI lower functions will crash.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public init(noHandle: NoHandle) {
+        self.handle = 0
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public func uniffiCloneHandle() -> UInt64 {
+        return try! rustCall { uniffi_janus_gateway_fn_clone_transportinbound(self.handle, $0) }
+    }
+    // No primary constructor declared for this class.
+
+    deinit {
+        if handle == 0 {
+            // Mock objects have handle=0 don't try to free them
+            return
+        }
+
+        try! rustCall { uniffi_janus_gateway_fn_free_transportinbound(handle, $0) }
+    }
+
+    
+
+    
+    /**
+     * Forwards one raw Janus payload from the host into jarust's demultiplexer.
+     */
+open func receive(data: Data)  {try! rustCall() {
+    uniffi_janus_gateway_fn_method_transportinbound_receive(
+            self.uniffiCloneHandle(),
+        FfiConverterData.lower(data),$0
+    )
+}
+}
+    
+
+    
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeTransportInbound: FfiConverter {
+    typealias FfiType = UInt64
+    typealias SwiftType = TransportInbound
+
+    public static func lift(_ handle: UInt64) throws -> TransportInbound {
+        return TransportInbound(unsafeFromHandle: handle)
+    }
+
+    public static func lower(_ value: TransportInbound) -> UInt64 {
+        return value.uniffiCloneHandle()
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> TransportInbound {
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
+    }
+
+    public static func write(_ value: TransportInbound, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(value))
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeTransportInbound_lift(_ handle: UInt64) throws -> TransportInbound {
+    return try FfiConverterTypeTransportInbound.lift(handle)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeTransportInbound_lower(_ value: TransportInbound) -> UInt64 {
+    return FfiConverterTypeTransportInbound.lower(value)
+}
+
+
+
+
+
+
 public protocol VideoRoomHandleProtocol: AnyObject, Sendable {
     
     func completeTrickle(timeout: TimeInterval) async throws 
@@ -6515,7 +6645,6 @@ public enum JanusApi: Equatable, Hashable {
     
     case webSocket
     case restful
-    case socketIo
 
 
 
@@ -6541,8 +6670,6 @@ public struct FfiConverterTypeJanusAPI: FfiConverterRustBuffer {
         
         case 2: return .restful
         
-        case 3: return .socketIo
-        
         default: throw UniffiInternalError.unexpectedEnumCase
         }
     }
@@ -6557,10 +6684,6 @@ public struct FfiConverterTypeJanusAPI: FfiConverterRustBuffer {
         
         case .restful:
             writeInt(&buf, Int32(2))
-        
-        
-        case .socketIo:
-            writeInt(&buf, Int32(3))
         
         }
     }
@@ -7212,6 +7335,93 @@ public func FfiConverterTypeLegacyVideoRoomVideoCodec_lower(_ value: LegacyVideo
     return FfiConverterTypeLegacyVideoRoomVideoCodec.lower(value)
 }
 
+
+
+/**
+ * Errors a host transport can report back to Rust.
+ */
+public enum TransportError: Swift.Error, Equatable, Hashable, Foundation.LocalizedError {
+
+    
+    
+    case ConnectionFailure(reason: String
+    )
+    case SendFailure(reason: String
+    )
+
+    
+
+    
+
+    
+    public var errorDescription: String? {
+        String(reflecting: self)
+    }
+    
+}
+
+#if compiler(>=6)
+extension TransportError: Sendable {}
+#endif
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeTransportError: FfiConverterRustBuffer {
+    typealias SwiftType = TransportError
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> TransportError {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+
+        
+
+        
+        case 1: return .ConnectionFailure(
+            reason: try FfiConverterString.read(from: &buf)
+            )
+        case 2: return .SendFailure(
+            reason: try FfiConverterString.read(from: &buf)
+            )
+
+         default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: TransportError, into buf: inout [UInt8]) {
+        switch value {
+
+        
+
+        
+        
+        case let .ConnectionFailure(reason):
+            writeInt(&buf, Int32(1))
+            FfiConverterString.write(reason, into: &buf)
+            
+        
+        case let .SendFailure(reason):
+            writeInt(&buf, Int32(2))
+            FfiConverterString.write(reason, into: &buf)
+            
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeTransportError_lift(_ buf: RustBuffer) throws -> TransportError {
+    return try FfiConverterTypeTransportError.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeTransportError_lower(_ value: TransportError) -> RustBuffer {
+    return FfiConverterTypeTransportError.lower(value)
+}
 
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
@@ -8195,6 +8405,225 @@ public func FfiConverterCallbackInterfaceHandleCallback_lift(_ handle: UInt64) t
 #endif
 public func FfiConverterCallbackInterfaceHandleCallback_lower(_ v: HandleCallback) -> UInt64 {
     return FfiConverterCallbackInterfaceHandleCallback.lower(v)
+}
+
+
+
+
+/**
+ * Implemented on the host (Swift/Kotlin). Moves raw Janus bytes; it does not need to
+ * understand the Janus protocol.
+ */
+public protocol JanusTransport: AnyObject, Sendable {
+    
+    /**
+     * Establishes the underlying connection to `url`. The host must retain `sink` and
+     * feed every inbound `janus` payload into it via [`TransportInbound::receive`].
+     */
+    func connect(url: String, sink: TransportInbound) async throws 
+    
+    /**
+     * Sends one already-serialized Janus request. Fire-and-forget: response
+     * correlation happens on the Rust side via the inbound stream.
+     */
+    func send(data: Data) 
+    
+    /**
+     * Tears down the underlying connection.
+     */
+    func disconnect() 
+    
+}
+
+
+// Put the implementation in a struct so we don't pollute the top-level namespace
+fileprivate struct UniffiCallbackInterfaceJanusTransport {
+
+    // Create the VTable using a series of closures.
+    // Swift automatically converts these into C callback functions.
+    //
+    // Store the vtable directly.
+    static let vtable: UniffiVTableCallbackInterfaceJanusTransport = UniffiVTableCallbackInterfaceJanusTransport(
+        uniffiFree: { (uniffiHandle: UInt64) -> () in
+            do {
+                try FfiConverterCallbackInterfaceJanusTransport.handleMap.remove(handle: uniffiHandle)
+            } catch {
+                print("Uniffi callback interface JanusTransport: handle missing in uniffiFree")
+            }
+        },
+        uniffiClone: { (uniffiHandle: UInt64) -> UInt64 in
+            do {
+                return try FfiConverterCallbackInterfaceJanusTransport.handleMap.clone(handle: uniffiHandle)
+            } catch {
+                fatalError("Uniffi callback interface JanusTransport: handle missing in uniffiClone")
+            }
+        },
+        connect: { (
+            uniffiHandle: UInt64,
+            url: RustBuffer,
+            sink: UInt64,
+            uniffiFutureCallback: @escaping UniffiForeignFutureCompleteVoid,
+            uniffiCallbackData: UInt64,
+            uniffiOutDroppedCallback: UnsafeMutablePointer<UniffiForeignFutureDroppedCallbackStruct>
+        ) in
+            let makeCall = {
+                () async throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceJanusTransport.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return try await uniffiObj.connect(
+                     url: try FfiConverterString.lift(url),
+                     sink: try FfiConverterTypeTransportInbound_lift(sink)
+                )
+            }
+
+            let uniffiHandleSuccess = { (returnValue: ()) in
+                uniffiFutureCallback(
+                    uniffiCallbackData,
+                    UniffiForeignFutureResultVoid(
+                        callStatus: RustCallStatus()
+                    )
+                )
+            }
+            let uniffiHandleError = { (statusCode, errorBuf) in
+                uniffiFutureCallback(
+                    uniffiCallbackData,
+                    UniffiForeignFutureResultVoid(
+                        callStatus: RustCallStatus(code: statusCode, errorBuf: errorBuf)
+                    )
+                )
+            }
+            uniffiTraitInterfaceCallAsyncWithError(
+                makeCall: makeCall,
+                handleSuccess: uniffiHandleSuccess,
+                handleError: uniffiHandleError,
+                lowerError: FfiConverterTypeTransportError_lower,
+                droppedCallback: uniffiOutDroppedCallback
+            )
+        },
+        send: { (
+            uniffiHandle: UInt64,
+            data: RustBuffer,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceJanusTransport.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.send(
+                     data: try FfiConverterData.lift(data)
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        disconnect: { (
+            uniffiHandle: UInt64,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfaceJanusTransport.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.disconnect(
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        }
+    )
+
+    // Rust stores this pointer for future callback invocations, so it must live
+    // for the process lifetime (not just for the init function call).
+    //
+    // `nonisolated(unsafe)` is needed under Swift 6 strict concurrency.
+    // This is safe because the pointee is initialized once during static init
+    // and never mutated by either side of the FFI.  Its fields are C function pointers.
+    nonisolated(unsafe) static let vtablePtr: UnsafePointer<UniffiVTableCallbackInterfaceJanusTransport> = {
+        let ptr = UnsafeMutablePointer<UniffiVTableCallbackInterfaceJanusTransport>.allocate(capacity: 1)
+        ptr.initialize(to: vtable)
+        return UnsafePointer(ptr)
+    }()
+}
+
+private func uniffiCallbackInitJanusTransport() {
+    uniffi_janus_gateway_fn_init_callback_vtable_janustransport(UniffiCallbackInterfaceJanusTransport.vtablePtr)
+}
+
+// FfiConverter protocol for callback interfaces
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterCallbackInterfaceJanusTransport {
+    fileprivate static let handleMap = UniffiHandleMap<JanusTransport>()
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+extension FfiConverterCallbackInterfaceJanusTransport : FfiConverter {
+    typealias SwiftType = JanusTransport
+    typealias FfiType = UInt64
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func lift(_ handle: UInt64) throws -> SwiftType {
+        try handleMap.get(handle: handle)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func lower(_ v: SwiftType) -> UInt64 {
+        return handleMap.insert(obj: v)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func write(_ v: SwiftType, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(v))
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterCallbackInterfaceJanusTransport_lift(_ handle: UInt64) throws -> JanusTransport {
+    return try FfiConverterCallbackInterfaceJanusTransport.lift(handle)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterCallbackInterfaceJanusTransport_lower(_ v: JanusTransport) -> UInt64 {
+    return FfiConverterCallbackInterfaceJanusTransport.lower(v)
 }
 
 
@@ -9874,11 +10303,120 @@ fileprivate func uniffiFutureContinuationCallback(handle: UInt64, pollResult: In
         print("uniffiFutureContinuationCallback invalid handle")
     }
 }
+private func uniffiTraitInterfaceCallAsync<T>(
+    makeCall: @escaping () async throws -> T,
+    handleSuccess: @escaping (T) -> (),
+    handleError: @escaping (Int8, RustBuffer) -> (),
+    droppedCallback: UnsafeMutablePointer<UniffiForeignFutureDroppedCallbackStruct>
+) {
+    let task = Task {
+        // Note: it's important we call either `handleSuccess` or `handleError` exactly once.  Each
+        // call consumes an Arc reference, which means there should be no possibility of a double
+        // call.  The following code is structured so that will will never call both `handleSuccess`
+        // and `handleError`, even in the face of weird errors.
+        //
+        // On platforms that need extra machinery to make C-ABI calls, like JNA or ctypes, it's
+        // possible that we fail to make either call.  However, it doesn't seem like this is
+        // possible on Swift since swift can just make the C call directly.
+        var callResult: T
+        do {
+            callResult = try await makeCall()
+        } catch {
+            handleError(CALL_UNEXPECTED_ERROR, FfiConverterString.lower(String(describing: error)))
+            return
+        }
+        handleSuccess(callResult)
+    }
+    let handle = UNIFFI_FOREIGN_FUTURE_HANDLE_MAP.insert(obj: task)
+    droppedCallback.pointee = UniffiForeignFutureDroppedCallbackStruct(
+        handle: handle,
+        free: uniffiForeignFutureDroppedCallback
+    )
+}
+
+private func uniffiTraitInterfaceCallAsyncWithError<T, E>(
+    makeCall: @escaping () async throws -> T,
+    handleSuccess: @escaping (T) -> (),
+    handleError: @escaping (Int8, RustBuffer) -> (),
+    lowerError: @escaping (E) -> RustBuffer,
+    droppedCallback: UnsafeMutablePointer<UniffiForeignFutureDroppedCallbackStruct>
+) {
+    let task = Task {
+        // See the note in uniffiTraitInterfaceCallAsync for details on `handleSuccess` and
+        // `handleError`.
+        var callResult: T
+        do {
+            callResult = try await makeCall()
+        } catch let error as E {
+            handleError(CALL_ERROR, lowerError(error))
+            return
+        } catch {
+            handleError(CALL_UNEXPECTED_ERROR, FfiConverterString.lower(String(describing: error)))
+            return
+        }
+        handleSuccess(callResult)
+    }
+    let handle = UNIFFI_FOREIGN_FUTURE_HANDLE_MAP.insert(obj: task)
+    droppedCallback.pointee = UniffiForeignFutureDroppedCallbackStruct(
+        handle: handle,
+        free: uniffiForeignFutureDroppedCallback
+    )
+}
+
+// Borrow the callback handle map implementation to store foreign future handles
+// TODO: consolidate the handle-map code (https://github.com/mozilla/uniffi-rs/pull/1823)
+fileprivate let UNIFFI_FOREIGN_FUTURE_HANDLE_MAP = UniffiHandleMap<UniffiForeignFutureTask>()
+
+// Protocol for tasks that handle foreign futures.
+//
+// Defining a protocol allows all tasks to be stored in the same handle map.  This can't be done
+// with the task object itself, since has generic parameters.
+fileprivate protocol UniffiForeignFutureTask {
+    func cancel()
+}
+
+extension Task: UniffiForeignFutureTask {}
+
+private func uniffiForeignFutureDroppedCallback(handle: UInt64) {
+    do {
+        let task = try UNIFFI_FOREIGN_FUTURE_HANDLE_MAP.remove(handle: handle)
+        // Set the cancellation flag on the task.  If it's still running, the code can check the
+        // cancellation flag or call `Task.checkCancellation()`.  If the task has completed, this is
+        // a no-op.
+        task.cancel()
+    } catch {
+        print("uniffiForeignFutureDroppedCallback: handle missing from handlemap")
+    }
+}
+
+// For testing
+public func uniffiForeignFutureHandleCountJanusGateway() -> Int {
+    UNIFFI_FOREIGN_FUTURE_HANDLE_MAP.count
+}
 public func janusConnect(config: Config, api: JanusApi)async throws  -> Connection  {
     return
         try  await uniffiRustCallAsync(
             rustFutureFunc: {
                 uniffi_janus_gateway_fn_func_janus_connect(FfiConverterTypeConfig_lower(config),FfiConverterTypeJanusAPI_lower(api)
+                )
+            },
+            pollFunc: ffi_janus_gateway_rust_future_poll_u64,
+            completeFunc: ffi_janus_gateway_rust_future_complete_u64,
+            freeFunc: ffi_janus_gateway_rust_future_free_u64,
+            liftFunc: FfiConverterTypeConnection_lift,
+            errorHandler: FfiConverterTypeJanusGatewayConnectionError_lift
+        )
+}
+/**
+ * Connects to Janus over a host-provided [`JanusTransport`] (e.g. the platform's own
+ * Socket.IO client) instead of a jarust-native transport. jarust still owns the full
+ * Janus protocol; the host only moves bytes.
+ */
+public func janusConnectWithTransport(config: Config, transport: JanusTransport)async throws  -> Connection  {
+    return
+        try  await uniffiRustCallAsync(
+            rustFutureFunc: {
+                uniffi_janus_gateway_fn_func_janus_connect_with_transport(FfiConverterTypeConfig_lower(config),FfiConverterCallbackInterfaceJanusTransport_lower(transport)
                 )
             },
             pollFunc: ffi_janus_gateway_rust_future_poll_u64,
@@ -9912,6 +10450,9 @@ private let initializationResult: InitializationResult = {
         return InitializationResult.contractVersionMismatch
     }
     if (uniffi_janus_gateway_checksum_func_janus_connect() != 60772) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_func_janus_connect_with_transport() != 48003) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_janus_gateway_checksum_func_init_janus_logger() != 52103) {
@@ -10169,6 +10710,9 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_session_destory() != 9784) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_transportinbound_receive() != 30201) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_janus_gateway_checksum_method_handlecallback_on_plugin_event() != 4431) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -10280,10 +10824,20 @@ private let initializationResult: InitializationResult = {
     if (uniffi_janus_gateway_checksum_method_videoroomhandlecallback_on_leaving() != 59680) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_janus_gateway_checksum_method_janustransport_connect() != 21016) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_janustransport_send() != 31367) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_janus_gateway_checksum_method_janustransport_disconnect() != 63115) {
+        return InitializationResult.apiChecksumMismatch
+    }
 
     uniffiCallbackInitAudioBridgeHandleCallback()
     uniffiCallbackInitEchotestHandleCallback()
     uniffiCallbackInitHandleCallback()
+    uniffiCallbackInitJanusTransport()
     uniffiCallbackInitLegacyVideoRoomHandleCallback()
     uniffiCallbackInitVideoRoomHandleCallback()
     return InitializationResult.ok

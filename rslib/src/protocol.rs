@@ -7,7 +7,6 @@ pub type JanusAPI = jarust::core::jaconfig::JanusAPI;
 pub enum JanusAPI {
     WebSocket,
     Restful,
-    SocketIo,
 }
 
 pub type Candidate = japrotocol::Candidate;
