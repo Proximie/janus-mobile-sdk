@@ -20,6 +20,8 @@ strip = "symbols"
 overflow-checks = false
 
 [dependencies]
+async-trait = "0.1.89"
+bytes = "1.11.1"
 log = "0.4.33"
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 serde = "1.0.229"
@@ -29,14 +31,17 @@ tokio = "1.53.1"
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 uniffi = { workspace = true, features = ["tokio"] }
-jarust = { version = "1.9.3", features = [
+# TODO: repoint to the published `1.10.0` crate once jarust is released.
+# Temporarily tracks the jarust custom-transport branch (Proximie/jarust#244) so this
+# builds before the crate is published. For local testing you can swap this for a
+# `path = "../../jarust/jarust"` dep.
+jarust = { git = "https://github.com/Proximie/jarust", branch = "feat/custom-transport-interface", features = [
     "echo-test-plugin",
     "audio-bridge-plugin",
     "video-room-plugin",
     "legacy-video-room-plugin",
     "ffi-compatible",
     "__plugin-experimental",
-    "socketio",
 ] }
 
 [target.'cfg(any(target_os = "ios", target_os = "macos"))'.dependencies]

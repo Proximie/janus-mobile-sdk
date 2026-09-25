@@ -6,6 +6,7 @@ pub mod logger;
 pub mod plugins;
 pub mod protocol;
 pub mod session;
+pub mod transport;
 
 #[macro_use]
 mod macros;
