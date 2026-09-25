@@ -35,6 +35,12 @@ let package = Package(
             path: "apple/Sources/JanusGateway",
             resources: [
                 .process("Resources/PrivacyInfo.xcprivacy")
+            ],
+            // The uniffi-generated bindings aren't written for Swift 6 strict
+            // concurrency (the async foreign-trait helpers trip `sending` checks),
+            // so compile this target in Swift 5 language mode.
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
             ]
         )
     ]
