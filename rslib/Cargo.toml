@@ -31,11 +31,7 @@ tokio = "1.53.1"
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 uniffi = { workspace = true, features = ["tokio"] }
-# TODO: repoint to the published `1.10.0` crate once jarust is released.
-# Temporarily tracks the jarust custom-transport branch (Proximie/jarust#244) so this
-# builds before the crate is published. For local testing swap this for a
-# `path = "../../jarust/jarust"` dep.
-jarust = { git = "https://github.com/Proximie/jarust", branch = "feat/custom-transport-interface", features = [
+jarust = { version = "1.10.0", features = [
     "echo-test-plugin",
     "audio-bridge-plugin",
     "video-room-plugin",
