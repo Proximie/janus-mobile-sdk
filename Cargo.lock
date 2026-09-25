@@ -948,7 +948,8 @@ checksum = "92ecc6618181def0457392ccd0ee51198e065e016d1d527a7ac1b6dc7c1f09d2"
 [[package]]
 name = "jarust"
 version = "1.10.0"
-source = "git+https://github.com/Proximie/jarust?branch=feat%2Fcustom-transport-interface#8e80df4934076c07591d95540ccac5cb3702593d"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a60295dd2c5d491d9bd6bf1b089fbc556d2d54b0c1fbc3caf0c87380c45552af"
 dependencies = [
  "jarust_core",
  "jarust_interface",
@@ -958,7 +959,8 @@ dependencies = [
 [[package]]
 name = "jarust_core"
 version = "1.10.0"
-source = "git+https://github.com/Proximie/jarust?branch=feat%2Fcustom-transport-interface#8e80df4934076c07591d95540ccac5cb3702593d"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "756e341a2ae2da43c316f33c5d80262ad10b2937e96502c530fc753887cc1a3e"
 dependencies = [
  "async-trait",
  "jarust_interface",
@@ -972,7 +974,8 @@ dependencies = [
 [[package]]
 name = "jarust_interface"
 version = "1.10.0"
-source = "git+https://github.com/Proximie/jarust?branch=feat%2Fcustom-transport-interface#8e80df4934076c07591d95540ccac5cb3702593d"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e364a384fc473889bdcc79b61b1414c6d2c404f8038d7c293015cf23328c4f96"
 dependencies = [
  "async-trait",
  "bytes",
@@ -995,7 +998,8 @@ dependencies = [
 [[package]]
 name = "jarust_plugins"
 version = "1.10.0"
-source = "git+https://github.com/Proximie/jarust?branch=feat%2Fcustom-transport-interface#8e80df4934076c07591d95540ccac5cb3702593d"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2bc633f20629342d072304b4369581d5493bf276e2226a9b81b312a3517752e0"
 dependencies = [
  "async-trait",
  "jarust_core",
@@ -1011,7 +1015,8 @@ dependencies = [
 [[package]]
 name = "jarust_rt"
 version = "1.10.0"
-source = "git+https://github.com/Proximie/jarust?branch=feat%2Fcustom-transport-interface#8e80df4934076c07591d95540ccac5cb3702593d"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "411d178857bf8f7351351a633565d288bfccaa998059cdcbca988ee9f77c6063"
 dependencies = [
  "futures-util",
  "gloo-timers",
